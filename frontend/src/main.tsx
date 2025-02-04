@@ -4,7 +4,6 @@ import { createBrowserRouter,RouterProvider } from "react-router-dom"
 
 import LoginPage from "./pages/login"
 
-import './index.css'
 
 
 const router = createBrowserRouter([
