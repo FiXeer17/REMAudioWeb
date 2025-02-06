@@ -592,6 +592,14 @@ body {
   color: hsl(var(--foreground));
 }
 
+.m-10 {
+  margin: 2.5rem;
+}
+
+.flex {
+  display: flex;
+}
+
 .inline-flex {
   display: inline-flex;
 }
@@ -608,8 +616,28 @@ body {
   height: 2.25rem;
 }
 
+.h-16 {
+  height: 4rem;
+}
+
+.h-36 {
+  height: 9rem;
+}
+
+.h-12 {
+  height: 3rem;
+}
+
+.h-14 {
+  height: 3.5rem;
+}
+
 .w-9 {
   width: 2.25rem;
+}
+
+.w-10 {
+  width: 2.5rem;
 }
 
 .items-center {
@@ -630,6 +658,14 @@ body {
 
 .rounded-md {
   border-radius: calc(var(--radius) - 2px);
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
 }
 
 .border {
@@ -656,6 +692,16 @@ body {
   background-color: hsl(var(--secondary));
 }
 
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+}
+
+.object-center {
+  -o-object-position: center;
+     object-position: center;
+}
+
 .px-3 {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
@@ -676,6 +722,21 @@ body {
   padding-bottom: 0.5rem;
 }
 
+.px-7 {
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+}
+
+.px-9 {
+  padding-left: 2.25rem;
+  padding-right: 2.25rem;
+}
+
+.px-10 {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -688,6 +749,10 @@ body {
 
 .font-medium {
   font-weight: 500;
+}
+
+.font-bold {
+  font-weight: 700;
 }
 
 .text-destructive-foreground {
@@ -704,6 +769,11 @@ body {
 
 .text-secondary-foreground {
   color: hsl(var(--secondary-foreground));
+}
+
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
 }
 
 .underline-offset-4 {
