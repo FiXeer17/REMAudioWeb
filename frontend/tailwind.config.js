@@ -10,6 +10,7 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -49,7 +50,15 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
-  			}
+  			},
+			login_colors: {
+				'bg/button_text': '#000000',
+				'forgot_pass':'#FFFFFF',
+				'button_bg/text':'#FAFAFA',
+				'place_holder':'#A1A1AA'
+			}
+			
+
   		}
   	}
   },
