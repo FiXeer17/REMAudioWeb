@@ -56,6 +56,15 @@ export default {
 				'forgot_pass':'#FFFFFF',
 				'button_bg/text':'#FAFAFA',
 				'place_holder':'#A1A1AA'
+			},
+			home_colors: {
+				'Bg/Button':'#000000',
+				'Selected_Borders/text':'#007AFF',
+				'Enabled_Channels':'#87FF77',
+				'Disabled_Channels':'#FF3030',
+				'Navbar/Selection_Bg':'#101011',
+				'Similar_White':'#FAFAFA'
+
 			}
 			
 
