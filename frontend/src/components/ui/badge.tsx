@@ -15,12 +15,12 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
-        output_input:
-          "border-colors-home_colors-Similar_White bg-colors-home_colors-Bg/Button text-[#FAFAFA]  "
+        modified:
+          "border-home_colors-Similar_White bg-home_colors-Bg/Button text-home_colors-Similar_White  "
       },
     },
     defaultVariants: {
-      variant: "output_input",
+      variant: "modified",
     },
   }
 )
