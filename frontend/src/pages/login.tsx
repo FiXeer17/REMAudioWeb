@@ -4,6 +4,7 @@ import { Input as Input_pass } from "../components/ui/input_pass";
 import { Badge } from "../components/ui/badge";
 import { Button as Button_channels } from "../components/ui/button_channels";
 import { Button as Button_mute } from "../components/ui/button_mute";
+import { Navbar } from "../components/ui/navbar";
 
 export default function LoginPage() {
   return (
@@ -24,6 +25,10 @@ export default function LoginPage() {
       <div className="flex items-center justify-center m-10">
         <Button_mute variant="modified">MUTE ALL</Button_mute>
       </div>
+      <div>
+        <Navbar></Navbar>
+      </div>
+
     </>
   );
 }
