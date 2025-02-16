@@ -28,4 +28,3 @@ export default function Navbar(){
     )
 }
 export {Navbar}
-//bg-home_colors-Navbar/Selection_Bg
