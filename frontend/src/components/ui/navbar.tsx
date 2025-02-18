@@ -22,8 +22,7 @@ export default function Navbar(){
             <div>
             {color==="settings" ? <SlidersHorizontal size={28} color="#007AFF" />
             : <SlidersHorizontal size={28} color="#FAFAFA" onClick={()=>setColor("settings")}/>}
-            </div>
-            
+            </div>            
         </div>
     )
 }
