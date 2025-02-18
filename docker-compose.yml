@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=users
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d users"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      # Mount source code for live reload
+      - ./backend/src:/usr/src/app/src
+      - ./backend/Cargo.toml:/usr/src/app/Cargo.toml
+      - ./backend/Cargo.lock:/usr/src/app/Cargo.lock
+      - ./backend/migrations:/usr/src/app/migrations
+      # Mount target for incremental compilation caching
+      - cargo_target:/usr/src/app/target
+      # Cache Cargo dependencies to speed up rebuilds
+      - cargo_registry:/usr/local/cargo/registry
+    ports:
+      - "8000:8000" 
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env
+      
+volumes:
+  postgres_data:
+  cargo_target:
+  cargo_registry:
