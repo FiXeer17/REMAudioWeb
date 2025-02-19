@@ -15,3 +15,5 @@ rand = {version="0.8.5"}
 serde_json = {version="1.0"}
 derive_more = {version="2.0.1", features=["display","error","from"]}
 actix-cors = {version="0.7.0"}
+jsonwebtoken = {version="9.3.1"}
+chrono = {version="0.4.39"}
