@@ -3,7 +3,7 @@ use actix_web::{web::Data, App, HttpServer};
 use sqlx::{Pool, Postgres};
 use actix_cors;
 
-
+pub mod env_dns;
 pub mod db;
 pub mod services;
 pub mod schemas;
