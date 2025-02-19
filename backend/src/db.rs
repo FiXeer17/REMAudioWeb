@@ -1,13 +1,10 @@
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
-use dotenv::{dotenv,from_filename};
+use crate::env_dns::Env;
 
 
 
 pub async fn establish_connection() -> Pool<Postgres> {
-    from_filename(".env.local").ok();
-    dotenv().ok();
-
-    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set.");
+    let db_url = Env::get_vars().get_db_url();
     println!("{db_url}");
     PgPoolOptions::new()
         .max_connections(5)
