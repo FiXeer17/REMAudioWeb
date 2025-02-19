@@ -11,8 +11,9 @@ pub async fn check_email(pgpool: &Data<AppState>, email: &str) -> Result<bool,sq
     Ok(result.is_some())
 }
 
-pub async fn from_id(pgpool: &Data<AppState>, id: i32) -> Result<ReturnFullUser,sqlx::Error>{
-    match sqlx::query_as::<_,ReturnFullUser>("SELECT id,username,email,admin FROM users WHERE id = $1 ")
+pub async fn from_id(pgpool: &Data<AppState>, id: i32, table: &str) -> Result<ReturnFullUser,sqlx::Error>{
+    match sqlx::query_as::<_,ReturnFullUser>("SELECT id,username,email,admin FROM $1 WHERE id = $2 ")
+    .bind(table)
     .bind(id)
     .fetch_optional(&pgpool.db)
     .await? {
