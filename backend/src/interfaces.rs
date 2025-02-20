@@ -1,4 +1,5 @@
 use actix_web::web::Data;
+use sqlx::query;
 use crate::{AppState, schemas::{ReturnFullUser,ReturnCreateUser}};
 
 
@@ -11,8 +12,21 @@ pub async fn check_email(pgpool: &Data<AppState>, email: &str) -> Result<bool,sq
     Ok(result.is_some())
 }
 
+pub async fn from_email(pgpool: &Data<AppState>, email:&str, table: &str) -> Result<ReturnFullUser, sqlx::Error>{
+    let query = format!("SELECT id,username,email,admin,password FROM {} WHERE email = $2 ",table);
+    match sqlx::query_as::<_,ReturnFullUser>(&query)
+    .bind(table)
+    .bind(email)
+    .fetch_optional(&pgpool.db)
+    .await?{
+        Some(user) => { println!("{user:?}"); Ok(user)},
+        None => Err(sqlx::Error::RowNotFound)
+    }
+}
+
 pub async fn from_id(pgpool: &Data<AppState>, id: i32, table: &str) -> Result<ReturnFullUser,sqlx::Error>{
-    match sqlx::query_as::<_,ReturnFullUser>("SELECT id,username,email,admin FROM $1 WHERE id = $2 ")
+    let query = format!("SELECT id,username,email,admin,password FROM {} WHERE id = $2 ",table);
+    match sqlx::query_as::<_,ReturnFullUser>(&query)
     .bind(table)
     .bind(id)
     .fetch_optional(&pgpool.db)
