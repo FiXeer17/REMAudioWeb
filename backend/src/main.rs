@@ -1,7 +1,9 @@
-use crate::{db::establish_connection,services::create_user};
+use crate::db::establish_connection;
+use crate::services::{register,signin};
 use actix_web::{web::Data, App, HttpServer};
 use sqlx::{Pool, Postgres};
 use actix_cors;
+
 
 pub mod env_dns;
 pub mod db;
@@ -33,7 +35,8 @@ async fn main() -> Result<(),std::io::Error>{
         App::new()
             .wrap(cors)
             .app_data(Data::new(AppState{db:pool.clone()}))
-            .service(create_user)
+            .service(register)
+            .service(signin)
     })
     .bind((SERVER_ADDR,SERVER_PORT)).expect(&format!("failed to run server on {}:{}",SERVER_ADDR,SERVER_PORT))
     .run()
