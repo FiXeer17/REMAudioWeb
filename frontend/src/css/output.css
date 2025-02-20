@@ -612,10 +612,6 @@ body {
   grid-row: span 2 / span 2;
 }
 
-.m-10 {
-  margin: 2.5rem;
-}
-
 .mx-9 {
   margin-left: 2.25rem;
   margin-right: 2.25rem;
@@ -653,10 +649,6 @@ body {
   height: 4rem;
 }
 
-.h-36 {
-  height: 9rem;
-}
-
 .h-8 {
   height: 2rem;
 }
@@ -665,28 +657,29 @@ body {
   height: 2.25rem;
 }
 
-.h-6 {
-  height: 1.5rem;
-}
-
-.h-40 {
-  height: 10rem;
-}
-
-.h-32 {
-  height: 8rem;
-}
-
-.h-24 {
-  height: 6rem;
+.h-full {
+  height: 100%;
 }
 
 .h-screen {
   height: 100vh;
 }
 
-.h-full {
-  height: 100%;
+.h-max {
+  height: -moz-max-content;
+  height: max-content;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.min-h-svh {
+  min-height: 100svh;
+}
+
+.w-10 {
+  width: 2.5rem;
 }
 
 .w-3\/4 {
@@ -705,8 +698,37 @@ body {
   width: 100%;
 }
 
-.w-10 {
-  width: 2.5rem;
+.w-16 {
+  width: 4rem;
+}
+
+.w-1\/2 {
+  width: 50%;
+}
+
+.w-1\/3 {
+  width: 33.333333%;
+}
+
+.w-1\/4 {
+  width: 25%;
+}
+
+.w-2\/4 {
+  width: 50%;
+}
+
+.w-3\/5 {
+  width: 60%;
+}
+
+.w-max {
+  width: -moz-max-content;
+  width: max-content;
+}
+
+.w-screen {
+  width: 100vw;
 }
 
 .shrink-0 {
@@ -726,20 +748,40 @@ body {
   cursor: pointer;
 }
 
-.grid-cols-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.grid-cols-5 {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+.grid-flow-col {
+  grid-auto-flow: column;
 }
 
 .grid-rows-5 {
   grid-template-rows: repeat(5, minmax(0, 1fr));
 }
 
+.grid-rows-\[auto\2c auto\2c auto\2c auto\2c 1fr\] {
+  grid-template-rows: auto auto auto auto 1fr;
+}
+
+.grid-rows-6 {
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
 .items-center {
   align-items: center;
+}
+
+.justify-start {
+  justify-content: flex-start;
 }
 
 .justify-center {
@@ -752,6 +794,50 @@ body {
 
 .gap-2 {
   gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-32 {
+  gap: 8rem;
+}
+
+.gap-12 {
+  gap: 3rem;
+}
+
+.gap-20 {
+  gap: 5rem;
+}
+
+.gap-\[5\%\] {
+  gap: 5%;
+}
+
+.gap-\[10\%\] {
+  gap: 10%;
+}
+
+.gap-\[20\%\] {
+  gap: 20%;
+}
+
+.gap-\[30\%\] {
+  gap: 30%;
+}
+
+.gap-\[25\%\] {
+  gap: 25%;
+}
+
+.gap-\[3\%\] {
+  gap: 3%;
+}
+
+.self-start {
+  align-self: flex-start;
 }
 
 .overflow-hidden {
@@ -829,6 +915,10 @@ body {
   background-color: rgb(250 250 250 / var(--tw-bg-opacity, 1));
 }
 
+.bg-muted {
+  background-color: hsl(var(--muted));
+}
+
 .bg-primary {
   background-color: hsl(var(--primary));
 }
@@ -841,32 +931,14 @@ body {
   background-color: transparent;
 }
 
-.bg-blue-500 {
+.bg-white {
   --tw-bg-opacity: 1;
-  background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 
-.bg-green-500 {
+.bg-yellow-50 {
   --tw-bg-opacity: 1;
-  background-color: rgb(34 197 94 / var(--tw-bg-opacity, 1));
-}
-
-.bg-red-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
-}
-
-.bg-yellow-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(234 179 8 / var(--tw-bg-opacity, 1));
-}
-
-.bg-muted {
-  background-color: hsl(var(--muted));
-}
-
-.p-4 {
-  padding: 1rem;
+  background-color: rgb(254 252 232 / var(--tw-bg-opacity, 1));
 }
 
 .px-10 {
@@ -907,6 +979,11 @@ body {
 .py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem;
+}
+
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .pr-12 {
@@ -1011,6 +1088,14 @@ body {
 
 .outline {
   outline-style: solid;
+}
+
+.outline-1 {
+  outline-width: 1px;
+}
+
+.outline-8 {
+  outline-width: 8px;
 }
 
 .transition-colors {
