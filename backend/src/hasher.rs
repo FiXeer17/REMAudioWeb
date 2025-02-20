@@ -39,11 +39,8 @@ pub fn argon2_verify(hash: &str, password: &str) -> Result<bool, Error> {
 }
 
 pub fn id_to_jwt(id: i32, session_type: String) -> Result<String, Box<dyn std::error::Error>> {
-    if session_type!="native" && session_type!="web"{
-        return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Unsupported, "unsupported session")));
-    }
-    let default_jwt_duration: i64 = 3; // hours
 
+    let default_jwt_duration: i64 = 3; // hours
 
     let jwt_exp = Utc::now()
         .checked_sub_signed(chrono::Duration::hours(default_jwt_duration))
