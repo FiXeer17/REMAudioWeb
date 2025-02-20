@@ -7,13 +7,15 @@ use chrono::Utc;
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 
+
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
     sub: i32,
+    session_type: String,
     exp: usize,
 }
 
-pub fn encrypt(password: &str) -> Result<String, Error> {
+pub fn argon2_enc(password: &str) -> Result<String, Error> {
     // create the salt
     let salt = SaltString::generate(&mut OsRng);
     // init the default argon parameters
@@ -24,7 +26,7 @@ pub fn encrypt(password: &str) -> Result<String, Error> {
         .to_string())
 }
 
-pub fn is_equal_to(hash: &str, password: &str) -> Result<bool, Error> {
+pub fn argon2_verify(hash: &str, password: &str) -> Result<bool, Error> {
     // parsing the phc hash into PasswordHash type
     let hash = PasswordHash::new(hash)?;
 
@@ -36,8 +38,12 @@ pub fn is_equal_to(hash: &str, password: &str) -> Result<bool, Error> {
     }
 }
 
-pub fn id_to_jwt(id: i32) -> Result<String, Box<dyn std::error::Error>> {
+pub fn id_to_jwt(id: i32, session_type: String) -> Result<String, Box<dyn std::error::Error>> {
+    if session_type!="native" && session_type!="web"{
+        return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Unsupported, "unsupported session")));
+    }
     let default_jwt_duration: i64 = 3; // hours
+
 
     let jwt_exp = Utc::now()
         .checked_sub_signed(chrono::Duration::hours(default_jwt_duration))
@@ -45,7 +51,9 @@ pub fn id_to_jwt(id: i32) -> Result<String, Box<dyn std::error::Error>> {
         .timestamp();
 
     let jwt_secret = Env::get_vars().get_jwt_secret();
+
     let claims = Claims {
+        session_type,
         sub: id,
         exp: jwt_exp as usize,
     };

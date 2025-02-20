@@ -1,6 +1,6 @@
 use actix_web::{post, web::{self, Data}, HttpResponse, Responder};
 use validator::Validate;
-use crate::{hasher::{encrypt,id_to_jwt}, interfaces::insert_user, schemas};
+use crate::{hasher::{argon2_enc,id_to_jwt}, interfaces::insert_user, schemas};
 use crate::AppState;
 use serde_json::{json, to_string_pretty};
 
@@ -13,14 +13,14 @@ pub async fn create_user(
         return HttpResponse::BadRequest().finish();
     }
 
-    let hashed_pswd = match encrypt(&request_body.password){
+    let hashed_pswd = match argon2_enc(&request_body.password){
         Ok(hash) => hash,
         Err(_) => {return HttpResponse::InternalServerError().json(json!({"reason":"hashing password error."}))}
     };
 
     match insert_user(pgpool, &request_body.username, &request_body.email, &hashed_pswd).await{
         Ok(new_user)  => { 
-            let jwt_token = match id_to_jwt(new_user.id){
+            let jwt_token = match id_to_jwt(new_user.id, request_body.session_type.clone()){
                 Ok(token) => token,
                 Err(_) => {return HttpResponse::InternalServerError().finish();}
             };

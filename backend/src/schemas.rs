@@ -9,6 +9,7 @@ pub struct CreateUser {
     #[validate(length(min = 4, max = 254), email)]
     pub email: String,
     pub password: String,
+    pub session_type: String
 }
 
 #[derive(Serialize, Debug, FromRow)]
