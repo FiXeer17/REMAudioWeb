@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Button as Button_sign } from "../components/ui/button_sign";
 import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
@@ -13,16 +12,16 @@ export default function SignInPage() {
           <AvatarImage src="/REM_avatar.svg" />
         </Avatar>
       </div>
-      <div className="flex flex-col items-center justify-center gap-[30%] row-span-2">
+      <div className="flex flex-col items-center justify-center row-span-2 gap-[30%]">
         <Input_email placeholder="Email" />
-        <div>
-          <Input_pass placeholder="Password"/>
-          <h1 className="text-white self-start">Forgot password?</h1>
-        </div>
+        <Input_pass className="visible" Forgot={"hidden"} placeholder="Password" />
+        
       </div>
-      <div className="flex justify-center">
-        <Button_sign variant={"login"} size={"login"}>Sign In</Button_sign>
-        <link rel="Register"></link>
+      <div className="flex flex-col items-center justify-center gap-[30%]">
+        <Button_sign variant={"login"} size={"login"}>
+          Sign In
+        </Button_sign>
+        <h1 className="text-white">Register</h1>
       </div>
     </div>
   );
