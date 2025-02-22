@@ -9,8 +9,8 @@ export default function SignInPage() {
     <div className="grid grid-rows-6 min-h-svh">
       <div></div>
       <div className="flex justify-center">
-        <Avatar className="w-3/5">
-          <AvatarImage src="/REM_avatar.svg" />
+        <Avatar className="flex justify-center items-start" >
+          <AvatarImage className="w-3/5" src="/REM_avatar.svg" />
         </Avatar>
       </div>
       <div className="flex flex-col items-center justify-center row-span-2 gap-[17%]">
