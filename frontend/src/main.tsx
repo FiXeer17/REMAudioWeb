@@ -3,13 +3,17 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter,RouterProvider } from "react-router-dom"
 
 import SignIn from "./pages/SignIn"
-
+import Register from "./pages/Register"
 
 
 const router = createBrowserRouter([
   {
     path: "/login",
     element: <SignIn/> 
+  },
+  {
+    path: "/Register",
+    element: <Register/> 
   }
 ]);
 
