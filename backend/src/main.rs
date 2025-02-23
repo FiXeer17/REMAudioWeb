@@ -3,6 +3,7 @@ use actix_cors;
 use actix_web::{
     web::{self, Data},
     App, HttpServer,
+    middleware::Logger
 };
 use services::public;
 use sqlx::{Pool, Postgres};
@@ -21,9 +22,9 @@ pub struct AppState {
 
 #[actix_web::main]
 async fn main() -> Result<(), std::io::Error> {
+    env_logger::init();
     let pool = establish_connection().await;
     let _ = sqlx::migrate!("./migrations").run(&pool).await;
-    println!("Server serving on: http://localhost:8000");
     HttpServer::new(move || {
         let cors = actix_cors::Cors::default()
             .allow_any_origin()
@@ -32,6 +33,7 @@ async fn main() -> Result<(), std::io::Error> {
 
         App::new()
             .wrap(cors)
+            .wrap(Logger::default())
             .app_data(Data::new(AppState { db: pool.clone() }))
             .service(
                 web::scope("/api").service(
