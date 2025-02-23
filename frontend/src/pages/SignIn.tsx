@@ -15,7 +15,7 @@ export default function SignInPage() {
       </div>
       <div className="flex flex-col items-center justify-center row-span-2 gap-[17%]">
         <Input_email placeholder="Email" />
-        <Input_pass className="visible" Forgot={"visible"} placeholder="Password" />
+        <Input_pass className="visible" Eye_state={"visible"} Forgot={"visible"} placeholder="Password" />
         
       </div>
       <div className="flex flex-col row-span-2 items-center justify-start mt-8 gap-[10%]">
