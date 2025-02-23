@@ -8,13 +8,10 @@ WORKDIR /app
 COPY package*.json ./
  
 # Install dependencies
-RUN npm install
+RUN npm i
  
 # Copy the rest of your application files
 COPY . .
- 
-# Expose the port your app runs on
-EXPOSE 5173
  
 # Define the command to run your app
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
