@@ -637,6 +637,10 @@ body {
   margin-top: 2.25rem;
 }
 
+.ml-32 {
+  margin-left: 8rem;
+}
+
 .flex {
   display: flex;
 }
@@ -730,16 +734,16 @@ body {
   cursor: pointer;
 }
 
+.grid-rows-5 {
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+}
+
 .grid-rows-6 {
   grid-template-rows: repeat(6, minmax(0, 1fr));
 }
 
-.grid-rows-4 {
-  grid-template-rows: repeat(4, minmax(0, 1fr));
-}
-
-.grid-rows-5 {
-  grid-template-rows: repeat(5, minmax(0, 1fr));
+.grid-rows-7 {
+  grid-template-rows: repeat(7, minmax(0, 1fr));
 }
 
 .flex-col {
@@ -774,32 +778,16 @@ body {
   gap: 10%;
 }
 
-.gap-\[17\%\] {
-  gap: 17%;
-}
-
-.gap-\[20\%\] {
-  gap: 20%;
-}
-
-.gap-\[5\%\] {
-  gap: 5%;
-}
-
 .gap-\[15\%\] {
   gap: 15%;
 }
 
-.gap-5 {
-  gap: 1.25rem;
+.gap-\[17\%\] {
+  gap: 17%;
 }
 
-.gap-\[30\&\] {
-  gap: 30&;
-}
-
-.gap-\[30\%\] {
-  gap: 30%;
+.gap-\[5\%\] {
+  gap: 5%;
 }
 
 .self-start {
@@ -1097,6 +1085,22 @@ body {
 
 .placeholder\:text-muted-foreground::placeholder {
   color: hsl(var(--muted-foreground));
+}
+
+.autofill\:\!bg-transparent:-webkit-autofill {
+  background-color: transparent !important;
+}
+
+.autofill\:\!bg-transparent:autofill {
+  background-color: transparent !important;
+}
+
+.autofill\:bg-transparent:-webkit-autofill {
+  background-color: transparent;
+}
+
+.autofill\:bg-transparent:autofill {
+  background-color: transparent;
 }
 
 .hover\:bg-accent:hover {
