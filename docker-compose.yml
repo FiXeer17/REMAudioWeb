@@ -18,14 +18,14 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     volumes:
-      # Mount source code for live reload
+      # mount source code for live reload
       - ./backend/src:/usr/src/app/src
       - ./backend/Cargo.toml:/usr/src/app/Cargo.toml
       - ./backend/Cargo.lock:/usr/src/app/Cargo.lock
       - ./backend/migrations:/usr/src/app/migrations
-      # Mount target for incremental compilation caching
+      # mount target for incremental compilation caching
       - cargo_target:/usr/src/app/target
-      # Cache Cargo dependencies to speed up rebuilds
+      # cache Cargo dependencies to speed up rebuilds
       - cargo_registry:/usr/local/cargo/registry
     ports:
       - "8000:8000" 
@@ -34,6 +34,8 @@ services:
         condition: service_healthy
     env_file:
       - ./backend/.env
+    environment:
+      - RUST_LOG=info
       
 volumes:
   postgres_data:
