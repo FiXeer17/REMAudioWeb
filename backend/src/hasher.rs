@@ -7,7 +7,6 @@ use chrono::Utc;
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
     sub: i32,
@@ -39,7 +38,6 @@ pub fn argon2_verify(hash: &str, password: &str) -> Result<bool, Error> {
 }
 
 pub fn id_to_jwt(id: i32, session_type: String) -> Result<String, Box<dyn std::error::Error>> {
-
     let default_jwt_duration: i64 = 3; // hours
 
     let jwt_exp = Utc::now()
@@ -47,7 +45,7 @@ pub fn id_to_jwt(id: i32, session_type: String) -> Result<String, Box<dyn std::e
         .expect("failed to create a jwt_exp.")
         .timestamp();
 
-    let jwt_secret = Env::get_vars().get_jwt_secret();
+    let jwt_secret = Env::get_jwt_secret();
 
     let claims = Claims {
         session_type,
