@@ -8,8 +8,8 @@ import { Link } from "react-router-dom";
 
 
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> & {Forgot:String}>(
-  ({ className,Forgot,...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> & {Forgot:String,Eye_state:String}>(
+  ({ className,Forgot,Eye_state,...props }, ref) => {
     const [state,setState]=useState(false);
 
     return (      
@@ -24,10 +24,10 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> &
             ref={ref}
             {...props}
           />
-          
+          <div className={cn(Eye_state)}>
           {state ? <Eye id="Eye" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white cursor-pointer"  onClick={()=>setState(!state)}/> 
           : <EyeSlash id="EyeSlash" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white cursor-pointer"  onClick={()=>setState(!state)} />}
-                  
+          </div>   
         </div>
         <Link to={"/Login"} className= {cn("flex self-start px-3 text-login_colors-forgot_pass text-sm mt-1 underline",Forgot)}>Forgot password?</Link>
       </div>
