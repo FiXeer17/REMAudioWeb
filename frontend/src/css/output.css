@@ -730,16 +730,12 @@ body {
   cursor: pointer;
 }
 
-.grid-rows-6 {
-  grid-template-rows: repeat(6, minmax(0, 1fr));
-}
-
-.grid-rows-4 {
-  grid-template-rows: repeat(4, minmax(0, 1fr));
-}
-
 .grid-rows-5 {
   grid-template-rows: repeat(5, minmax(0, 1fr));
+}
+
+.grid-rows-6 {
+  grid-template-rows: repeat(6, minmax(0, 1fr));
 }
 
 .flex-col {
@@ -774,32 +770,12 @@ body {
   gap: 10%;
 }
 
-.gap-\[17\%\] {
-  gap: 17%;
-}
-
-.gap-\[20\%\] {
-  gap: 20%;
-}
-
-.gap-\[5\%\] {
-  gap: 5%;
-}
-
 .gap-\[15\%\] {
   gap: 15%;
 }
 
-.gap-5 {
-  gap: 1.25rem;
-}
-
-.gap-\[30\&\] {
-  gap: 30&;
-}
-
-.gap-\[30\%\] {
-  gap: 30%;
+.gap-\[17\%\] {
+  gap: 17%;
 }
 
 .self-start {
