@@ -18,17 +18,15 @@ export default function Register() {
           <AvatarImage className="w-3/5" src="/REM_avatar.svg" />
         </Avatar>
       </div>
-      <div className="flex flex-col row-span-2 justify-start gap-[15%]">
-        <div className="flex flex-col items-center ">
+      <div className="flex flex-col items-center gap-[5%]">
         <Input_email placeholder="Username"/>
         <Input_email placeholder="Email"/>
-        </div>
-        <div className="flex flex-col items-center ">
+      </div>
+      <div className="flex flex-col items-center gap-[5%]">
           <Input_pass className="visible" Eye_state={"visible"} Forgot={"hidden"} placeholder="Password" />
           <Input_pass className="visible" Eye_state={"hidden"} Forgot={"hidden"} placeholder="Confirm password" />
-        </div>
       </div>
-      <div className="flex flex-col row-span-2 items-center justify-start mt-8 gap-[10%]">
+      <div className="flex flex-col items-center justify-start gap-[15%]">
         <Button_register variant={"login"} size={"login"}>
           Register
         </Button_register>
