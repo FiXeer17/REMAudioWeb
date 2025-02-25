@@ -2,7 +2,7 @@ use dotenv::{dotenv, from_filename};
 
 pub const DATABASE_URL: &str = "DATABASE_URL";
 pub const JWT_SECRET: &str = "JWT_SECRET";
-pub const DATABASE_NAME : &str = "DATABASE_NAME";
+pub const DATABASE_NAME: &str = "DATABASE_NAME";
 
 pub struct Env {
     database_url: String,
@@ -22,7 +22,7 @@ impl Env {
         Env {
             database_url,
             jwt_secret,
-            database_name
+            database_name,
         }
     }
 
@@ -32,7 +32,7 @@ impl Env {
     pub fn get_jwt_secret() -> String {
         Env::get_vars().jwt_secret
     }
-    pub fn get_db_name() -> String{
+    pub fn get_db_name() -> String {
         Env::get_vars().database_name
     }
 }
