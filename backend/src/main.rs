@@ -1,13 +1,14 @@
 use crate::db::establish_connection;
 use actix_cors;
 use actix_web::{
+    middleware::Logger,
     web::{self, Data},
     App, HttpServer,
-    middleware::Logger
 };
 use services::public;
 use sqlx::{Pool, Postgres};
 
+pub mod auth_middleware;
 pub mod db;
 pub mod env_dns;
 pub mod hasher;
