@@ -1,8 +1,9 @@
-use crate::services::public::register::schemas;
-use crate::services::public::{common::return_json_reason, interfaces::insert_user};
+use crate::services::public::{interfaces::insert_user, register::schemas};
 use crate::{
-    env_dns::Env,
-    hasher::{argon2_enc, id_to_jwt},
+    utils::{
+        common::return_json_reason,
+        hasher::{argon2_enc, id_to_jwt},
+    },
     AppState,
 };
 use actix_web::{
@@ -29,13 +30,11 @@ pub async fn register(
                 .json(return_json_reason("hashing password error."))
         }
     };
-    let db_name = Env::get_db_name();
     match insert_user(
         pgpool,
         &request_body.username,
         &request_body.email,
         &hashed_pswd,
-        &db_name,
     )
     .await
     {
