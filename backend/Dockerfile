@@ -5,7 +5,7 @@ FROM rust:1.82
 WORKDIR /usr/src/app
 
 # Install sqlx-cli and cargo-watch tools
-RUN cargo install sqlx-cli --no-default-features --features postgres && \
+RUN cargo install sqlx-cli --version 0.8.2 --no-default-features --features postgres && \
     cargo install cargo-watch
 
 # Copy dependency files and build dependencies only
