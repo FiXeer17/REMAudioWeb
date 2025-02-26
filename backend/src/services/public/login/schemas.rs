@@ -1,4 +1,4 @@
-use crate::services::public::common::validate_session_type;
+use crate::utils::common::validate_session_type;
 use serde::{Deserialize, Serialize};
 use sqlx::{self, FromRow};
 use validator::Validate;

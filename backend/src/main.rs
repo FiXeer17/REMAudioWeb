@@ -1,4 +1,4 @@
-use crate::db::establish_connection;
+use crate::utils::db::establish_connection;
 use actix_cors;
 use actix_web::{
     middleware::Logger,
@@ -8,11 +8,8 @@ use actix_web::{
 use services::public;
 use sqlx::{Pool, Postgres};
 
-pub mod auth_middleware;
-pub mod db;
-pub mod env_dns;
-pub mod hasher;
 pub mod services;
+pub mod utils;
 
 const SERVER_ADDR: &str = "0.0.0.0";
 const SERVER_PORT: u16 = 8000;

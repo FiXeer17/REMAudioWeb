@@ -1,7 +1,9 @@
-use crate::services::public::{common::return_json_reason, interfaces::from_email, login::schemas};
+use crate::services::public::{interfaces::from_email, login::schemas};
 use crate::{
-    env_dns::Env,
-    hasher::{argon2_verify, id_to_jwt},
+    utils::{
+        common::return_json_reason,
+        hasher::{argon2_verify, id_to_jwt},
+    },
     AppState,
 };
 use actix_web::{
@@ -20,8 +22,7 @@ pub async fn signin(
     if let Err(_) = request_body.validate() {
         return HttpResponse::BadRequest().json(return_json_reason("validation error."));
     }
-    let db_name = Env::get_db_name();
-    match from_email(&pgpool, &request_body.email, &db_name).await {
+    match from_email(&pgpool, &request_body.email).await {
         Ok(user) => match argon2_verify(&user.password, &request_body.password) {
             Ok(true) => {
                 let token = match id_to_jwt(user.id, request_body.session_type.clone()) {
