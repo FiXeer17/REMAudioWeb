@@ -3,23 +3,8 @@
 ## Setup:
 
 
-### Database settings
-choose settings to use for the database: username,password,database name and put them in a .env file:
-
-```
-nano .env
-```
-write:
-
-```
-POSTGRES_USER=[your username] 
-POSTGRES_PASSWORD=[your password]  
-POSTGRES_DB=[your db name]
-
-```
-
 ### Backend env variables
-first you have to write the `DATABASE_URL` and the `JWT_SECRET` variable needed by the `env_dns.rs` file variable so:
+enter the backend folder and create a .env file where you have to store the database user password and name variables and the jwt_secret variable used to generate the jwt_token so:
 
 ```
 cd backend
@@ -29,14 +14,13 @@ nano .env
 now you need to write this line:
 
 ```
-DATABASE_URL= postgresql://[POSTGRES_USER]:[POSTGRES_PASSWORD]@db:5432/[POSTGRES_DB]
-DATABASE_NAME=[your db name]
-JWT_SECRET = [STRONG SECRET PASSWORD]
+POSTGRES_USER=[your username] 
+POSTGRES_PASSWORD=[your password]  
+POSTGRES_DB=[your db name]
+JWT_SECRET=[STRONG SECRET PASSWORD]
 
 
 ```
-
-(username and password have to be set).
 
 ## Run:
 

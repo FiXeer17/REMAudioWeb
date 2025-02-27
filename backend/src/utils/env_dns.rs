@@ -1,12 +1,16 @@
 use dotenv::{dotenv, from_filename};
 
-pub const DATABASE_URL: &str = "DATABASE_URL";
 pub const JWT_SECRET: &str = "JWT_SECRET";
-pub const DATABASE_NAME: &str = "DATABASE_NAME";
+pub const DATABASE_NAME: &str = "POSTGRES_DB";
+pub const DATABASE_PASSWORD: &str = "POSTGRES_PASSWORD";
+pub const DATABASE_USER: &str = "POSTGRES_USER";
 
+#[allow(dead_code)]
 pub struct Env {
     database_url: String,
     database_name: String,
+    database_user: String,
+    database_password: String,
     jwt_secret: String,
 }
 
@@ -15,14 +19,17 @@ impl Env {
         from_filename(".env.local").ok();
         dotenv().ok();
 
-        let database_url: String =
-            std::env::var(DATABASE_URL).expect("failed to retrive database url.");
         let jwt_secret: String = std::env::var(JWT_SECRET).expect("failed to retrive jwt secret.");
         let database_name = std::env::var(DATABASE_NAME).expect("failed to retrieve database name");
+        let database_user = std::env::var(DATABASE_USER).expect("failed to retrieve database username");
+        let database_password = std::env::var(DATABASE_PASSWORD).expect("failed to retrieve database password");
+        let database_url = format!("postgresql://{}:{}@db:5432/{}",database_user,database_password,database_name);
         Env {
             database_url,
-            jwt_secret,
             database_name,
+            database_user,
+            database_password,
+            jwt_secret
         }
     }
 
