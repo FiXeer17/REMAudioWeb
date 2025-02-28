@@ -1,9 +1,11 @@
-import { Form, Link } from "react-router-dom";
+import { Form, Link, redirect } from "react-router-dom";
 import { Button as Button_sign } from "../components/ui/button_sign";
 import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
+import {login } from "../lib/services";
 import axios from "axios";
+
 
 export default function SignInPage() {
   return (
@@ -33,12 +35,20 @@ export default function SignInPage() {
   );
 }
 export const loginAction = async({ request }: {request:Request})=>{
+  try{
   const data= await request.formData()
-  const sub={
-    email: data.get('email'),
-    password: data.get('password'),
-    session_type:"web"
-
+  const credential = {
+    email: data.get('email') as string,
+    password: data.get('password') as string,
+    session_type: "web" as string
   }
-  console.log(sub)
+
+  const response= await login(credential)
+  const accessToken=response.data.jwt_token
+  localStorage.setItem("accessToken",accessToken)
+  return redirect("/register")
+}catch(error){
+  return redirect("/login")
+}
+
 }
