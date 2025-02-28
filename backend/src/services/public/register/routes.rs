@@ -19,15 +19,15 @@ pub async fn register(
     request_body: web::Json<schemas::CreateUser>,
     pgpool: Data<AppState>,
 ) -> impl Responder {
-    if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("validation error."));
+    if let Err(e) = request_body.validate() {
+        return HttpResponse::BadRequest().json(return_json_reason(&e.to_string()));
     }
 
     let hashed_pswd = match argon2_enc(&request_body.password) {
         Ok(hash) => hash,
-        Err(_) => {
+        Err(e) => {
             return HttpResponse::InternalServerError()
-                .json(return_json_reason("hashing password error."))
+                .json(return_json_reason(&e.to_string()))
         }
     };
     match insert_user(

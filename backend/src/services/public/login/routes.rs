@@ -19,8 +19,8 @@ pub async fn signin(
     request_body: web::Json<schemas::SignIn>,
     pgpool: Data<AppState>,
 ) -> impl Responder {
-    if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("validation error."));
+    if let Err(e) = request_body.validate() {
+        return HttpResponse::BadRequest().json(return_json_reason(&e.to_string()));
     }
     match from_email(&pgpool, &request_body.email).await {
         Ok(user) => match argon2_verify(&user.password, &request_body.password) {
