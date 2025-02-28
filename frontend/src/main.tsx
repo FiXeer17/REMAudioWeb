@@ -2,9 +2,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter,Navigate,RouterProvider } from "react-router-dom"
 import { loginAction } from './pages/SignIn'
+import { registerAction } from "./pages/Register"
+import { clientLoader } from './lib/clientLoader'
 
 import SignIn from "./pages/SignIn"
 import Register from "./pages/Register"
+import Volume from './pages/Volume'
 
 
 const router = createBrowserRouter([
@@ -19,7 +22,13 @@ const router = createBrowserRouter([
   },
   {
     path: "/Register",
-    element: <Register/>
+    element: <Register/>,
+    action: registerAction
+  },
+  {
+    path: "/volume",
+    element: <Volume/>,
+    loader: clientLoader
   }
 ]);
 

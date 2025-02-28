@@ -4,7 +4,7 @@ import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import {login } from "../lib/services";
-import axios from "axios";
+
 
 
 export default function SignInPage() {
@@ -46,9 +46,9 @@ export const loginAction = async({ request }: {request:Request})=>{
   const response= await login(credential)
   const accessToken=response.data.jwt_token
   localStorage.setItem("accessToken",accessToken)
-  return redirect("/register")
+  return redirect("/volume")
 }catch(error){
-  return redirect("/login")
+  return redirect("/register")
 }
 
 }
