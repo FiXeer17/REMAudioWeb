@@ -20,7 +20,7 @@ pub async fn register(
     pgpool: Data<AppState>,
 ) -> impl Responder {
     if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("Format not valid, retry later."));
+        return HttpResponse::BadRequest().json(return_json_reason("Email format not valid."));
     }
 
     let hashed_pswd = match argon2_enc(&request_body.password) {
