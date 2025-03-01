@@ -19,8 +19,8 @@ pub async fn register(
     request_body: web::Json<schemas::CreateUser>,
     pgpool: Data<AppState>,
 ) -> impl Responder {
-    if let Err(e) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason(&e.to_string()));
+    if let Err(_) = request_body.validate() {
+        return HttpResponse::BadRequest().json(return_json_reason("Format not valid, retry later."));
     }
 
     let hashed_pswd = match argon2_enc(&request_body.password) {
