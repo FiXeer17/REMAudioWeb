@@ -15,7 +15,7 @@ export default function Register() {
       </div>
       <div className="flex justify-center items-start">
         <Avatar className="flex justify-center">
-          <AvatarImage className="w-3/5" src="/REM_avatar.svg" />
+          <AvatarImage className="w-4/5" src="/REM_avatar.svg" />
         </Avatar>
       </div>
       <Form method="post" action="/register" className="flex flex-col row-span-4 justify-start gap-[10%]">
@@ -31,7 +31,7 @@ export default function Register() {
         <Button_register variant={"login"} size={"login"}>
           Register
         </Button_register>
-        <Link to={"/Login"} className="text-login_colors-button_bg/text font-bold">Sign in</Link>
+        <Link to={"/Login"} className="text-login_colors-button_bg/text font-bold mt-5">Sign in</Link>
       </div>
       </Form>
     </div>
