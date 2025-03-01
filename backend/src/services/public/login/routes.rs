@@ -41,7 +41,7 @@ pub async fn signin(
             }
         },
         Err(_) => {
-            return HttpResponse::NotFound().json(return_json_reason("Email not found."));
+            return HttpResponse::NotFound().json(return_json_reason("Wrong credentials."));
         }
     }
 }

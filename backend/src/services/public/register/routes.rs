@@ -62,7 +62,7 @@ pub async fn register(
         }
         Err(sqlx::Error::RowNotFound) => {
             return HttpResponse::UnprocessableEntity()
-                .json(return_json_reason("e-mail already taken."))
+                .json(return_json_reason("Email already taken."))
         }
         Err(_) => return HttpResponse::BadRequest().finish(),
     }
