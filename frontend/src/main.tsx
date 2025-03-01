@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter,Navigate,RouterProvider } from "react-router-dom"
 import { loginAction } from './pages/SignIn'
-import { registerAction } from "./pages/Register"
+
 import { clientLoader } from './lib/clientLoader'
 
 import SignIn from "./pages/SignIn"
@@ -21,9 +21,8 @@ const router = createBrowserRouter([
     action: loginAction
   },
   {
-    path: "/Register",
-    element: <Register/>,
-    action: registerAction
+    path: "/register",
+    element: <Register/>
   },
   {
     path: "/volume",

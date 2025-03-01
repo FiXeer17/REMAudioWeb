@@ -1,11 +1,34 @@
 import { ArrowLeft } from "@phosphor-icons/react";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
-import { Link,Form } from "react-router-dom";
+import { Link,Form, redirect } from "react-router-dom";
 import { Button as Button_register } from "../components/ui/button_sign";
 import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
+import { useState } from "react";
 
 export default function Register() {
+  const [match,setMatch]=useState(false)
+
+  const credentialValidation= async (data:FormData)=>{
+    try{
+    const username = data.get('username') 
+    const email = data.get('email') 
+    const password = data.get('password')
+    const confirm_password= data.get('confirm_password') 
+    const session_type = "web" 
+    console.log(username)
+    console.log(password)
+    if (password===confirm_password)
+      setMatch(true)
+    else{
+      setMatch(false)
+    }
+
+  }
+  catch(error){
+    return redirect("/register")
+    }
+  }
   return (
     <div className="grid grid-rows-6 min-h-svh">
       <div className="mt-9 ml-7">
@@ -18,14 +41,15 @@ export default function Register() {
           <AvatarImage className="w-4/5" src="/REM_avatar.svg" />
         </Avatar>
       </div>
-      <Form method="post" action="/register" className="flex flex-col row-span-4 justify-center gap-[10%]">
+      <Form  className="flex flex-col row-span-4 justify-center gap-[10%]">
       <div className="flex flex-col items-center gap-2">
-        <Input_email placeholder="Username"/>
-        <Input_email placeholder="Email"/>
+        <Input_email placeholder="Username" name="username"/>
+        <Input_email placeholder="Email" name="email"/>
       </div>
       <div className="flex flex-col items-center gap-2 ">
-          <Input_pass className="visible" Eye_state={"visible"} Forgot={"hidden"} placeholder="Password" />
-          <Input_pass className="visible" Eye_state={"hidden"} Forgot={"hidden"} placeholder="Confirm password" />
+          <Input_pass className="visible" Eye_state={"visible"} Forgot={"hidden"} placeholder="Password" name="password"/>
+          <Input_pass className="visible" Eye_state={"hidden"} Forgot={"hidden"} placeholder="Confirm password" name="confirm_password"/>
+          {match && <h1 className="text-white" >Password doesn't match</h1>}
       </div>
       <div className="flex flex-col items-center justify-start mt-7">
         <Button_register variant={"login"} size={"login"}>
@@ -36,8 +60,4 @@ export default function Register() {
       </Form>
     </div>
   );
-}
-
-export const registerAction= async({ request }: {request:Request})=>{
-  return
 }
