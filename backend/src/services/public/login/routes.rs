@@ -20,7 +20,7 @@ pub async fn signin(
     pgpool: Data<AppState>,
 ) -> impl Responder {
     if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("Format not valid, retry later."));
+        return HttpResponse::BadRequest().json(return_json_reason("Email format not valid."));
     }
     match from_email(&pgpool, &request_body.email).await {
         Ok(user) => match argon2_verify(&user.password, &request_body.password) {
