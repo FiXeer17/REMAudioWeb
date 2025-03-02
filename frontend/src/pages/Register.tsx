@@ -4,9 +4,7 @@ import { Link,redirect } from "react-router-dom";
 import { Button as Button_register } from "../components/ui/button_sign";
 import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
-import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form"
-import { watch } from "fs";
 
 type FormFields = {
   username:string;
