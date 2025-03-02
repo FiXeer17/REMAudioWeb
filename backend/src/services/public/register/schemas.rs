@@ -1,13 +1,12 @@
-use crate::services::public::common::validate_session_type;
+use crate::utils::common::validate_session_type;
 use serde::{Deserialize, Serialize};
 use sqlx::{self, FromRow};
 use validator::Validate;
 
 #[derive(Deserialize, Debug, Validate)]
 pub struct CreateUser {
-    #[validate(length(min = 4, max = 254))]
     pub username: String,
-    #[validate(length(min = 4, max = 254), email)]
+    #[validate(email)]
     pub email: String,
     pub password: String,
     #[validate(custom = "validate_session_type")]

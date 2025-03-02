@@ -1,10 +1,10 @@
-use crate::env_dns::Env;
+use crate::utils::env_dns::Env;
 use argon2::{
     password_hash::{rand_core::OsRng, Error, PasswordHasher, SaltString},
     Argon2, PasswordHash, PasswordVerifier,
 };
 use chrono::Utc;
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]

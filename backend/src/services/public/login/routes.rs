@@ -1,7 +1,9 @@
-use crate::services::public::{common::return_json_reason, interfaces::from_email, login::schemas};
+use crate::services::public::{interfaces::from_email, login::schemas};
 use crate::{
-    env_dns::Env,
-    hasher::{argon2_verify, id_to_jwt},
+    utils::{
+        common::return_json_reason,
+        hasher::{argon2_verify, id_to_jwt},
+    },
     AppState,
 };
 use actix_web::{
@@ -18,10 +20,9 @@ pub async fn signin(
     pgpool: Data<AppState>,
 ) -> impl Responder {
     if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("validation error."));
+        return HttpResponse::BadRequest().json(return_json_reason("Email format not valid."));
     }
-    let db_name = Env::get_db_name();
-    match from_email(&pgpool, &request_body.email, &db_name).await {
+    match from_email(&pgpool, &request_body.email).await {
         Ok(user) => match argon2_verify(&user.password, &request_body.password) {
             Ok(true) => {
                 let token = match id_to_jwt(user.id, request_body.session_type.clone()) {
@@ -30,17 +31,17 @@ pub async fn signin(
                         return HttpResponse::InternalServerError().finish();
                     }
                 };
-                return HttpResponse::Ok().json(json!({"jwt_token":token}));
+                return HttpResponse::Ok().json(json!({"access_token":token}));
             }
             Ok(false) => {
-                return HttpResponse::Unauthorized().json(return_json_reason("wrong credentials."));
+                return HttpResponse::Unauthorized().json(return_json_reason("Wrong credentials."));
             }
             Err(_) => {
                 return HttpResponse::InternalServerError().finish();
             }
         },
         Err(_) => {
-            return HttpResponse::NotFound().json(return_json_reason("email not found."));
+            return HttpResponse::NotFound().json(return_json_reason("Wrong credentials."));
         }
     }
 }
