@@ -4,38 +4,56 @@ use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation}
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
+pub struct WebClaims {
     pub sub: i32,
     pub session_type: String,
     pub exp: usize,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct NativeClaims {
+    pub sub: i32,
+    pub session_type: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Claims {
+    Web(WebClaims),
+    Native(NativeClaims),
+}
+
 pub fn id_to_jwt(id: i32, session_type: String) -> Result<String, Box<dyn std::error::Error>> {
-    let default_jwt_duration: i64 = 3; // hours
-
-    let jwt_exp = Utc::now()
-        .checked_add_signed(chrono::Duration::hours(default_jwt_duration))
-        .unwrap()
-        .timestamp();
-
     let jwt_secret = Env::get_jwt_secret();
+    let claims: Claims;
 
-    let claims = Claims {
-        session_type,
-        sub: id,
-        exp: jwt_exp as usize,
-    };
-    let token: String = encode(
+    if session_type == "web" {
+        let default_jwt_duration: i64 = 3; // hours
+
+        let jwt_exp = Utc::now()
+            .checked_add_signed(chrono::Duration::hours(default_jwt_duration))
+            .unwrap()
+            .timestamp();
+
+        claims = Claims::Web(WebClaims {
+            session_type,
+            sub: id,
+            exp: jwt_exp as usize,
+        });
+    } else {
+        claims = Claims::Native(NativeClaims {
+            sub: id,
+            session_type,
+        });
+    }
+    Ok(encode(
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(jwt_secret.as_bytes()),
-    )?;
-    Ok(token)
+    )?)
 }
 
 pub fn jwt_to_id(jwt_token: String) -> Result<i32, jsonwebtoken::errors::Error> {
     let jwt_secret = Env::get_jwt_secret();
-    let claim = decode::<Claims>(
+    let claim = decode::<WebClaims>(
         &jwt_token,
         &DecodingKey::from_secret(jwt_secret.as_bytes()),
         &Validation::new(jsonwebtoken::Algorithm::HS256),
