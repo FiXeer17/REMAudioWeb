@@ -15,7 +15,7 @@ pub struct ReturnFullUser {
 
 #[derive(Deserialize, Serialize, Debug, Validate)]
 pub struct SignIn {
-    #[validate(length(min = 4, max = 254), email)]
+    #[validate(email)]
     pub email: String,
     pub password: String,
     #[validate(custom = "validate_session_type")]
