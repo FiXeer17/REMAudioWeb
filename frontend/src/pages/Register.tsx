@@ -1,11 +1,13 @@
 import { ArrowLeft } from "@phosphor-icons/react";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
-import { Link, redirect } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button as Button_register } from "../components/ui/button_sign";
 import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { register as registerUser } from "@/lib/services";
 import { z } from "zod";
 
 const schema = z.object({
@@ -30,10 +32,32 @@ type FormFields = z.infer<typeof schema>;
 
 
 export default function Register() {
-  const {register,handleSubmit,formState: { errors }} = useForm<FormFields>({ resolver: zodResolver(schema) });
+  const {register,handleSubmit,setError,formState: { errors }} = useForm<FormFields>({ resolver: zodResolver(schema) });
+  const navigate= useNavigate()
 
-  const onSubmit: SubmitHandler<FormFields> = async (data) => {};
+  const onSubmit: SubmitHandler<FormFields> = async (data) => {
+    try{
+    const credential={
+      username : data.username as string,
+      email : data.email as string,
+      password : data.password as string,
+      session_type : "web" as string
+    }
+    const response= await registerUser(credential)
+    const accessToken=response.data.jwt_token
+    localStorage.setItem("accessToken",accessToken)
 
+    return navigate("/volume")
+  }catch(error){
+      if (axios.isAxiosError(error) && error.response?.status === 422) {
+          setError("email", {
+            type: "manual",
+            message: "Email already taken",
+          });
+  }
+  return navigate("/register")
+  }
+};
   return (
     <div className="grid grid-rows-6 min-h-svh">
       <div className="mt-9 ml-7">
