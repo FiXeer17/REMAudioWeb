@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button as Button_register } from "../components/ui/button_sign";
 import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
+import { toast, Toaster } from "sonner"
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -11,13 +12,13 @@ import { register as registerUser } from "@/lib/services";
 import { z } from "zod";
 
 const schema = z.object({
-  username: z.string().min(1,{message: "Required"}),
-  email: z.string().min(1,{message: "Required"}).regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,{message:"Email not valid"}),
-  password: z.string(),
-  confirm_password: z.string()
+  username: z.string().min(1,{message: "All fields must be filled"}),
+  email: z.string().min(1,{message: "All fields must be filled"}).regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,{message:"Email not valid"}),
+  password: z.string().min(1,{message: "All fields must be filled"}),
+  confirm_password: z.string().min(1,{message: "All fields must be filled"})
 })
 .refine((data)=>data.password===data.confirm_password,{
-  message:"Password doesn't match",
+  message:"Password doesn't match ",
   path: ["confirm_password"]
 })
 .refine((data)=>{
@@ -32,9 +33,8 @@ type FormFields = z.infer<typeof schema>;
 
 
 export default function Register() {
-  const {register,handleSubmit,setError,formState: { errors }} = useForm<FormFields>({ resolver: zodResolver(schema) });
+  const {register,handleSubmit,formState: { errors }} = useForm<FormFields>({ resolver: zodResolver(schema) });
   const navigate= useNavigate()
-
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     try{
     const credential={
@@ -50,13 +50,11 @@ export default function Register() {
     return navigate("/volume")
   }catch(error){
       if (axios.isAxiosError(error) && error.response?.status === 422) {
-          setError("email", {
-            type: "manual",
-            message: "Email already taken",
-          });
+        toast.error("Email already taken");
   }
   return navigate("/register")
   }
+  
 };
   return (
     <div className="grid grid-rows-6 min-h-svh">
@@ -70,25 +68,16 @@ export default function Register() {
           <AvatarImage className="w-4/5" src="/REM_avatar.svg" />
         </Avatar>
       </div>
-      <form
-        className="flex flex-col row-span-4 justify-center gap-[10%]"
-        onSubmit={handleSubmit(onSubmit)}
-      >
+      <form className="flex flex-col row-span-4 justify-center gap-[10%]" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col items-center gap-2">
           <Input_email
             {...register("username")}
             placeholder="Username"
           />
-          {errors.username && (
-            <h1 className="text-white">{errors.username.message}</h1>
-          )}
           <Input_email
             {...register("email")}
             placeholder="Email"
           />
-          {errors.email && (
-            <h1 className="text-white">{errors.email.message}</h1>
-          )}
         </div>
         <div className="flex flex-col items-center gap-2 ">
           <Input_pass
@@ -98,20 +87,24 @@ export default function Register() {
             Forgot={"hidden"}
             placeholder="Password"
           />
-          <Input_pass
+          <Input_pass 
             {...register("confirm_password")}
             className="visible"
             Eye_state={"hidden"}
             Forgot={"hidden"}
             placeholder="Confirm password"
+            
           />
-
-          {errors.confirm_password && (
-            <h1 className="text-white">{errors.confirm_password.message}</h1>
-          )}
+            <Toaster />
+            {(errors.username?.message || errors.email?.message || errors.password?.message ||errors.confirm_password?.message
+              )&& (
+              toast.error(errors.username?.message || errors.email?.message || errors.password?.message ||errors.confirm_password?.message, { 
+              duration: 1000})
+            )}
         </div>
         <div className="flex flex-col items-center justify-start mt-7">
-          <Button_register variant={"login"} size={"login"}>
+
+          <Button_register variant={"login"} size={"login" }>
             Register
           </Button_register>
           <Link

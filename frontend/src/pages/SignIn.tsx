@@ -4,6 +4,7 @@ import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
 import {login } from "../lib/services";
+import { toast,Toaster } from "sonner";
 
 
 
@@ -30,7 +31,6 @@ export default function SignInPage() {
           </Link>
         </div>
         </Form>
-        
     </div>
   );
 }
