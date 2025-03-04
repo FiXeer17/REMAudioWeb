@@ -24,5 +24,5 @@ pub struct ReturnCreateUserJWT {
     pub id: i32,
     pub username: String,
     pub email: String,
-    pub jwt_token: String,
+    pub access_token: String,
 }

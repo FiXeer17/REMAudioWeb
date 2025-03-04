@@ -47,7 +47,7 @@ pub async fn register(
                     id: new_user.id,
                     username: new_user.username,
                     email: new_user.email,
-                    jwt_token,
+                    access_token: jwt_token,
                 }) {
                     Ok(pretty) => pretty,
                     Err(_) => {
