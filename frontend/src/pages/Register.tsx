@@ -13,13 +13,17 @@ import { z } from "zod";
 
 const schema = z.object({
   username: z.string().min(1,{message: "All fields must be filled"}),
-  email: z.string().min(1,{message: "All fields must be filled"}).regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,{message:"Email not valid"}),
+  email: z.string().min(1,{message: "All fields must be filled"}).email({message:"Email not valid"}),
   password: z.string().min(1,{message: "All fields must be filled"}),
   confirm_password: z.string().min(1,{message: "All fields must be filled"})
 })
 .refine((data)=>data.password===data.confirm_password,{
   message:"Password doesn't match ",
   path: ["confirm_password"]
+})
+.refine((data)=>data.confirm_password===data.password,{
+  message:"Password doesn't match ",
+  path: ["password"]
 })
 .refine((data)=>{
   const regex= /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
@@ -35,6 +39,33 @@ type FormFields = z.infer<typeof schema>;
 export default function Register() {
   const {register,handleSubmit,formState: { errors }} = useForm<FormFields>({ resolver: zodResolver(schema) });
   const navigate= useNavigate()
+
+    const showErrorToast = () => {
+      if (errors.username?.message === "All fields must be filled" ||
+        errors.email?.message === "All fields must be filled" ||
+        errors.password?.message === "All fields must be filled" ||
+        errors.confirm_password?.message === "All fields must be filled") {
+      toast.error("All fields must be filled", { duration: 2000 });
+      return;
+    }
+    if (errors.email?.message === "Email not valid") {
+      toast.error("Email not valid", { duration: 2000 });
+      return;
+    }  
+    if (errors.confirm_password?.message === "Password doesn't match ") {
+      toast.error("Password doesn't match", { duration: 2000 });
+      return;
+    }
+    if (errors.password?.message === "Password doesn't match ") {
+      toast.error("Password doesn't match", { duration: 2000 });
+      return;
+    }
+    if (errors.confirm_password?.message === "The password must contain at least 8 characters, one uppercase letter, one number, and one special character") {
+      toast.error("The password must contain at least 8 characters, one uppercase letter, one number, and one special character", { duration: 2000 });
+      return;
+    }
+    };
+
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     try{
     const credential={
@@ -68,7 +99,7 @@ export default function Register() {
           <AvatarImage className="w-4/5" src="/REM_avatar.svg" />
         </Avatar>
       </div>
-      <form className="flex flex-col row-span-4 justify-center gap-[10%]" onSubmit={handleSubmit(onSubmit)}>
+      <form className="flex flex-col row-span-4 justify-center gap-[10%]" onSubmit={handleSubmit(onSubmit,showErrorToast)}>
         <div className="flex flex-col items-center gap-2">
           <Input_email
             {...register("username")}
@@ -94,13 +125,8 @@ export default function Register() {
             Forgot={"hidden"}
             placeholder="Confirm password"
             
-          />
-            <Toaster />
-            {(errors.username?.message || errors.email?.message || errors.password?.message ||errors.confirm_password?.message
-              )&& (
-              toast.error(errors.username?.message || errors.email?.message || errors.password?.message ||errors.confirm_password?.message, { 
-              duration: 1000})
-            )}
+          />      
+            <Toaster />            
         </div>
         <div className="flex flex-col items-center justify-start mt-7">
 
