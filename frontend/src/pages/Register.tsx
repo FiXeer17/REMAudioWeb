@@ -11,80 +11,61 @@ import axios from "axios";
 import { register as registerUser } from "@/lib/services";
 import { z } from "zod";
 
-const schema = z.object({
-  username: z.string().min(1,{message: "All fields must be filled"}),
-  email: z.string().min(1,{message: "All fields must be filled"}).email({message:"Email not valid"}),
-  password: z.string().min(1,{message: "All fields must be filled"}),
-  confirm_password: z.string().min(1,{message: "All fields must be filled"})
-})
-.refine((data)=>data.password===data.confirm_password,{
-  message:"Password doesn't match ",
-  path: ["confirm_password"]
-})
-.refine((data)=>data.confirm_password===data.password,{
-  message:"Password doesn't match ",
-  path: ["password"]
-})
-.refine((data)=>{
-  const regex= /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-  return regex.test(data.password)
-},{
-  message:"The password must contain at least 8 characters, one uppercase letter, one number, and one special character",
-  path: ["confirm_password"]
-})
 
-type FormFields = z.infer<typeof schema>;
+type FormFields = {
+  username: string;
+  email:string;
+  password: string;
+  confirm_password: string;
+}
 
 
 export default function Register() {
-  const {register,handleSubmit,formState: { errors }} = useForm<FormFields>({ resolver: zodResolver(schema) });
+  const { register,handleSubmit } =useForm<FormFields>();
   const navigate= useNavigate()
 
-    const showErrorToast = () => {
-      if (errors.username?.message === "All fields must be filled" ||
-        errors.email?.message === "All fields must be filled" ||
-        errors.password?.message === "All fields must be filled" ||
-        errors.confirm_password?.message === "All fields must be filled") {
-      toast.error("All fields must be filled", { duration: 2000 });
-      return;
-    }
-    if (errors.email?.message === "Email not valid") {
-      toast.error("Email not valid", { duration: 2000 });
-      return;
-    }  
-    if (errors.confirm_password?.message === "Password doesn't match ") {
-      toast.error("Password doesn't match", { duration: 2000 });
-      return;
-    }
-    if (errors.password?.message === "Password doesn't match ") {
-      toast.error("Password doesn't match", { duration: 2000 });
-      return;
-    }
-    if (errors.confirm_password?.message === "The password must contain at least 8 characters, one uppercase letter, one number, and one special character") {
-      toast.error("The password must contain at least 8 characters, one uppercase letter, one number, and one special character", { duration: 2000 });
-      return;
-    }
+    const showErrorToast = (data : FormFields) => {
+      const emailRegex=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      const passRegex= /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/
+      if (data.username===""||data.email===""||data.password===""||data.confirm_password===""){
+        toast.error("All fields must be filled", { duration: 1000 });
+        return false;
+      }
+      if (!emailRegex.test(data.email)){
+        toast.error("Email not valid", { duration: 1000 });
+        return false;
+      } 
+      if(data.password!==data.confirm_password){
+        toast.error("Password doesn't match", { duration: 1000 });
+        return false;
+      }
+      if(!passRegex.test(data.password)||!passRegex.test(data.confirm_password)){
+        toast.error("The password must contain at least 8 characters, one uppercase letter, one number, and one special character", { duration: 1000 });
+        return false;
+      }
+      return true
     };
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    try{
-    const credential={
-      username : data.username as string,
-      email : data.email as string,
-      password : data.password as string,
-      session_type : "web" as string
-    }
-    const response= await registerUser(credential)
-    const accessToken=response.data.jwt_token
-    localStorage.setItem("accessToken",accessToken)
+    if (showErrorToast(data)){
+      try{
+      const credential={
+        username : data.username as string,
+        email : data.email as string,
+        password : data.password as string,
+        session_type : "web" as string
+      }
+      const response= await registerUser(credential)
+      const accessToken=response.data.jwt_token
+      localStorage.setItem("accessToken",accessToken)
 
-    return navigate("/volume")
-  }catch(error){
-      if (axios.isAxiosError(error) && error.response?.status === 422) {
-        toast.error("Email already taken");
-  }
-  return navigate("/register")
-  }
+      return navigate("/volume")
+    }catch(error){
+        if (axios.isAxiosError(error) && error.response?.status === 422) {
+          toast.error("Email already taken");
+    }
+    return navigate("/register")
+    }}
   
 };
   return (
@@ -99,7 +80,7 @@ export default function Register() {
           <AvatarImage className="w-4/5" src="/REM_avatar.svg" />
         </Avatar>
       </div>
-      <form className="flex flex-col row-span-4 justify-center gap-[10%]" onSubmit={handleSubmit(onSubmit,showErrorToast)}>
+      <form className="flex flex-col row-span-4 justify-center gap-[10%]" onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col items-center gap-2">
           <Input_email
             {...register("username")}
