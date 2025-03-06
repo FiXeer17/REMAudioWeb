@@ -6,10 +6,9 @@ import { Input as Input_email } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";
 import { toast, Toaster } from "sonner"
 import { SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { register as registerUser } from "@/lib/services";
-import { z } from "zod";
+
 
 
 type FormFields = {
@@ -56,7 +55,7 @@ export default function Register() {
         session_type : "web" as string
       }
       const response= await registerUser(credential)
-      const accessToken=response.data.jwt_token
+      const accessToken=response.data.access_token
       localStorage.setItem("accessToken",accessToken)
 
       return navigate("/volume")
