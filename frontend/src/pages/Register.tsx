@@ -58,7 +58,7 @@ export default function Register() {
       const accessToken=response.data.access_token
       localStorage.setItem("accessToken",accessToken)
 
-      return navigate("/volume")
+      return navigate("/homeAudio")
     }catch(error){
         if (axios.isAxiosError(error) && error.response?.status === 422) {
           toast.error("Email already taken");
