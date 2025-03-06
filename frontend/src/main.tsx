@@ -7,6 +7,7 @@ import { clientLoader } from './lib/clientLoader'
 import SignIn from "./pages/SignIn"
 import Register from "./pages/Register"
 import HomeAudio from './pages/HomeAudio'
+import Test from './pages/Test'
 
 
 const router = createBrowserRouter([
@@ -24,8 +25,12 @@ const router = createBrowserRouter([
   },
   {
     path: "/homeAudio",
-    element: <HomeAudio/>,
-    loader: clientLoader
+    element: <HomeAudio/>
+    
+  },
+  {
+    path: "/test",
+    element: <Test/>
   }
 ]);
 
