@@ -53,10 +53,23 @@ pub fn id_to_jwt(id: i32, session_type: String) -> Result<String, Box<dyn std::e
 
 pub fn jwt_to_id(jwt_token: String) -> Result<i32, jsonwebtoken::errors::Error> {
     let jwt_secret = Env::get_jwt_secret();
-    let claim = decode::<WebClaims>(
+    let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
+    validation.required_spec_claims.remove("exp");
+    let claim = decode::<Claims>(
         &jwt_token,
         &DecodingKey::from_secret(jwt_secret.as_bytes()),
-        &Validation::new(jsonwebtoken::Algorithm::HS256),
+        &validation,
     )?;
-    Ok(claim.claims.sub)
+    match claim.claims {
+        Claims::Native(c) => Ok(c.sub),
+        Claims::Web(c) => {
+            let now = chrono::Utc::now().timestamp() as usize;
+            if now > c.exp {
+                return Err(jsonwebtoken::errors::Error::from(
+                    jsonwebtoken::errors::ErrorKind::ExpiredSignature,
+                ));
+            }
+            return Ok(c.sub);
+        }
+    }
 }
