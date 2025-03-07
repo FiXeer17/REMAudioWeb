@@ -6,7 +6,7 @@ import { useState } from "react";
 export default function Navbar(){
     const [color,setColor] = useState("house")
     return(
-        <div className="flex items-center justify-around bg-home_colors-Navbar/Selection_Bg w-full mx-9 rounded-full h-16 text-center ">
+        <div className="flex items-center justify-around bg-home_colors-Navbar/Selection_Bg w-full mx-8 rounded-full h-16 text-center ">
             <div>
             {color==="house" ? <House size={28} color="#007AFF" />
             : <House size={28} color="#FAFAFA" onClick={()=>setColor("house")}/>}
