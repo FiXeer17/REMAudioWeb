@@ -2,12 +2,16 @@ import { Navbar } from "@/components/ui/navbar";
 import { Button as Mute } from "@/components/ui/button_mute";
 import { Button as Channel } from "@/components/ui/button_channels";
 import { Badge } from "@/components/ui/badge";
+import { Button as Audio_Video } from "@/components/ui/audio_video";
 
 export default function Volume() {
   return (
     <div className="grid grid-rows-5 min-h-svh">
-      <div>
-        <div className=" grid grid-cols-4 h-max w-full bg-home_colors-Navbar/Selection_Bg rounded-3xl"></div>
+      <div className="flex justify-center px-7 ">
+        <div className=" grid grid-cols-2  w-full items-center justify-items-center bg-home_colors-Navbar/Selection_Bg rounded-3xl">
+        <Audio_Video variant={"audio"}>AUDIO</Audio_Video>
+        <Audio_Video variant={"audio"}>VOLUME</Audio_Video>
+        </div>
       </div>
       <div className="flex flex-col px-7 ">
         <div className="relative w-full h-full ">

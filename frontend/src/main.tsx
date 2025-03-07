@@ -26,7 +26,6 @@ const router = createBrowserRouter([
   {
     path: "/homeAudio",
     element: <HomeAudio/>
-    
   },
   {
     path: "/test",
