@@ -19,8 +19,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        audio: "border-[1px] border-home_colors-Selected_Borders/text text-home_colors-Selected_Borders/text font-sans font-bold",
-        video: "border-[1px] border-home_colors-Similar_White text-home_colors-Similar_White font-sans font-bold"
+        blue: "border-[1px] border-home_colors-Selected_Borders/text text-home_colors-Selected_Borders/text font-sans font-bold",
+        white: "border-[1px] border-home_colors-Similar_White text-home_colors-Similar_White font-sans font-bold"
       },
       size: {
         default: "h-9 px-4 py-2",

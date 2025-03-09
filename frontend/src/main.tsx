@@ -8,6 +8,7 @@ import SignIn from "./pages/SignIn"
 import Register from "./pages/Register"
 import HomeAudio from './pages/HomeAudio'
 import Test from './pages/Test'
+import HomeVideo from "./pages/HomeVideo"
 
 
 const router = createBrowserRouter([
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
   {
     path: "/homeAudio",
     element: <HomeAudio/>
+  },
+  {
+    path: "/homeVideo",
+    element: <HomeVideo/>
   },
   {
     path: "/test",

@@ -18,8 +18,8 @@ export default function Volume() {
     <div className="grid grid-rows-[auto,1fr,1fr,auto] min-h-svh ">
       <div className="flex justify-start px-2 pb-5 pt-3 ">
         <div className=" grid grid-cols-2 px-5 py-3 w-full items-center justify-items-center bg-home_colors-Navbar/Selection_Bg rounded-full">
-        <Audio_Video variant={"blue"}>AUDIO</Audio_Video>
-        <Audio_Video variant={"white"}>VIDEO</Audio_Video>
+        <Audio_Video variant={"white"}>AUDIO</Audio_Video>
+        <Audio_Video variant={"blue"}>VIDEO</Audio_Video>
         </div>
       </div>
       <div className="flex flex-col px-7 py-6">
