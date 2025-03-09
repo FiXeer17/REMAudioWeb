@@ -1,4 +1,4 @@
-use crate::services::public::login::schemas::ReturnFullUser;
+use crate::services::public::signin::schemas::ReturnFullUser;
 use crate::services::public::register::schemas::ReturnCreateUser;
 use crate::AppState;
 use actix_web::web::Data;
