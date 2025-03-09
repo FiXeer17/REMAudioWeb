@@ -1,15 +1,17 @@
 use crate::utils::db::establish_connection;
 use actix_cors;
 use actix_web::{
-    middleware::Logger,
+    middleware::{from_fn, Logger},
     web::{self, Data},
     App, HttpServer,
 };
-use services::public;
+use services::{private, public};
 use sqlx::{Pool, Postgres};
+use utils::auth_middleware::auth_middleware;
 
 pub mod services;
 pub mod utils;
+pub mod engine;
 
 const SERVER_ADDR: &str = "0.0.0.0";
 const SERVER_PORT: u16 = 8000;
@@ -37,8 +39,13 @@ async fn main() -> Result<(), std::io::Error> {
                 web::scope("/api").service(
                     web::scope("/auth")
                         .configure(public::register::router)
-                        .configure(public::login::router),
+                        .configure(public::signin::router),
                 ),
+            )
+            .service(
+                web::scope("/ws")
+                    .wrap(from_fn(auth_middleware))
+                    .configure(private::app::router),
             )
     })
     .bind((SERVER_ADDR, SERVER_PORT))
