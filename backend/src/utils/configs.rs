@@ -21,15 +21,20 @@ impl Env {
 
         let jwt_secret: String = std::env::var(JWT_SECRET).expect("failed to retrive jwt secret.");
         let database_name = std::env::var(DATABASE_NAME).expect("failed to retrieve database name");
-        let database_user = std::env::var(DATABASE_USER).expect("failed to retrieve database username");
-        let database_password = std::env::var(DATABASE_PASSWORD).expect("failed to retrieve database password");
-        let database_url = format!("postgresql://{}:{}@db:5432/{}",database_user,database_password,database_name);
+        let database_user =
+            std::env::var(DATABASE_USER).expect("failed to retrieve database username");
+        let database_password =
+            std::env::var(DATABASE_PASSWORD).expect("failed to retrieve database password");
+        let database_url = format!(
+            "postgresql://{}:{}@db:5432/{}",
+            database_user, database_password, database_name
+        );
         Env {
             database_url,
             database_name,
             database_user,
             database_password,
-            jwt_secret
+            jwt_secret,
         }
     }
 

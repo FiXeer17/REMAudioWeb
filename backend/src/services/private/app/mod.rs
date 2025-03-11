@@ -1,10 +1,10 @@
 use actix_web::web;
 
 pub mod routes;
-pub mod session;
 pub mod server;
+pub mod session;
 use routes::app;
 
-pub fn router(cfg: &mut web::ServiceConfig){
+pub fn router(cfg: &mut web::ServiceConfig) {
     cfg.service(app);
 }

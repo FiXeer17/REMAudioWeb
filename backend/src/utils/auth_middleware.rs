@@ -1,4 +1,4 @@
-use crate::utils::{jwt_utils::jwt_to_id,common::return_json_reason};
+use crate::utils::{common::return_json_reason, jwt_utils::jwt_to_id};
 
 use actix_web::{
     body::BoxBody,

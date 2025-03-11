@@ -1,12 +1,9 @@
-use crate::services::public::signin::schemas::ReturnFullUser;
 use crate::services::public::register::schemas::ReturnCreateUser;
+use crate::services::public::signin::schemas::ReturnFullUser;
 use crate::AppState;
 use actix_web::web::Data;
 
-pub async fn check_email(
-    pgpool: &Data<AppState>,
-    email: &str,
-) -> Result<bool, sqlx::Error> {
+pub async fn check_email(pgpool: &Data<AppState>, email: &str) -> Result<bool, sqlx::Error> {
     let query_string = "SELECT email FROM users WHERE email = $1 AND deleted_at IS NULL;";
     let result = sqlx::query(query_string)
         .bind(email.to_string())
@@ -30,10 +27,7 @@ pub async fn from_email(
     }
 }
 
-pub async fn from_id(
-    pgpool: &Data<AppState>,
-    id: i32,
-) -> Result<ReturnFullUser, sqlx::Error> {
+pub async fn from_id(pgpool: &Data<AppState>, id: i32) -> Result<ReturnFullUser, sqlx::Error> {
     let query = "SELECT id,username,email,admin,password FROM users WHERE id = $1 ";
 
     match sqlx::query_as::<_, ReturnFullUser>(query)

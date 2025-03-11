@@ -7,12 +7,12 @@ use std::time::Instant;
 pub async fn app(
     req: HttpRequest,
     stream: web::Payload,
-    srv: web::Data<actix::Addr<WsServer>>
+    srv: web::Data<actix::Addr<WsServer>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     ws::start(
         WsSession {
             hb: Instant::now(),
-            srv: srv.get_ref().clone()
+            srv: srv.get_ref().clone(),
         },
         &req,
         stream,
