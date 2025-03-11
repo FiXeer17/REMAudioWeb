@@ -1,5 +1,8 @@
+use std::str::FromStr;
+
 use backend::engine::defs::datas::io::*;
 use backend::engine::{mute::*, presets::read_current_preset, volume::*};
+use backend::engine::lib::*;
 
 #[test]
 fn ok_read_mute_cmd() {
@@ -126,4 +129,94 @@ A5 C3 3C 5A FF 63 04 02 01 16 EE"
 fn ok_read_current_preset_cmd() {
     let cmd = read_current_preset().unwrap();
     assert_eq!(cmd.to_string(), "A5 C3 3C 5A FF 63 02 00 EE".to_string())
+}
+
+
+#[test]
+fn ok_read_all_states(){
+    let cmds = read_all_states().unwrap();
+    let mut string = String::new();
+    for cmd in cmds {
+        string.push_str(cmd.to_string().as_str());
+        string.push('\n');
+    }
+    assert_eq!(string.trim(),
+    "A5 C3 3C 5A FF 63 03 02 01 01 EE
+A5 C3 3C 5A FF 63 03 02 01 02 EE
+A5 C3 3C 5A FF 63 03 02 01 03 EE
+A5 C3 3C 5A FF 63 03 02 01 04 EE
+A5 C3 3C 5A FF 63 03 02 01 05 EE
+A5 C3 3C 5A FF 63 03 02 01 06 EE
+A5 C3 3C 5A FF 63 03 02 01 07 EE
+A5 C3 3C 5A FF 63 03 02 01 08 EE
+A5 C3 3C 5A FF 63 03 02 01 09 EE
+A5 C3 3C 5A FF 63 03 02 01 10 EE
+A5 C3 3C 5A FF 63 03 02 01 11 EE
+A5 C3 3C 5A FF 63 03 02 01 12 EE
+A5 C3 3C 5A FF 63 03 02 01 13 EE
+A5 C3 3C 5A FF 63 03 02 01 14 EE
+A5 C3 3C 5A FF 63 03 02 01 15 EE
+A5 C3 3C 5A FF 63 03 02 01 16 EE
+A5 C3 3C 5A FF 63 03 02 02 01 EE
+A5 C3 3C 5A FF 63 03 02 02 02 EE
+A5 C3 3C 5A FF 63 03 02 02 03 EE
+A5 C3 3C 5A FF 63 03 02 02 04 EE
+A5 C3 3C 5A FF 63 03 02 02 05 EE
+A5 C3 3C 5A FF 63 03 02 02 06 EE
+A5 C3 3C 5A FF 63 03 02 02 07 EE
+A5 C3 3C 5A FF 63 03 02 02 08 EE
+A5 C3 3C 5A FF 63 03 02 02 09 EE
+A5 C3 3C 5A FF 63 03 02 02 10 EE
+A5 C3 3C 5A FF 63 03 02 02 11 EE
+A5 C3 3C 5A FF 63 03 02 02 12 EE
+A5 C3 3C 5A FF 63 03 02 02 13 EE
+A5 C3 3C 5A FF 63 03 02 02 14 EE
+A5 C3 3C 5A FF 63 03 02 02 15 EE
+A5 C3 3C 5A FF 63 03 02 02 16 EE
+A5 C3 3C 5A FF 63 04 02 01 01 EE
+A5 C3 3C 5A FF 63 04 02 01 02 EE
+A5 C3 3C 5A FF 63 04 02 01 03 EE
+A5 C3 3C 5A FF 63 04 02 01 04 EE
+A5 C3 3C 5A FF 63 04 02 01 05 EE
+A5 C3 3C 5A FF 63 04 02 01 06 EE
+A5 C3 3C 5A FF 63 04 02 01 07 EE
+A5 C3 3C 5A FF 63 04 02 01 08 EE
+A5 C3 3C 5A FF 63 04 02 01 09 EE
+A5 C3 3C 5A FF 63 04 02 01 10 EE
+A5 C3 3C 5A FF 63 04 02 01 11 EE
+A5 C3 3C 5A FF 63 04 02 01 12 EE
+A5 C3 3C 5A FF 63 04 02 01 13 EE
+A5 C3 3C 5A FF 63 04 02 01 14 EE
+A5 C3 3C 5A FF 63 04 02 01 15 EE
+A5 C3 3C 5A FF 63 04 02 01 16 EE
+A5 C3 3C 5A FF 63 04 02 02 01 EE
+A5 C3 3C 5A FF 63 04 02 02 02 EE
+A5 C3 3C 5A FF 63 04 02 02 03 EE
+A5 C3 3C 5A FF 63 04 02 02 04 EE
+A5 C3 3C 5A FF 63 04 02 02 05 EE
+A5 C3 3C 5A FF 63 04 02 02 06 EE
+A5 C3 3C 5A FF 63 04 02 02 07 EE
+A5 C3 3C 5A FF 63 04 02 02 08 EE
+A5 C3 3C 5A FF 63 04 02 02 09 EE
+A5 C3 3C 5A FF 63 04 02 02 10 EE
+A5 C3 3C 5A FF 63 04 02 02 11 EE
+A5 C3 3C 5A FF 63 04 02 02 12 EE
+A5 C3 3C 5A FF 63 04 02 02 13 EE
+A5 C3 3C 5A FF 63 04 02 02 14 EE
+A5 C3 3C 5A FF 63 04 02 02 15 EE
+A5 C3 3C 5A FF 63 04 02 02 16 EE
+A5 C3 3C 5A FF 63 02 00 EE"
+)
+}
+
+
+#[test]
+fn ok_from_str_to_matrix_command(){
+    let cmd = MatrixCommand::from_str("A5 C3 3C 5A FF 63 03 02 02 16 EE").unwrap();
+    
+    assert_eq!(cmd, read_mute_ch(SRC::OUTPUT, 16).unwrap());
+
+    let cmd = MatrixCommand::from_str("A5 C3 3C 5A FF 63 02 00 EE").unwrap();
+    
+    assert_eq!(cmd,read_current_preset().unwrap());
 }
