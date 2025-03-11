@@ -3,12 +3,14 @@ import { Button as Mute } from "@/components/ui/button_mute";
 import { Button as Channel } from "@/components/ui/button_channels";
 import { Badge } from "@/components/ui/badge";
 import { Button as Audio_Video } from "@/components/ui/audio_video";
+import { useNavigate } from "react-router-dom"
 
 
 
 
 export default function Volume() {
   const channels= ["CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8"]
+  const navigate= useNavigate();
   const handleState=(channel:string,type:string)=>{
     channel
     console.log(type)
@@ -18,7 +20,7 @@ export default function Volume() {
     <div className="grid grid-rows-[auto,1fr,1fr,auto] min-h-svh ">
       <div className="flex justify-start px-2 pb-5 pt-3 ">
         <div className=" grid grid-cols-2 px-5 py-3 w-full items-center justify-items-center bg-home_colors-Navbar/Selection_Bg rounded-full">
-        <Audio_Video variant={"white"}>AUDIO</Audio_Video>
+        <Audio_Video variant={"white"} onClick={()=>navigate("/homeAudio")}>AUDIO</Audio_Video>
         <Audio_Video variant={"blue"}>VIDEO</Audio_Video>
         </div>
       </div>
