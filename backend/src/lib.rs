@@ -6,14 +6,13 @@ use actix_web::{
     web::{self, Data},
     App, HttpServer,
 };
-use services::{private, public,private::app::server};
+use services::{private, private::app::server, public};
 use sqlx::{Pool, Postgres};
 use utils::auth_middleware::auth_middleware;
 
-
+pub mod engine;
 pub mod services;
 pub mod utils;
-pub mod engine;
 
 pub const SERVER_ADDR: &str = "0.0.0.0";
 pub const SERVER_PORT: u16 = 8000;

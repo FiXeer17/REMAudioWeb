@@ -15,15 +15,15 @@ pub mod fncodes {
     pub const VOLUME: &str = "04";
     pub const GAIN_IN_STEP: &str = "05";
     pub const MIC_SENSITIVITY: &str = "06";
-    
-    pub enum FNCODE{
+
+    pub enum FNCODE {
         SCENE,
         MUTE,
         VOLUME,
         GAINSTEP,
-        MICSENSITIVITY
+        MICSENSITIVITY,
     }
-    
+
     impl From<FNCODE> for &'static str {
         fn from(code: FNCODE) -> Self {
             match code {
@@ -36,7 +36,7 @@ pub mod fncodes {
         }
     }
 
-    impl FromStr for FNCODE{
+    impl FromStr for FNCODE {
         type Err = ();
         fn from_str(s: &str) -> Result<Self, Self::Err> {
             match s {
@@ -45,14 +45,10 @@ pub mod fncodes {
                 VOLUME => Ok(FNCODE::VOLUME),
                 GAIN_IN_STEP => Ok(FNCODE::GAINSTEP),
                 MIC_SENSITIVITY => Ok(FNCODE::MICSENSITIVITY),
-                _ => Err(())
-
+                _ => Err(()),
             }
-
         }
     }
-
-    
 }
 
 // DATA FOUNDAMENTALS:
@@ -60,20 +56,19 @@ pub mod datas {
     // INPUT/OUTPUT IDs
     pub mod io {
         use core::fmt;
-        use std::fmt::write;
 
         pub const INPUT: &str = "01";
         pub const OUTPUT: &str = "02";
         pub enum SRC {
             INPUT,
-            OUTPUT
+            OUTPUT,
         }
 
-        impl From<SRC> for &'static str{
+        impl From<SRC> for &'static str {
             fn from(value: SRC) -> Self {
                 match value {
                     SRC::INPUT => INPUT,
-                    SRC::OUTPUT => OUTPUT
+                    SRC::OUTPUT => OUTPUT,
                 }
             }
         }
@@ -81,14 +76,11 @@ pub mod datas {
         impl fmt::Display for SRC {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 match self {
-                    &SRC::INPUT => write!(f,"{}",INPUT),
-                    &SRC::OUTPUT => write!(f,"{}",OUTPUT)
-                    
+                    &SRC::INPUT => write!(f, "{}", INPUT),
+                    &SRC::OUTPUT => write!(f, "{}", OUTPUT),
                 }
             }
-            
         }
-        
     }
     // READ/WRITE IDs
     pub mod rw {
@@ -97,7 +89,7 @@ pub mod datas {
     }
 }
 // STATUS CODES RETURNING FROM MATRIX
-pub mod status_codes{
+pub mod status_codes {
     pub const SUCCESS: &str = "00";
     pub const ERR: &str = "01";
 }

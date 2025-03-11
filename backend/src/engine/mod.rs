@@ -1,6 +1,5 @@
 pub mod defs;
-
 pub mod lib;
-
-#[cfg(test)]
-pub mod tests;
+pub mod mute;
+pub mod presets;
+pub mod volume;

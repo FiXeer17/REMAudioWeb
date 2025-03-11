@@ -28,22 +28,34 @@ pub struct MatrixCommand {
 
 impl fmt::Display for MatrixCommand {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let data = match &self.data {
-            Some(value) => value.join(" "),
-            None => "".to_string(),
-        };
-
-        write!(
-            f,
-            "{} {} {} {} {} {} {}",
-            self.start,
-            self.id,
-            self.rw,
-            self.fcode,
-            self.data_length.as_deref().unwrap_or(""),
-            data,
-            self.end
-        )
+        match &self.data {
+            Some(value) => {
+                let d = value.join(" ");
+                write!(
+                    f,
+                    "{} {} {} {} {} {} {}",
+                    self.start,
+                    self.id,
+                    self.rw,
+                    self.fcode,
+                    self.data_length.as_deref().unwrap(),
+                    d,
+                    self.end
+                )
+            }
+            None => {
+                write!(
+                    f,
+                    "{} {} {} {} {} {}",
+                    self.start,
+                    self.id,
+                    self.rw,
+                    self.fcode,
+                    self.data_length.as_deref().unwrap_or("00"),
+                    self.end
+                )
+            }
+        }
     }
 }
 
@@ -71,37 +83,5 @@ impl MatrixCommand {
             data,
             end: END_CODE.to_string(),
         })
-    }
-}
-
-pub mod mute {
-    use crate::engine::defs;
-    use crate::engine::defs::{datas::io, fncodes};
-    use crate::engine::lib::MatrixCommand;
-
-    pub fn read_mute_ch(src: io::SRC, ch: u32) -> Result<MatrixCommand, String> {
-        let fcode = fncodes::MUTE.to_string();
-        let rw = defs::datas::rw::READ.to_string();
-        let io = src.to_string();
-        if ch < 1 || ch > 16 {
-            return Err("Invalid channel".to_string());
-        }
-        let ch = format!("{:02}", ch);
-
-        let data = Some(vec![io, ch]);
-
-        MatrixCommand::new(rw, fcode, data)
-    }
-    pub fn read_mute_all(src: io::SRC) -> Result<Vec<MatrixCommand>, String> {
-        let fcode = fncodes::MUTE.to_string();
-        let rw = defs::datas::rw::READ.to_string();
-        let io = src.to_string();
-        let mut commands: Vec<MatrixCommand> = Vec::new();
-        for ch in 1..=16 {
-            let ch = format!("{:02}",ch);
-            let data = Some(vec![io.clone(), ch]);
-            commands.push(MatrixCommand::new(rw.clone(), fcode.clone(), data).unwrap());
-        }
-        Ok(commands)
     }
 }
