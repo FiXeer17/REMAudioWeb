@@ -1,8 +1,8 @@
 use actix_web::web;
 
 pub mod routes;
+pub mod session;
 pub mod server;
-
 use routes::app;
 
 pub fn router(cfg: &mut web::ServiceConfig){

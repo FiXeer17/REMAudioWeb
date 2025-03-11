@@ -1,66 +1,54 @@
 use actix::prelude::*;
-use actix_web_actors::ws;
-use std::time::{Duration,Instant};
+use std::collections::HashSet;
+use actix::Message;
+use super::session::WsSession;
 
-const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
-const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
-pub struct WsSession{
-    pub hb: Instant
+#[derive(Message,Debug)]
+#[rtype(result="()")]
+pub struct Connect{
+    pub addr: Addr<WsSession>
 }
 
-impl WsSession {
-    /// helper method that sends ping to client every 5 seconds (HEARTBEAT_INTERVAL).
-    ///
-    /// also this method checks heartbeats from client
-    fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
-        ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
-            if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
-                println!("Websocket Client heartbeat failed, disconnecting!");
-                ctx.stop();
-            
-                return;
-            }
+#[derive(Message,Debug,Clone)]
+#[rtype(result="()")]
+pub struct BroadcastMessage{
+    pub message: String
+}
 
-            ctx.ping(b"");
-        });
-    }
+pub struct WsServer{
+    pub clients : HashSet<Addr<WsSession>>
 }
 
 
-impl Actor for WsSession{
-    type Context = ws::WebsocketContext<Self>;
-    fn started(&mut self, ctx: &mut Self::Context) {
-        self.hb(ctx);
-    }
+impl Actor for WsServer{
+    type Context = Context<Self>;
 }
 
-impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
-    fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
-        let msg = match msg {
-            Err(_) => {
-                ctx.stop();
-                return;
-            }
-            Ok(msg) => msg,
-        };
-        match msg {
-            ws::Message::Ping(msg) => {
-                self.hb = Instant::now();
-                ctx.pong(&msg);
-            }
-            ws::Message::Pong(_) => {
-                self.hb = Instant::now();
-            }
-            ws::Message::Text(text) => {
-                ctx.text(text.clone());
-                println!("{}",text.to_string());
-            },
-            ws::Message::Binary(_) => println!("Unexpected binary"),
-            ws::Message::Close(reason) => {
-                ctx.close(reason);
-                ctx.stop();
-            }
-            _ => (),
+impl WsServer{
+    pub fn new() -> Self{
+        WsServer{
+            clients : HashSet::new()
         }
+    }
+}
+
+impl Handler<Connect> for WsServer{
+    type Result = ();
+    fn handle(&mut self, msg: Connect, _: &mut Self::Context) -> Self::Result {
+        let address = msg.addr;
+        self.clients.insert(address);
+
+        /*  TODO: let datas = read_all();
+        for client in &self.clients{
+            
+            let message = BroadcastMessage{
+                message:datas.clone()
+            };
+            client.do_send(message);
+        } */
+
+       for client in &self.clients{
+            client.do_send(BroadcastMessage{message:"new".to_string()});
+       }
     }
 }
