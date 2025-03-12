@@ -6,7 +6,7 @@ use crate::engine::{
 };
 
 use core::fmt;
-use std::str::FromStr;
+use std::{num::ParseIntError, str::FromStr};
 
 pub trait Command {
     fn is_valid_format(&self) -> bool;
@@ -55,6 +55,23 @@ impl MatrixCommand {
             data,
             end: END_CODE.to_string(),
         })
+    }
+    pub fn to_byte_hex(&self) -> Result<Vec<u8>, ParseIntError> {
+        let cmd = self.to_string();
+        cmd.split_whitespace()
+            .map(|strslice| u8::from_str_radix(strslice, 16))
+            .collect()
+    }
+}
+
+impl From<&[u8]> for MatrixCommand {
+    fn from(value: &[u8]) -> Self {
+        let raw_cmd = value
+            .iter()
+            .map(|byte| format!("{:02X}", byte))
+            .collect::<Vec<String>>()
+            .join(" ");
+        MatrixCommand::from_str(&raw_cmd).unwrap()
     }
 }
 

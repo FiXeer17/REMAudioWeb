@@ -220,3 +220,10 @@ fn ok_from_str_to_matrix_command(){
     
     assert_eq!(cmd,read_current_preset().unwrap());
 }
+
+#[test]
+
+fn ok_from_bytes_to_matrix_command(){
+    let bytes = read_mute_ch(SRC::OUTPUT, 16).unwrap().to_byte_hex().unwrap();
+    assert_eq!(read_mute_ch(SRC::OUTPUT, 16).unwrap(), MatrixCommand::from(&bytes[..]))
+}
