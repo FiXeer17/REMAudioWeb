@@ -1,4 +1,4 @@
-use crate::services::private::app::server;
+use crate::services::private::app::{messages,tcp_manager};
 use actix::prelude::*;
 use actix_web_actors::ws;
 use std::time::{Duration, Instant};
@@ -7,7 +7,13 @@ const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 pub struct WsSession {
     pub hb: Instant,
-    pub srv: Addr<server::WsServer>,
+    pub srv: Addr<tcp_manager::TcpStreamsManager>,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct Disconnect{
+    pub addr: Addr<WsSession>
 }
 
 impl WsSession {
@@ -15,6 +21,8 @@ impl WsSession {
         ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
             if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
                 println!("Websocket Client heartbeat failed, disconnecting!");
+                let address = ctx.address();
+                act.srv.do_send(Disconnect{addr:address});
                 ctx.stop();
                 return;
             }
@@ -24,7 +32,7 @@ impl WsSession {
     }
     fn on_connect(&self, ctx: &mut ws::WebsocketContext<Self>) {
         let addr = ctx.address();
-        self.srv.do_send(server::Connect { addr });
+        self.srv.do_send(messages::Connect { addr,socket:None });
     }
 }
 
@@ -36,9 +44,9 @@ impl Actor for WsSession {
     }
 }
 
-impl Handler<server::BroadcastMessage> for WsSession {
+impl Handler<messages::BroadcastMessage> for WsSession {
     type Result = ();
-    fn handle(&mut self, msg: server::BroadcastMessage, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: messages::BroadcastMessage, ctx: &mut Self::Context) -> Self::Result {
         ctx.text(msg.message);
     }
 }

@@ -1,4 +1,4 @@
-use crate::services::private::app::{server::WsServer, session::WsSession};
+use crate::services::private::app::{tcp_manager::TcpStreamsManager, session::WsSession};
 use actix_web::{get, web, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 use std::time::Instant;
@@ -7,7 +7,7 @@ use std::time::Instant;
 pub async fn app(
     req: HttpRequest,
     stream: web::Payload,
-    srv: web::Data<actix::Addr<WsServer>>,
+    srv: web::Data<actix::Addr<TcpStreamsManager>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     ws::start(
         WsSession {
