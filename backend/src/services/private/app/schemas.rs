@@ -1,17 +1,22 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::engine::lib::MatrixCommandDatas;
+
+
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+
+pub struct ResponseAllStatesValue {
+    pub datas: Vec<State>,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 
 pub struct State {
     pub side: String,                      // audio/video
     pub section: String,                   // volume/presets/mute
     pub values: HashMap<String, Vec<i32>>, // value
-}
-#[derive(Serialize, Deserialize, Clone, Debug)]
-
-pub struct ResponseAllStatesValue {
-    pub datas: Vec<State>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -42,4 +47,9 @@ pub enum WsRequests {
     SetMute(RequestSetMute),
     SetGain(RequestSetGain),
     SetPreset(RequestSetPreset),
+}
+
+#[derive(Serialize,Deserialize)]
+pub struct ReturnReadAll{
+    datas: Vec<MatrixCommandDatas>
 }

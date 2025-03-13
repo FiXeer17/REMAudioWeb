@@ -6,7 +6,7 @@ use actix_web::{
     web::{self, Data},
     App, HttpServer,
 };
-use services::{private, private::app::server, public};
+use services::{private::{self, app::tcp_manager}, public};
 use sqlx::{Pool, Postgres};
 use utils::auth_middleware::auth_middleware;
 
@@ -25,7 +25,7 @@ pub async fn crate_app() -> Result<(), std::io::Error> {
     env_logger::init();
     let pool = establish_connection().await;
     let _ = sqlx::migrate!("./migrations").run(&pool).await;
-    let server = server::WsServer::new().start();
+    let server = tcp_manager::TcpStreamsManager::new().start();
     HttpServer::new(move || {
         let cors = actix_cors::Cors::default()
             .allow_any_origin()
