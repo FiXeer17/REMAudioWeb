@@ -6,7 +6,7 @@ pub fn read_volume_ch(src: io::SRC, ch: u32) -> Result<MatrixCommand, String> {
     let fcode = fncodes::VOLUME.to_string();
     let rw = defs::datas::rw::READ.to_string();
     let io = src.to_string();
-    if ch < 1 || ch > 16 {
+    if ch > 16 {
         return Err("Invalid channel".to_string());
     }
     let ch = format!("{:02}", ch);
