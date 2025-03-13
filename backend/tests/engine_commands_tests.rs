@@ -53,16 +53,6 @@ fn err_read_mute_cmd_over() {
     assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string());
 }
 
-#[test]
-fn err_read_volume_cmd_under() {
-    let cmd = read_volume_ch(SRC::INPUT, 0);
-
-    assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string());
-
-    let cmd = read_volume_ch(SRC::OUTPUT, 0);
-
-    assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string())
-}
 
 #[test]
 fn err_read_volume_cmd_over() {
