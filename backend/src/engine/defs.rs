@@ -35,7 +35,17 @@ pub mod fncodes {
             }
         }
     }
-
+    impl FNCODE {
+        pub fn to_label(&self) -> String {
+            match self {
+                FNCODE::SCENE => String::from("preset"),
+                FNCODE::MUTE => String::from("mute"),
+                FNCODE::VOLUME => String::from("volume"),
+                FNCODE::GAINSTEP => String::from("gain_in_step"),
+                FNCODE::MICSENSITIVITY => String::from("mic_sensitivity"),
+            }
+        }
+    }
     impl FromStr for FNCODE {
         type Err = ();
         fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -56,19 +66,46 @@ pub mod datas {
     // INPUT/OUTPUT IDs
     pub mod io {
         use core::fmt;
+        use std::str::FromStr;
 
+        pub const GENERAL: &str = "00";
         pub const INPUT: &str = "01";
         pub const OUTPUT: &str = "02";
+
         pub enum SRC {
+            GENERAL,
             INPUT,
             OUTPUT,
+        }
+
+        impl SRC {
+            pub fn to_label(&self) -> String {
+                match self {
+                    SRC::GENERAL => String::from("both"),
+                    SRC::INPUT => String::from("input"),
+                    SRC::OUTPUT => String::from("output"),
+                }
+            }
         }
 
         impl From<SRC> for &'static str {
             fn from(value: SRC) -> Self {
                 match value {
+                    SRC::GENERAL => GENERAL,
                     SRC::INPUT => INPUT,
                     SRC::OUTPUT => OUTPUT,
+                }
+            }
+        }
+
+        impl FromStr for SRC {
+            type Err = ();
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    INPUT => Ok(SRC::INPUT),
+                    OUTPUT => Ok(SRC::OUTPUT),
+                    GENERAL => Ok(SRC::GENERAL),
+                    _ => Err(()),
                 }
             }
         }
@@ -76,6 +113,7 @@ pub mod datas {
         impl fmt::Display for SRC {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 match self {
+                    &SRC::GENERAL => write!(f, "{}", GENERAL),
                     &SRC::INPUT => write!(f, "{}", INPUT),
                     &SRC::OUTPUT => write!(f, "{}", OUTPUT),
                 }
