@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::engine::{
     defs::{datas::io::SRC, fncodes::FNCODE, *},
     mute::read_mute_all,
@@ -31,6 +33,21 @@ pub struct MatrixCommand {
     pub data: Option<Vec<String>>,
     pub end: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+
+pub struct MatrixCommandDatas {
+    pub machine_id: String,
+    pub function: String,
+    pub data_length: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub io: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub channel: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<f32>,
+}
+
 impl MatrixCommand {
     pub fn new(rw: String, fcode: String, data: Option<Vec<String>>) -> Result<Self, String> {
         if !rw.is_valid_format() || !fcode.is_valid_format() || FNCODE::from_str(&fcode).is_err() {
@@ -61,6 +78,42 @@ impl MatrixCommand {
         cmd.split_whitespace()
             .map(|strslice| u8::from_str_radix(strslice, 16))
             .collect()
+    }
+}
+
+impl MatrixCommandDatas {
+    pub fn to_json(&self) -> Result<String, serde_json::Error> {
+        serde_json::to_string_pretty(self)
+    }
+}
+
+impl From<MatrixCommand> for MatrixCommandDatas {
+    fn from(value: MatrixCommand) -> Self {
+        let function = fncodes::FNCODE::from_str(&value.fcode).expect("Cannot retrieve fcode").to_label();
+        let data_length =
+            u32::from_str_radix(&value.data_length.unwrap_or("00".to_string()), 10).unwrap();
+        let (mut io, mut ch, mut v) = (None, None, None);
+
+        if let Some(mut data) = value.data {
+            io = Some(SRC::from_str(&data.remove(0)).expect("Cannot retrieve io code").to_label());
+            if data.len() > 0 {
+                ch = Some(u32::from_str_radix(&data.remove(0), 10).expect("Cannot find channel code"));
+                if !data.is_empty() {
+                    data.reverse();
+                    let decimal = u16::from_str_radix(&data.concat(), 16).expect("Cannot convert data code") as i16;
+                    v = Some(decimal as f32 * 0.1)
+                }
+            }
+        }
+
+        Self {
+            machine_id: value.id,
+            function,
+            data_length,
+            io,
+            channel: ch,
+            value: v,
+        }
     }
 }
 
