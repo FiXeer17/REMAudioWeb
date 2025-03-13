@@ -4,6 +4,7 @@ pub const JWT_SECRET: &str = "JWT_SECRET";
 pub const DATABASE_NAME: &str = "POSTGRES_DB";
 pub const DATABASE_PASSWORD: &str = "POSTGRES_PASSWORD";
 pub const DATABASE_USER: &str = "POSTGRES_USER";
+pub const DEFAULT_SOCKET: &str = "10.232.10.6:8234";
 
 #[allow(dead_code)]
 pub struct Env {
