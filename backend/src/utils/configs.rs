@@ -4,7 +4,7 @@ pub const JWT_SECRET: &str = "JWT_SECRET";
 pub const DATABASE_NAME: &str = "POSTGRES_DB";
 pub const DATABASE_PASSWORD: &str = "POSTGRES_PASSWORD";
 pub const DATABASE_USER: &str = "POSTGRES_USER";
-pub const DEFAULT_SOCKET: &str = "10.232.10.6:8234";
+pub const DEFAULT_SOCKET: &str = "DEFAULT_SOCKET";
 
 #[allow(dead_code)]
 pub struct Env {
@@ -13,6 +13,7 @@ pub struct Env {
     database_user: String,
     database_password: String,
     jwt_secret: String,
+    default_socket: String,
 }
 
 impl Env {
@@ -30,12 +31,15 @@ impl Env {
             "postgresql://{}:{}@db:5432/{}",
             database_user, database_password, database_name
         );
+        let default_socket =
+            std::env::var(DEFAULT_SOCKET).expect("failed to retrieve default socket");
         Env {
             database_url,
             database_name,
             database_user,
             database_password,
             jwt_secret,
+            default_socket,
         }
     }
 
@@ -47,5 +51,8 @@ impl Env {
     }
     pub fn get_db_name() -> String {
         Env::get_vars().database_name
+    }
+    pub fn get_default_socket() -> String {
+        Env::get_vars().default_socket
     }
 }
