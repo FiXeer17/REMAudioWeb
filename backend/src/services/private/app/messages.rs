@@ -1,6 +1,10 @@
+use crate::engine::lib::MatrixCommand;
+
+use super::schemas::MatrixStates;
 use super::session::WsSession;
 use actix::prelude::*;
 use actix::Message;
+use tokio::net::TcpStream;
 use std::net::SocketAddrV4;
 
 
@@ -26,5 +30,45 @@ pub struct StartStream {
 }
 
 
+#[derive(Message)]
+#[rtype(result="()")]
+pub struct StreamStarted{
+    pub tcp_stream : TcpStream
+}
 
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct StreamFailed{
+    pub socket : SocketAddrV4,
+    pub error: String
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct CommandReturn{
+    pub response: String,
+}
+
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct ClosedByRemotePeer{
+    pub socket: SocketAddrV4,
+    pub message: String
+}
+
+
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct MatrixReady{
+    pub socket: SocketAddrV4,
+    pub states: MatrixStates
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct CommandError{
+    pub command: MatrixCommand
+}
 
