@@ -125,9 +125,91 @@ pub mod datas {
         pub const READ: &str = "63";
         pub const WRITE: &str = "36";
     }
+    pub mod mute_status{
+        use std::str::FromStr;
+
+        pub const NOTMUTED: &str = "00";
+        pub const MUTED: &str = "01";
+
+        #[derive(Debug,Clone)]
+        pub enum MuteStatus{
+            MUTED,
+            NOTMUTED,
+        }
+        impl MuteStatus{
+            pub fn to_label(&self) -> bool {
+                match self {
+                     MuteStatus::MUTED => true,
+                     MuteStatus::NOTMUTED => false,
+                }
+            }
+        }
+
+        impl FromStr for MuteStatus{
+            type Err = ();
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    MUTED => Ok(MuteStatus::MUTED),
+                    NOTMUTED => Ok(MuteStatus::NOTMUTED),
+                    _ => Err(())
+                }
+            }
+        }
+    }
 }
 // STATUS CODES RETURNING FROM MATRIX
 pub mod status_codes {
+    use super::errors::Error;
+
+
     pub const SUCCESS: &str = "00";
     pub const ERR: &str = "01";
+
+    pub enum StatusCodes{
+        Success,
+        Error
+    }
+    
+    impl ToString for StatusCodes{
+        fn to_string(&self) -> String {
+            match self {
+                StatusCodes::Success => SUCCESS.to_string(),
+                StatusCodes::Error => ERR.to_string()
+            }
+        }
+    }
+    impl TryFrom<&[u8]> for StatusCodes{
+        type Error = Error;
+        fn try_from(value: &[u8]) -> Result<Self, Error> {
+            if value.len() > 2{
+                
+                return Err(Error::InvalidCode)
+            } 
+            let value = String::from_utf8(value.to_vec()).unwrap();
+            
+            match value.as_str() {
+                SUCCESS => Ok(StatusCodes::Success),
+                ERR => Ok(StatusCodes::Error),
+                _ => return Err(Error::InvalidCode)
+
+            }
+        }
+    }
+}
+
+pub mod errors{
+    #[derive(Debug,Clone)]
+    pub enum Error{
+        ConversionError(String),
+        InvalidCode
+    }
+
+    impl ToString for Error{
+        fn to_string(&self) -> String {
+            match self {
+                Error::ConversionError(value) => String::from(value),
+                Error::InvalidCode => String::from("invalid code")
+            }
+        }
+    }
 }
