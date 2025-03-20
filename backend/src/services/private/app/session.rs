@@ -1,7 +1,9 @@
-use crate::services::private::app::{messages,tcp_manager};
+use crate::services::private::app::{messages, tcp_manager};
 use actix::prelude::*;
 use actix_web_actors::ws;
 use std::time::{Duration, Instant};
+
+use super::{messages::{ClosedByRemotePeer, MatrixReady, StreamFailed}, schemas::StreamError};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -10,10 +12,10 @@ pub struct WsSession {
     pub srv: Addr<tcp_manager::TcpStreamsManager>,
 }
 
-#[derive(Message,Clone)]
-#[rtype(result="()")]
-pub struct Disconnect{
-    pub addr: Addr<WsSession>
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct Disconnect {
+    pub addr: Addr<WsSession>,
 }
 
 impl WsSession {
@@ -22,7 +24,7 @@ impl WsSession {
             if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
                 println!("Websocket Client heartbeat failed, disconnecting!");
                 let address = ctx.address();
-                act.srv.do_send(Disconnect{addr:address});
+                act.srv.do_send(Disconnect { addr: address });
                 ctx.stop();
                 return;
             }
@@ -32,7 +34,7 @@ impl WsSession {
     }
     fn on_connect(&self, ctx: &mut ws::WebsocketContext<Self>) {
         let addr = ctx.address();
-        self.srv.do_send(messages::Connect { addr,socket:None });
+        self.srv.do_send(messages::Connect { addr, socket: None });
     }
 }
 
@@ -51,6 +53,41 @@ impl Handler<messages::BroadcastMessage> for WsSession {
     }
 }
 
+impl Handler<StreamFailed> for WsSession {
+    type Result = ();
+    fn handle(&mut self, msg: StreamFailed, ctx: &mut Self::Context) -> Self::Result {
+        let failed_socket = msg.socket.to_string();
+        let message = StreamError {
+            fail_reason: msg.error,
+            at_socket: failed_socket,
+        };
+        
+
+        ctx.text(serde_json::to_string_pretty(&message).unwrap());
+        ctx.stop();
+    }
+}
+impl Handler<ClosedByRemotePeer> for WsSession{
+    type Result = ();
+    fn handle(&mut self, msg: ClosedByRemotePeer, ctx: &mut Self::Context) -> Self::Result {
+        let failed_socket = msg.socket.to_string();
+        let message = StreamError {
+            fail_reason: msg.message,
+            at_socket: failed_socket,
+        };
+        ctx.text(serde_json::to_string_pretty(&message).unwrap());
+        ctx.stop();
+    }
+}
+
+impl Handler<MatrixReady> for WsSession{
+    type Result = ();
+    fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
+        let message = serde_json::to_string_pretty(&msg.states).unwrap();
+        ctx.text(message);
+    }
+}
+    
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
         let msg = match msg {
