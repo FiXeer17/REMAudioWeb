@@ -1,3 +1,5 @@
+use super::defs::{datas::mute_status::MuteStatus, status_codes::StatusCodes};
+use errors::Error;
 use serde::{Deserialize, Serialize};
 
 use crate::engine::{
@@ -46,6 +48,14 @@ pub struct MatrixCommandDatas {
     pub channel: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<f32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub muted: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preset: Option<u8>,
+}
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct MatrixReturnCode {
+    pub return_code: String,
 }
 
 impl MatrixCommand {
@@ -89,23 +99,41 @@ impl MatrixCommandDatas {
 
 impl From<MatrixCommand> for MatrixCommandDatas {
     fn from(value: MatrixCommand) -> Self {
-        let function = fncodes::FNCODE::from_str(&value.fcode).expect("Cannot retrieve fcode").to_label();
+        let function = fncodes::FNCODE::from_str(&value.fcode)
+            .expect("Cannot retrieve fcode")
+            .to_label();
         let data_length =
             u32::from_str_radix(&value.data_length.unwrap_or("00".to_string()), 10).unwrap();
-        let (mut io, mut ch, mut v) = (None, None, None);
+        let (mut io, mut ch, mut v, mut muted, mut preset) = (None, None, None, None, None);
 
         if let Some(mut data) = value.data {
-            io = Some(SRC::from_str(&data.remove(0)).expect("Cannot retrieve io code").to_label());
+            if function != fncodes::FNCODE::SCENE.to_label(){
+            io = Some(
+                SRC::from_str(&data.remove(0))
+                    .expect("Cannot retrieve io code")
+                    .to_label(),
+            );
+            }else{
+                let value = data.remove(0);
+                preset = Some(u8::from_str_radix(&value, 10).unwrap())
+            }
             if data.len() > 0 {
-                ch = Some(u32::from_str_radix(&data.remove(0), 10).expect("Cannot find channel code"));
-                if !data.is_empty() {
+                ch = Some(
+                    u32::from_str_radix(&data.remove(0), 10).expect("Cannot find channel code"),
+                );
+                if !data.is_empty() && function == FNCODE::VOLUME.to_label() {
                     data.reverse();
-                    let decimal = u16::from_str_radix(&data.concat(), 16).expect("Cannot convert data code") as i16;
+                    let decimal = u16::from_str_radix(&data.concat(), 16)
+                        .expect("Cannot convert data code")
+                        as i16;
                     v = Some(decimal as f32 * 0.1)
+                } else if !data.is_empty() && function == FNCODE::MUTE.to_label() {
+                    let value = data.get(0).unwrap();
+                    let status = MuteStatus::from_str(value).expect("Cannot convert mute code");
+                    muted = Some(status.to_label());
                 }
             }
         }
-
         Self {
             machine_id: value.id,
             function,
@@ -113,18 +141,21 @@ impl From<MatrixCommand> for MatrixCommandDatas {
             io,
             channel: ch,
             value: v,
+            muted,
+            preset,
         }
     }
 }
 
-impl From<&[u8]> for MatrixCommand {
-    fn from(value: &[u8]) -> Self {
+impl TryFrom<&[u8]> for MatrixCommand {
+    type Error = errors::Error;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         let raw_cmd = value
             .iter()
             .map(|byte| format!("{:02X}", byte))
             .collect::<Vec<String>>()
             .join(" ");
-        MatrixCommand::from_str(&raw_cmd).unwrap()
+        MatrixCommand::from_str(&raw_cmd)
     }
 }
 
@@ -161,8 +192,21 @@ impl fmt::Display for MatrixCommand {
     }
 }
 
+impl TryFrom<&[u8]> for MatrixReturnCode {
+    type Error = errors::Error;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        match StatusCodes::try_from(value) {
+            Ok(return_code) => {
+                let return_code = return_code.to_string();
+                Ok(Self { return_code })
+            }
+            Err(value) => Err(value),
+        }
+    }
+}
+
 impl FromStr for MatrixCommand {
-    type Err = String;
+    type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.strip_prefix(format!("{} {}", START_CODE, "FF").as_str()) {
@@ -171,13 +215,15 @@ impl FromStr for MatrixCommand {
                     let mut raw_vec: Vec<&str> = raw.split_whitespace().collect();
                     raw_vec.retain(|&value| !value.is_empty());
 
-                    let rw = raw_vec.get(0).ok_or_else(|| String::from("Missing rw"))?;
+                    let rw = raw_vec
+                        .get(0)
+                        .ok_or_else(|| Error::ConversionError(String::from("Missing rw")))?;
                     let fcode = raw_vec
                         .get(1)
-                        .ok_or_else(|| String::from("Missing fcode"))?;
-                    let data_length = raw_vec
-                        .get(2)
-                        .ok_or_else(|| String::from("Missing data length"))?;
+                        .ok_or_else(|| Error::ConversionError(String::from("Missing fcode")))?;
+                    let data_length = raw_vec.get(2).ok_or_else(|| {
+                        Error::ConversionError(String::from("Missing data length"))
+                    })?;
 
                     if let Ok(usable_data_length) = u8::from_str_radix(data_length, 10) {
                         let data: Option<Vec<String>>;
@@ -201,12 +247,18 @@ impl FromStr for MatrixCommand {
                             end: END_CODE.to_string(),
                         });
                     } else {
-                        return Err(String::from("Invalid format, data length isn't a number"));
+                        return Err(Error::ConversionError(String::from(
+                            "Invalid format, data length isn't a number",
+                        )));
                     }
                 }
-                None => Err(String::from("Invalid format, no end code found")),
+                None => Err(Error::ConversionError(String::from(
+                    "Invalid format, no end code found",
+                ))),
             },
-            None => Err(String::from("Invalid format, no start code found")),
+            None => Err(Error::ConversionError(String::from(
+                "Invalid format, no start code found",
+            ))),
         }
     }
 }
