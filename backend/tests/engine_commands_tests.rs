@@ -215,5 +215,34 @@ fn ok_from_str_to_matrix_command(){
 
 fn ok_from_bytes_to_matrix_command(){
     let bytes = read_mute_ch(SRC::OUTPUT, 16).unwrap().to_byte_hex().unwrap();
-    assert_eq!(read_mute_ch(SRC::OUTPUT, 16).unwrap(), MatrixCommand::from(&bytes[..]))
+    assert_eq!(read_mute_ch(SRC::OUTPUT, 16).unwrap(), MatrixCommand::try_from(&bytes[..]).unwrap())
+}
+
+
+#[test]
+fn ok_from_bytes_to_matrix_status_code(){
+    let bytes = "00".as_bytes();
+    let res = MatrixReturnCode::try_from(bytes);
+    assert!(res.is_ok());
+    let bytes = "01".as_bytes();
+    let res = MatrixReturnCode::try_from(bytes);
+    assert!(res.is_ok());
+    let bytes = "02".as_bytes();
+    let res = MatrixReturnCode::try_from(bytes);
+    assert!(res.is_err()); 
+
+}
+
+#[test]
+fn err_conversion_error_for_status_code(){
+    let bytes = "00".as_bytes();
+    let res = MatrixCommand::try_from(bytes);
+    assert_eq!(res.unwrap_err().to_string(),"Invalid format, no start code found".to_string());
+}
+
+#[test]
+fn parse_preset_to_cmd(){
+    let raw_cmd = "A5 C3 3C 5A FF 63 02 00 EE";
+    let bytes = MatrixCommand::from_str(raw_cmd).unwrap().to_byte_hex().unwrap();
+    MatrixCommand::try_from(&bytes[..]).unwrap();
 }
