@@ -5,6 +5,7 @@ use super::session::WsSession;
 use actix::prelude::*;
 use actix::Message;
 use tokio::net::TcpStream;
+use uuid::Uuid;
 use std::net::SocketAddrV4;
 
 
@@ -13,6 +14,16 @@ use std::net::SocketAddrV4;
 pub struct Connect {
     pub addr: Addr<WsSession>,
     pub socket: Option<SocketAddrV4>,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="String")]
+pub struct SessionOpened{}
+
+#[derive(Message,Clone)]
+#[rtype(result="Result<(),String>")]
+pub struct CheckSessionUUID{
+    pub uuid: Uuid
 }
 
 #[derive(Message, Debug, Clone)]
@@ -56,7 +67,6 @@ pub struct ClosedByRemotePeer{
     pub socket: SocketAddrV4,
     pub message: String
 }
-
 
 
 #[derive(Message,Clone)]

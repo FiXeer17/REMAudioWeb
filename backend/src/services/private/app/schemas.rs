@@ -53,6 +53,12 @@ pub struct StreamError {
     pub at_socket: String,
 }
 
+#[derive(Deserialize)]
+pub struct SessionUUID{
+    pub uuid: String
+}
+
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct MatrixStates {
     pub i_mute: HashMap<u32, bool>,

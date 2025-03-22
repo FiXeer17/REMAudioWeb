@@ -1,10 +1,11 @@
 use super::{
-    messages::{ClosedByRemotePeer, Connect, StartStream, StreamFailed,MatrixReady},
+    messages::{CheckSessionUUID, ClosedByRemotePeer, Connect, MatrixReady, SessionOpened, StartStream, StreamFailed},
     session::{Disconnect, WsSession},
     tcp_handler::TcpStreamActor,
 };
 use crate::utils::configs::Env;
-use actix::{Actor, Addr, AsyncContext, Context, Handler};
+use actix::{ Actor, Addr, AsyncContext, Context, Handler};
+use uuid::Uuid;
 
 use std::{
     collections::{HashMap, HashSet},
@@ -16,12 +17,15 @@ use std::{
 pub struct TcpStreamsManager {
     pub streams: HashMap<SocketAddrV4, HashSet<Addr<WsSession>>>,
     pub streams_actors: HashMap<SocketAddrV4, Addr<TcpStreamActor>>,
+    pub uuids: HashSet<Uuid>
 }
+
 impl TcpStreamsManager {
     pub fn new() -> Self {
         Self {
             streams: HashMap::with_capacity(1),
             streams_actors: HashMap::with_capacity(1),
+            uuids: HashSet::new()
         }
     }
 }
@@ -54,6 +58,19 @@ impl Handler<Connect> for TcpStreamsManager {
         }
     }
 }
+
+impl Handler<SessionOpened> for TcpStreamsManager{
+    type Result = String;
+    fn handle(&mut self, _: SessionOpened, _: &mut Self::Context) -> Self::Result {
+       let mut uuid = Uuid::new_v4();
+       while self.uuids.get(&uuid).is_some(){
+         uuid = Uuid::new_v4();
+       }
+       self.uuids.insert(uuid);
+       uuid.to_string()
+    }
+}
+
 
 impl Handler<StartStream> for TcpStreamsManager {
     type Result = ();
@@ -106,4 +123,14 @@ impl Handler<MatrixReady> for TcpStreamsManager {
         }
     }
     
+}
+
+impl Handler<CheckSessionUUID> for TcpStreamsManager{
+    type Result = Result<(),String>;
+    fn handle(&mut self, msg: CheckSessionUUID, _ctx: &mut Self::Context) -> Self::Result {
+        match self.uuids.get(&msg.uuid){
+            Some(_) => return Ok(()),
+            None => return Err("UUID not found.".to_string()) 
+        }
+    }
 }
