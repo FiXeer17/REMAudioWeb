@@ -6,7 +6,10 @@ use actix_web::{
     web::{self, Data},
     App, HttpServer,
 };
-use services::{private::{self, app::tcp_manager}, public};
+use services::{
+    private::{self, app::tcp_manager},
+    public,
+};
 use sqlx::{Pool, Postgres};
 use utils::auth_middleware::auth_middleware;
 
@@ -46,8 +49,12 @@ pub async fn crate_app() -> Result<(), std::io::Error> {
             )
             .service(
                 web::scope("/ws")
-                    .wrap(from_fn(auth_middleware))
-                    .configure(private::app::router),
+                    .service(
+                        web::scope("/auth")
+                            .wrap(from_fn(auth_middleware))
+                            .configure(private::auth::router),
+                    )
+                    .configure(private::app::router)
             )
     })
     .bind((SERVER_ADDR, SERVER_PORT))?
