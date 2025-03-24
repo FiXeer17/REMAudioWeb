@@ -19,4 +19,8 @@ export function login({ email, password, session_type }: UserCredentials): Promi
   return client.post("/signin", { email, password, session_type });
 }
 
+export function getUUID():Promise<AxiosResponse<string>>{
+  return client.get("",{baseURL: "https://3299-37-103-104-79.ngrok-free.app/ws/auth"})
+}
+
 

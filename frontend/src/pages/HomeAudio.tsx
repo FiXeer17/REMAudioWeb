@@ -8,57 +8,16 @@ import { SwipeChannels } from "../lib/swipeChannels";
 import { useState } from "react";
 
 export default function Volume() {
-  const [inputChannelStates, setInputChannelStates] = useState<{
-    [key: string]: boolean;
-  }>({});
-  const [outputChannelStates, setOutputChannelStates] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
+  const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
 
   const navigate = useNavigate();
 
-  const inputChannels1 = [
-    "CH1",
-    "CH2",
-    "CH3",
-    "CH4",
-    "CH5",
-    "CH6",
-    "CH7",
-    "CH8",
-  ];
+  const inputChannels1 = ["CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8",];
+  const inputChannels2 = ["CH9","CH10","CH11","CH12","CH13","CH14","CH15","CH16",];
 
-  const inputChannels2 = [
-    "CH9",
-    "CH10",
-    "CH11",
-    "CH12",
-    "CH13",
-    "CH14",
-    "CH15",
-    "CH16",
-  ];
-
-  const outputChannels1 = [
-    "CH1",
-    "CH2",
-    "CH3",
-    "CH4",
-    "CH5",
-    "CH6",
-    "CH7",
-    "CH8",
-  ];
-  const outputChannels2 = [
-    "CH9",
-    "CH10",
-    "CH11",
-    "CH12",
-    "CH13",
-    "CH14",
-    "CH15",
-    "CH16",
-  ];
+  const outputChannels1 = ["CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8",];
+  const outputChannels2 = ["CH9","CH10","CH11","CH12","CH13","CH14","CH15","CH16",];
 
   const {
     displayedChannels: displayedInputChannels,
@@ -152,8 +111,7 @@ export default function Volume() {
             {displayedOutputChannels.map((channel: string) => (
               <Channel
                 key={channel}
-                variant={outputChannelStates[channel] ? "channels_activated" : "channels_disabled"
-                }
+                variant={outputChannelStates[channel] ? "channels_activated" : "channels_disabled"}
                 onClick={() => handleState(channel, "O")}
               >
                 {channel}

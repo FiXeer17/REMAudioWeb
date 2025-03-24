@@ -693,10 +693,6 @@ body {
   height: 4rem;
 }
 
-.h-64 {
-  height: 16rem;
-}
-
 .h-8 {
   height: 2rem;
 }
@@ -739,10 +735,6 @@ body {
 
 .w-full {
   width: 100%;
-}
-
-.flex-shrink-0 {
-  flex-shrink: 0;
 }
 
 .shrink-0 {
@@ -851,10 +843,6 @@ body {
   border-radius: 9999px;
 }
 
-.rounded-lg {
-  border-radius: var(--radius);
-}
-
 .rounded-md {
   border-radius: calc(var(--radius) - 2px);
 }
@@ -904,23 +892,8 @@ body {
   background-color: hsl(var(--background));
 }
 
-.bg-blue-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
-}
-
 .bg-destructive {
   background-color: hsl(var(--destructive));
-}
-
-.bg-gray-300 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
-}
-
-.bg-green-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(34 197 94 / var(--tw-bg-opacity, 1));
 }
 
 .bg-home_colors-Bg\/Button {
@@ -946,22 +919,12 @@ body {
   background-color: hsl(var(--primary));
 }
 
-.bg-red-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
-}
-
 .bg-secondary {
   background-color: hsl(var(--secondary));
 }
 
 .bg-transparent {
   background-color: transparent;
-}
-
-.bg-yellow-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(234 179 8 / var(--tw-bg-opacity, 1));
 }
 
 .px-10 {

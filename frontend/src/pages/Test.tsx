@@ -1,60 +1,57 @@
-import React, { useState, useRef } from "react";
+import { useState } from "react";
+import axios from "axios";
+import { io } from "socket.io-client";
 
-export default function SwipeComponent() {
-  const colors = ["bg-red-500", "bg-green-500", "bg-blue-500", "bg-yellow-500"];
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const touchStartX = useRef(0);
-  const isDragging = useRef(false);
+const token = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJOYXRpdmUiOnsic3ViIjozOSwic2Vzc2lvbl90eXBlIjoibmF0aXZlIn19.HG40BXb_BsUplDUEgZkpmLZNcM-o0D9YHTBJ6dKhNxM"; 
 
-  // Inizio del tocco
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    isDragging.current = true;
-  };
-
-  // Durante lo swipe
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging.current) return;
-
-    const deltaX = e.touches[0].clientX - touchStartX.current;
-
-    // Blocca lo swipe se sei al primo o all'ultimo div
-    if ((currentIndex === 0 && deltaX > 0) || (currentIndex === colors.length - 1 && deltaX < 0)) {
-      return;
-    }
-
-    setOffset(deltaX); // Muove subito il div con il dito
-  };
-
-  // Rilascio del tocco
-  const handleTouchEnd = () => {
-    if (offset > 100 && currentIndex > 0) {
-      setCurrentIndex((prevIndex) => prevIndex - 1);
-    } else if (offset < -100 && currentIndex < colors.length - 1) {
-      setCurrentIndex((prevIndex) => prevIndex + 1);
-    }
-
-    setOffset(0); // Reset offset dopo il rilascio
-    isDragging.current = false;
-  };
+function App() {
+    const [message, setMessage] = useState("");
+    const [UUId, setUuid] = useState(null);
+    const [socket, setSocket] = useState(null);
+  
+    const getUUID = async () => {
+      try {
+        const response = await axios.get("https://3f76-151-42-175-197.ngrok-free.app/ws/auth", {
+          headers: {
+            Authorization: token,
+            'ngrok-skip-browser-warning':'true'
+          }
+        });
+        const UUID = response.data.uuid;
+        
+        
+        // Connessione Socket.IO con UUID
+        const newSocket = io("wss://3f76-151-42-175-197.ngrok-free.app/ws/app", {
+          query: { uuid: UUID },
+          extraHeaders:{'ngrok-skip-browser-warning':'true'} ,
+          path: "/ws/app"
+          
+        });
+  
+        // Gestisci la connessione
+        newSocket.on("connect", () => {
+          console.log("Connected to Socket.IO server");
+        });
+  
+        // Gestisci i messaggi in arrivo
+        newSocket.on("message", (data) => {
+          setMessage(data);
+        });
+  
+        
+      } catch (error) {
+        setMessage("Errore nel recupero dell'UUID");
+      }
+    };
+  
+  ;
 
   return (
-    <div className="w-full h-64 flex justify-center items-center bg-gray-300 rounded-lg overflow-hidden">
-      <div
-        className="flex w-full h-full"
-        style={{
-          transform: `translateX(calc(-${currentIndex * 100}% + ${offset}px))`,
-          transition: isDragging.current ? "none" : "transform 0.3s ease",
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        {colors.map((color, index) => (
-          <div key={index} className={`w-full h-full flex-shrink-0 ${color}`} />
-        ))}
-      </div>
+    <div className="flex flex-col">
+      <button onClick={getUUID} className="text-white">Ottieni UUID</button>
+      <h1 className="text-white">{message}</h1>
     </div>
   );
 }
+
+export default App;
