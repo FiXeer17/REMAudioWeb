@@ -1,9 +1,6 @@
 use crate::services::public::{interfaces::insert_user, register::schemas};
 use crate::{
-    utils::{
-        common::return_json_reason,
-        hasher::{argon2_enc, id_to_jwt},
-    },
+    utils::{common::return_json_reason, hasher::argon2_enc, jwt_utils::id_to_jwt},
     AppState,
 };
 use actix_web::{
@@ -20,14 +17,13 @@ pub async fn register(
     pgpool: Data<AppState>,
 ) -> impl Responder {
     if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("validation error."));
+        return HttpResponse::BadRequest().json(return_json_reason("Email format not valid."));
     }
 
     let hashed_pswd = match argon2_enc(&request_body.password) {
         Ok(hash) => hash,
-        Err(_) => {
-            return HttpResponse::InternalServerError()
-                .json(return_json_reason("hashing password error."))
+        Err(e) => {
+            return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
         }
     };
     match insert_user(
@@ -51,7 +47,7 @@ pub async fn register(
                     id: new_user.id,
                     username: new_user.username,
                     email: new_user.email,
-                    jwt_token,
+                    access_token: jwt_token,
                 }) {
                     Ok(pretty) => pretty,
                     Err(_) => {
@@ -62,7 +58,7 @@ pub async fn register(
         }
         Err(sqlx::Error::RowNotFound) => {
             return HttpResponse::UnprocessableEntity()
-                .json(return_json_reason("e-mail already taken."))
+                .json(return_json_reason("Email already taken."))
         }
         Err(_) => return HttpResponse::BadRequest().finish(),
     }
