@@ -26,20 +26,18 @@ pub struct AppState {
 
 pub async fn crate_app() -> Result<(), std::io::Error> {
     env_logger::init();
-    let pool = establish_connection().await;
-    let _ = sqlx::migrate!("./migrations").run(&pool).await;
-    let server = tcp_manager::TcpStreamsManager::new().start();
+    let pool = establish_connection().await; // create a connection with the database
+    let _ = sqlx::migrate!("./migrations").run(&pool).await; // migrate 
+    let server = tcp_manager::TcpStreamsManager::new().start(); // start tcp connections manager
     HttpServer::new(move || {
-        let cors = actix_cors::Cors::default()
-            .allow_any_origin()
-            .allow_any_header()
-            .allow_any_method();
+        let cors = actix_cors::Cors::permissive();
+            
 
         App::new()
             .wrap(cors)
             .wrap(Logger::default())
             .app_data(Data::new(AppState { db: pool.clone() }))
-            .app_data(Data::new(server.clone()))
+            .app_data(Data::new(server.clone())) 
             .service(
                 web::scope("/api").service(
                     web::scope("/auth")
