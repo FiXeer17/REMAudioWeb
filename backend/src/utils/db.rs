@@ -1,4 +1,4 @@
-use crate::utils::env_dns::Env;
+use crate::utils::configs::Env;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 pub async fn establish_connection() -> Pool<Postgres> {
