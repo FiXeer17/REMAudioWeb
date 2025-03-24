@@ -5,8 +5,9 @@ use validator::Validate;
 
 #[derive(Deserialize, Debug, Validate)]
 pub struct CreateUser {
+    #[validate(length(min = 4, max = 254))]
     pub username: String,
-    #[validate(email)]
+    #[validate(length(min = 4, max = 254), email)]
     pub email: String,
     pub password: String,
     #[validate(custom = "validate_session_type")]

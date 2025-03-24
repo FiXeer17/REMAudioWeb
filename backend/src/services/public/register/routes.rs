@@ -20,14 +20,14 @@ pub async fn register(
     pgpool: Data<AppState>,
 ) -> impl Responder {
     if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("Email format not valid."));
+        return HttpResponse::BadRequest().json(return_json_reason("validation error."));
     }
 
     let hashed_pswd = match argon2_enc(&request_body.password) {
         Ok(hash) => hash,
-        Err(e) => {
+        Err(_) => {
             return HttpResponse::InternalServerError()
-                .json(return_json_reason(&e.to_string()))
+                .json(return_json_reason("hashing password error."))
         }
     };
     match insert_user(
@@ -62,7 +62,7 @@ pub async fn register(
         }
         Err(sqlx::Error::RowNotFound) => {
             return HttpResponse::UnprocessableEntity()
-                .json(return_json_reason("Email already taken."))
+                .json(return_json_reason("e-mail already taken."))
         }
         Err(_) => return HttpResponse::BadRequest().finish(),
     }

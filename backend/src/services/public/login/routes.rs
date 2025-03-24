@@ -20,7 +20,7 @@ pub async fn signin(
     pgpool: Data<AppState>,
 ) -> impl Responder {
     if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("Email format not valid."));
+        return HttpResponse::BadRequest().json(return_json_reason("validation error."));
     }
     match from_email(&pgpool, &request_body.email).await {
         Ok(user) => match argon2_verify(&user.password, &request_body.password) {
@@ -31,17 +31,17 @@ pub async fn signin(
                         return HttpResponse::InternalServerError().finish();
                     }
                 };
-                return HttpResponse::Ok().json(json!({"access_token":token}));
+                return HttpResponse::Ok().json(json!({"jwt_token":token}));
             }
             Ok(false) => {
-                return HttpResponse::Unauthorized().json(return_json_reason("Wrong credentials."));
+                return HttpResponse::Unauthorized().json(return_json_reason("wrong credentials."));
             }
             Err(_) => {
                 return HttpResponse::InternalServerError().finish();
             }
         },
         Err(_) => {
-            return HttpResponse::NotFound().json(return_json_reason("Wrong credentials."));
+            return HttpResponse::NotFound().json(return_json_reason("email not found."));
         }
     }
 }
