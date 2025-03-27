@@ -2,7 +2,7 @@ use crate::utils::db::establish_connection;
 use actix::Actor;
 use actix_cors;
 use actix_web::{
-    middleware::{from_fn, Logger},
+    middleware::{from_fn, Logger, NormalizePath},
     web::{self, Data},
     App, HttpServer,
 };
@@ -36,6 +36,7 @@ pub async fn crate_app() -> Result<(), std::io::Error> {
         App::new()
             .wrap(cors)
             .wrap(Logger::default())
+            .wrap(NormalizePath::trim())
             .app_data(Data::new(AppState { db: pool.clone() }))
             .app_data(Data::new(server.clone())) 
             .service(

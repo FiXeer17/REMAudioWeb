@@ -55,7 +55,7 @@ export default function Register() {
         session_type : "web" as string
       }
       const response= await registerUser(credential)
-      const accessToken=response.data.jwt_token
+      const accessToken=response.data.access_token
       localStorage.setItem("accessToken",accessToken)
 
       return navigate("/homeAudio")

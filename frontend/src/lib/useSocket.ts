@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
-import io, { ManagerOptions,SocketOptions,Socket } from "socket.io-client"
 
-export const useSocket=(uri: string,token:string, opts?: Partial<ManagerOptions & SocketOptions> | undefined): Socket => {
-  const { current: socket } = useRef(io(uri,{...opts,auth:{token}}))
 
+export const useSocket=(uri: string): WebSocket => {
+  const { current: socket } = useRef(new WebSocket(uri))
+  console.log(socket)
   useEffect(()=>{
     return () => {
       if (socket) socket.close();

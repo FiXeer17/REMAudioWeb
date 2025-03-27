@@ -5,9 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button as Audio_Video } from "@/components/ui/audio_video";
 import { useNavigate } from "react-router-dom";
 import { SwipeChannels } from "../lib/swipeChannels";
-import { useState } from "react";
+import { useState,useContext,useEffect } from "react";
+import SocketContext from "@/lib/socket/context"
 
 export default function Volume() {
+
+  const {socket}=useContext(SocketContext).socketState
+  const [message, setMessage]=useState("")
+  
+  useEffect(() => {
+      if (!socket) return;
+  
+      socket.onmessage = (event) => {
+        setMessage(event.data);
+      };
+  
+    });
+
   const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
   const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
 

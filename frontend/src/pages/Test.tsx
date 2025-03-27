@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { io } from "socket.io-client";
+
 
 const token = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJOYXRpdmUiOnsic3ViIjozOSwic2Vzc2lvbl90eXBlIjoibmF0aXZlIn19.HG40BXb_BsUplDUEgZkpmLZNcM-o0D9YHTBJ6dKhNxM"; 
 
@@ -11,32 +11,26 @@ function App() {
   
     const getUUID = async () => {
       try {
-        const response = await axios.get("https://3f76-151-42-175-197.ngrok-free.app/ws/auth", {
+        /*
+        const response = await axios.get("http://localhost:8000/ws/auth", {
           headers: {
             Authorization: token,
-            'ngrok-skip-browser-warning':'true'
           }
         });
         const UUID = response.data.uuid;
         
-        
+        */
         // Connessione Socket.IO con UUID
-        const newSocket = io("wss://3f76-151-42-175-197.ngrok-free.app/ws/app", {
-          query: { uuid: UUID },
-          extraHeaders:{'ngrok-skip-browser-warning':'true'} ,
-          path: "/ws/app"
-          
-        });
-  
-        // Gestisci la connessione
-        newSocket.on("connect", () => {
-          console.log("Connected to Socket.IO server");
-        });
-  
-        // Gestisci i messaggi in arrivo
-        newSocket.on("message", (data) => {
-          setMessage(data);
-        });
+        const socket= new WebSocket("ws://localhost:8000/ws/app?uuid=1b203946-a0a0-401a-ac40-0938b19db9b8",)
+
+        socket.onopen = () => {
+          console.log('Connected to WebSocket server');
+        };
+        
+        socket.onmessage = (event) => {
+          console.log(`Received message: ${event.data}`);
+        };
+
   
         
       } catch (error) {
