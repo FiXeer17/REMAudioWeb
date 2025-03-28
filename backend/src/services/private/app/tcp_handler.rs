@@ -1,5 +1,5 @@
 use super::{
-    messages::{Connect, MatrixReady, StreamFailed, StreamStarted},
+    messages::{Connect, MatrixReady, SetCommand, StreamFailed, StreamStarted},
     schemas::MatrixStates,
     tcp_manager::TcpStreamsManager,
 };
@@ -16,7 +16,7 @@ use tokio::{
     net::TcpStream,
 };
 
-const COMMAND_DELAY: Duration = Duration::from_millis(201);
+const COMMAND_DELAY: Duration = Duration::from_millis(20);
 const RECONNECT_DELAY: Duration = Duration::from_secs(1);
 const READ_TIMEOUT: Duration = Duration::from_secs(10);
 const MAX_RETRIES: u8 = 3;
@@ -166,15 +166,16 @@ impl Handler<StreamStarted> for TcpStreamActor {
 
         ctx.run_interval(COMMAND_DELAY, |act, ctx| {
             if !act.commands_queue.is_empty() {
-                let cmd = act.commands_queue.pop_back();
+                let cmd = act.commands_queue.pop_back().unwrap();
                 let stream = act.stream.as_mut().unwrap().clone();
                 let ctx_addr = ctx.address().clone();
                 let socket = act.stream_socket;
+                let mut states = act.machine_states.as_mut().unwrap().clone();
                 tokio::spawn(async move {
                     let written_bytes = {
                         let mut steram_guard = stream.lock().await;
                         steram_guard
-                            .write(&cmd.unwrap().to_byte_hex().unwrap())
+                            .write(&cmd.to_byte_hex().unwrap())
                             .await
                     };
 
@@ -201,6 +202,14 @@ impl Handler<StreamStarted> for TcpStreamActor {
                                     socket,
                                 };
                                 ctx_addr.do_send(message);
+                            }else{
+                                let buffer = &buffer[..n];
+                                let converted = buffer.iter().map(|byte|{format!("{:02X}",byte)}).collect::<Vec<String>>();
+                                if converted.get(0) == Some(&"00".to_string()){ 
+                                    states.set_changes(cmd);
+                                    let message = MatrixReady{socket,states};
+                                    ctx_addr.do_send(message);
+                                } 
                             }
                         }
                         Ok(Err(e)) => {
@@ -222,6 +231,14 @@ impl Handler<StreamStarted> for TcpStreamActor {
                 });
             }
         });
+    }
+}
+
+
+impl Handler<SetCommand> for TcpStreamActor{
+    type Result = ();
+    fn handle(&mut self, msg: SetCommand, _: &mut Self::Context) -> Self::Result {
+        self.commands_queue.push_front(msg.command);
     }
 }
 
