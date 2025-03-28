@@ -1,4 +1,3 @@
-use crate::services::public::interfaces::retrieve_admin;
 use crate::services::public::signin::schemas::SignInReturn;
 use crate::services::public::{interfaces::from_username, signin::schemas};
 use crate::{
@@ -30,10 +29,7 @@ pub async fn signin(
                         return HttpResponse::InternalServerError().finish();
                     }
                 };
-                let admin = match retrieve_admin(&pgpool, username).await{
-                    Ok(admin) => admin,
-                    Err(_) => {return HttpResponse::InternalServerError().finish();}
-                };
+                let admin = user.admin;
                 let to_return = SignInReturn{access_token:token,admin};
                 return HttpResponse::Ok().json(to_return);
             }

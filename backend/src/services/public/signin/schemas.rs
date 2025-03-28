@@ -8,7 +8,6 @@ use validator::Validate;
 pub struct ReturnFullUser {
     pub id: i32,
     pub username: String,
-    pub email: String,
     pub password: String,
     pub admin: bool,
 }
