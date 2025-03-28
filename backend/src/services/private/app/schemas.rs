@@ -4,47 +4,15 @@ use std::collections::HashMap;
 
 use crate::engine::lib::{MatrixCommand, MatrixCommandDatas};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ResponseAllStatesValue {
-    pub datas: Vec<State>,
-}
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct State {
-    pub side: String,                      // audio/video
-    pub section: String,                   // volume/presets/mute
-    pub values: HashMap<String, Vec<i32>>, // value
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct RequestSetMute {
+pub struct SetState {
     pub section: String,
-    pub action: String,
-    pub channel: String,
-    pub src: String,
+    pub io: Option<String>,                   
+    pub channel: Option<String>,
+    pub value : Option<String>
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct RequestSetGain {
-    pub section: String,
-    pub action: String,
-    pub channel: String,
-    pub src: String,
-    pub value: i32,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct RequestSetPreset {
-    pub section: String,
-    pub action: String,
-    pub preset: i32,
-}
-
-pub enum WsRequests {
-    SetMute(RequestSetMute),
-    SetGain(RequestSetGain),
-    SetPreset(RequestSetPreset),
-}
 
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -132,15 +100,17 @@ impl MatrixStates {
         if function == FNCODE::MUTE.to_label(){
             let (muted,io,channel) = (cmd.muted.unwrap(),io.unwrap(),cmd.channel.unwrap());
             if io == input_from_def{
-                self.i_mute.entry(channel).or_insert(muted);
+                self.i_mute.insert(channel,muted);
+                return;
             }
-            self.o_mute.entry(channel).or_insert(muted);
+            self.o_mute.insert(channel,muted);
         }else if function == FNCODE::VOLUME.to_label(){
             let (value,io,channel) = (cmd.value.unwrap(),io.unwrap(),cmd.channel.unwrap()); 
             if io == input_from_def{
-                self.i_volumes.entry(channel).or_insert(value);
+                self.i_volumes.insert(channel,value);
+                return;
             }
-            self.o_volumes.entry(channel).or_insert(value);
+            self.o_volumes.insert(channel,value);
         }else{
             self.current_preset = cmd.preset.unwrap();
         }
