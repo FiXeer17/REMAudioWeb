@@ -1,5 +1,5 @@
 use super::{
-    messages::{CheckSessionUUID, ClosedByRemotePeer, Connect, MatrixReady, SessionOpened, StartStream, StreamFailed},
+    messages::{CheckSessionUUID, ClosedByRemotePeer, Connect, GetConnections, MatrixReady, SessionOpened, SetCommand, StartStream, StreamFailed},
     session::{Disconnect, WsSession},
     tcp_handler::TcpStreamActor,
 };
@@ -8,9 +8,7 @@ use actix::{ Actor, Addr, AsyncContext, Context, Handler};
 use uuid::Uuid;
 
 use std::{
-    collections::{HashMap, HashSet},
-    net::SocketAddrV4,
-    str::FromStr,
+    collections::{HashMap, HashSet}, net::SocketAddrV4, str::FromStr
 };
 
 
@@ -56,6 +54,31 @@ impl Handler<Connect> for TcpStreamsManager {
             };
             ctx.address().do_send(message);
         }
+    }
+}
+impl Handler<SetCommand> for TcpStreamsManager{
+    type Result = ();
+    fn handle(&mut self, msg: SetCommand, _: &mut Self::Context) -> Self::Result {
+        let address = &msg.addr;
+        let streams = self.streams.clone();
+        for stream in streams{
+            if stream.1.contains(&address){
+                let socket = stream.0;
+                let tcp_act: &Addr<TcpStreamActor> = self.streams_actors.get(&socket).unwrap();
+                tcp_act.do_send(msg.clone());
+            }
+        }
+    }
+}
+
+impl Handler<GetConnections> for TcpStreamsManager{
+    type Result = Option<Vec<SocketAddrV4>>;
+    fn handle(&mut self, _: GetConnections, _: &mut Self::Context) -> Self::Result {
+        let socket_vec : Vec<SocketAddrV4> = self.streams_actors.keys().cloned().collect();
+        if socket_vec.is_empty(){
+            return None
+        }
+        Some(socket_vec)
     }
 }
 
