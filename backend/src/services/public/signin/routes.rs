@@ -1,4 +1,6 @@
-use crate::services::public::{interfaces::from_email, signin::schemas};
+use crate::services::public::interfaces::retrieve_admin;
+use crate::services::public::signin::schemas::SignInReturn;
+use crate::services::public::{interfaces::from_username, signin::schemas};
 use crate::{
     utils::{common::return_json_reason, hasher::argon2_verify, jwt_utils::id_to_jwt},
     AppState,
@@ -8,7 +10,6 @@ use actix_web::{
     web::{self, Data},
     HttpResponse, Responder,
 };
-use serde_json::json;
 use validator::Validate;
 
 #[post("/signin")]
@@ -17,9 +18,10 @@ pub async fn signin(
     pgpool: Data<AppState>,
 ) -> impl Responder {
     if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("Email format not valid."));
+        return HttpResponse::BadRequest().json(return_json_reason("user format not valid."));
     }
-    match from_email(&pgpool, &request_body.email).await {
+    let username = &request_body.username;
+    match from_username(&pgpool, &username.clone()).await {
         Ok(user) => match argon2_verify(&user.password, &request_body.password) {
             Ok(true) => {
                 let token = match id_to_jwt(user.id, request_body.session_type.clone()) {
@@ -28,7 +30,12 @@ pub async fn signin(
                         return HttpResponse::InternalServerError().finish();
                     }
                 };
-                return HttpResponse::Ok().json(json!({"access_token":token}));
+                let admin = match retrieve_admin(&pgpool, username).await{
+                    Ok(admin) => admin,
+                    Err(_) => {return HttpResponse::InternalServerError().finish();}
+                };
+                let to_return = SignInReturn{access_token:token,admin};
+                return HttpResponse::Ok().json(to_return);
             }
             Ok(false) => {
                 return HttpResponse::Unauthorized().json(return_json_reason("Wrong credentials."));
