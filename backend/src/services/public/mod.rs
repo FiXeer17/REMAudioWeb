@@ -1,3 +1,3 @@
 pub mod interfaces;
-pub mod register;
 pub mod signin;
+pub mod root;
