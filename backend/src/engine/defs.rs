@@ -16,6 +16,11 @@ pub mod fncodes {
     pub const GAIN_IN_STEP: &str = "05";
     pub const MIC_SENSITIVITY: &str = "06";
 
+    pub const SCENE_LABEL: &str = "preset";
+    pub const MUTE_LABEL: &str = "mute";
+    pub const VOLUME_LABEL: &str = "volume";
+    pub const GAIN_IN_STEP_LABEL: &str = "gain_in_step";
+    pub const MIC_SENSITIVITY_LABEL: &str = "mic_sensitivity";
     pub enum FNCODE {
         SCENE,
         MUTE,
@@ -35,14 +40,25 @@ pub mod fncodes {
             }
         }
     }
+    impl ToString for FNCODE{
+        fn to_string(&self) -> String {
+            match self{
+                FNCODE::SCENE => String::from(SCENE),
+                FNCODE::MUTE => String::from(MUTE),
+                FNCODE::VOLUME => String::from(VOLUME),
+                FNCODE::GAINSTEP => String::from(GAIN_IN_STEP),
+                FNCODE::MICSENSITIVITY => String::from(MIC_SENSITIVITY),
+            }
+        }
+    }
     impl FNCODE {
         pub fn to_label(&self) -> String {
             match self {
-                FNCODE::SCENE => String::from("preset"),
-                FNCODE::MUTE => String::from("mute"),
-                FNCODE::VOLUME => String::from("volume"),
-                FNCODE::GAINSTEP => String::from("gain_in_step"),
-                FNCODE::MICSENSITIVITY => String::from("mic_sensitivity"),
+                FNCODE::SCENE => String::from(SCENE_LABEL),
+                FNCODE::MUTE => String::from(MUTE_LABEL),
+                FNCODE::VOLUME => String::from(VOLUME_LABEL),
+                FNCODE::GAINSTEP => String::from(GAIN_IN_STEP_LABEL),
+                FNCODE::MICSENSITIVITY => String::from(MIC_SENSITIVITY_LABEL),
             }
         }
     }
@@ -55,7 +71,12 @@ pub mod fncodes {
                 VOLUME => Ok(FNCODE::VOLUME),
                 GAIN_IN_STEP => Ok(FNCODE::GAINSTEP),
                 MIC_SENSITIVITY => Ok(FNCODE::MICSENSITIVITY),
-                _ => Err(()),
+                SCENE_LABEL => Ok(FNCODE::SCENE),
+                MUTE_LABEL => Ok(FNCODE::MUTE),
+                VOLUME_LABEL => Ok(FNCODE::VOLUME),
+                GAIN_IN_STEP_LABEL => Ok(FNCODE::GAINSTEP),
+                MIC_SENSITIVITY_LABEL => Ok(FNCODE::MICSENSITIVITY),
+                _ => Err(())
             }
         }
     }
@@ -68,9 +89,14 @@ pub mod datas {
         use core::fmt;
         use std::str::FromStr;
 
+        use crate::engine::defs::errors::Error;
+
         pub const GENERAL: &str = "00";
         pub const INPUT: &str = "01";
         pub const OUTPUT: &str = "02";
+        pub const GENERAL_LABEL: &str = "both";
+        pub const INPUT_LABEL: &str = "input";
+        pub const OUTPUT_LABEL: &str = "output";
 
         pub enum SRC {
             GENERAL,
@@ -81,9 +107,9 @@ pub mod datas {
         impl SRC {
             pub fn to_label(&self) -> String {
                 match self {
-                    SRC::GENERAL => String::from("both"),
-                    SRC::INPUT => String::from("input"),
-                    SRC::OUTPUT => String::from("output"),
+                    SRC::GENERAL => String::from(GENERAL_LABEL),
+                    SRC::INPUT => String::from(INPUT_LABEL),
+                    SRC::OUTPUT => String::from(OUTPUT_LABEL),
                 }
             }
         }
@@ -99,13 +125,16 @@ pub mod datas {
         }
 
         impl FromStr for SRC {
-            type Err = ();
+            type Err = Error;
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 match s {
                     INPUT => Ok(SRC::INPUT),
                     OUTPUT => Ok(SRC::OUTPUT),
                     GENERAL => Ok(SRC::GENERAL),
-                    _ => Err(()),
+                    INPUT_LABEL => Ok(SRC::INPUT),
+                    OUTPUT_LABEL => Ok(SRC::OUTPUT),
+                    GENERAL_LABEL => Ok(SRC::GENERAL),
+                    _ => Err(Error::ConversionError("cannot convert source".to_string())),
                 }
             }
         }
@@ -128,8 +157,12 @@ pub mod datas {
     pub mod mute_status{
         use std::str::FromStr;
 
+        use crate::engine::defs::errors::Error;
+
         pub const NOTMUTED: &str = "00";
         pub const MUTED: &str = "01";
+        pub const NOTMUTED_LABEL: &str = "false";
+        pub const MUTED_LABEL: &str = "true";
 
         #[derive(Debug,Clone)]
         pub enum MuteStatus{
@@ -139,19 +172,30 @@ pub mod datas {
         impl MuteStatus{
             pub fn to_label(&self) -> bool {
                 match self {
-                     MuteStatus::MUTED => true,
-                     MuteStatus::NOTMUTED => false,
+                     MuteStatus::MUTED => bool::from_str(MUTED_LABEL).unwrap(),
+                     MuteStatus::NOTMUTED => bool::from_str(NOTMUTED_LABEL).unwrap(),
                 }
             }
         }
 
         impl FromStr for MuteStatus{
-            type Err = ();
+            type Err = Error;
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 match s {
                     MUTED => Ok(MuteStatus::MUTED),
                     NOTMUTED => Ok(MuteStatus::NOTMUTED),
-                    _ => Err(())
+                    MUTED_LABEL => Ok(MuteStatus::MUTED),
+                    NOTMUTED_LABEL=> Ok(MuteStatus::NOTMUTED),
+                    _ => Err(Error::ConversionError("cannot convert mute status.".to_string()))
+                }
+            }
+        }
+
+        impl ToString for MuteStatus{
+            fn to_string(&self) -> String {
+                match self{
+                    MuteStatus::MUTED => MUTED.to_string(),
+                    MuteStatus::NOTMUTED => NOTMUTED.to_string(), 
                 }
             }
         }
@@ -201,14 +245,24 @@ pub mod errors{
     #[derive(Debug,Clone)]
     pub enum Error{
         ConversionError(String),
-        InvalidCode
+        InvalidCode,
+        InvalidFormat(String),
+        InvalidChannel,
+        InvalidData(String),
+        InvalidPreset,
+        InvalidFunctionCode,
     }
 
     impl ToString for Error{
         fn to_string(&self) -> String {
             match self {
                 Error::ConversionError(value) => String::from(value),
-                Error::InvalidCode => String::from("invalid code")
+                Error::InvalidCode => String::from("invalid code"),
+                Error::InvalidFormat(value) => String::from(value),
+                Error::InvalidChannel => String::from("invalid channel"),
+                Error::InvalidData(value) => String::from(value),
+                Error::InvalidPreset => String::from("invalid preset"),
+                Error::InvalidFunctionCode => String::from("invalid function code"),
             }
         }
     }
