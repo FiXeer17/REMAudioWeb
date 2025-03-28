@@ -82,3 +82,20 @@ pub struct CommandError{
     pub command: MatrixCommand
 }
 
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct SetCommand{
+    pub command: MatrixCommand,
+    pub addr: Addr<WsSession>
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct SetCommandOk{
+    pub cmd: MatrixCommand,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="Option<Vec<SocketAddrV4>>")]
+pub struct GetConnections{}
+
