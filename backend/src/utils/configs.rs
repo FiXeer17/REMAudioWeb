@@ -1,10 +1,14 @@
 use dotenv::{dotenv, from_filename};
 
+
+ //VARIABLES NAMES IN .env FILE:
 pub const JWT_SECRET: &str = "JWT_SECRET";
 pub const DATABASE_NAME: &str = "POSTGRES_DB";
 pub const DATABASE_PASSWORD: &str = "POSTGRES_PASSWORD";
 pub const DATABASE_USER: &str = "POSTGRES_USER";
 pub const DEFAULT_SOCKET: &str = "DEFAULT_SOCKET";
+pub const DEFAULT_ADMIN: &str = "DEFAULT_ADMIN";
+pub const DEFAULT_ADMIN_PASSWORD: &str = "DEFAULT_ADMIN_PASSWORD";
 
 #[allow(dead_code)]
 pub struct Env {
@@ -14,6 +18,8 @@ pub struct Env {
     database_password: String,
     jwt_secret: String,
     default_socket: String,
+    default_admin: String,
+    default_admin_password: String
 }
 
 impl Env {
@@ -33,6 +39,10 @@ impl Env {
         );
         let default_socket =
             std::env::var(DEFAULT_SOCKET).expect("failed to retrieve default socket");
+        let default_admin =
+            std::env::var(DEFAULT_ADMIN).expect("failed to retrieve default admin user");
+        let default_admin_password =
+            std::env::var(DEFAULT_ADMIN_PASSWORD).expect("failed to retrieve default admin user password");
         Env {
             database_url,
             database_name,
@@ -40,6 +50,8 @@ impl Env {
             database_password,
             jwt_secret,
             default_socket,
+            default_admin,
+            default_admin_password,
         }
     }
 
@@ -54,5 +66,11 @@ impl Env {
     }
     pub fn get_default_socket() -> String {
         Env::get_vars().default_socket
+    }
+    pub fn get_default_admin() -> String {
+        Env::get_vars().default_admin
+    }
+    pub fn get_default_admin_password() -> String {
+        Env::get_vars().default_admin_password
     }
 }
