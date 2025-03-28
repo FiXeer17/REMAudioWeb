@@ -4,25 +4,16 @@
 
 ### api urls:
 
-- [POST] register: `/auth/register`
-- [POST] sign-in: `/auth/signin`
+- [POST] sign-in: `/api/auth/signin`
+- [GET] get connections: `/api`
 
 ## Json body:
 
-### Register:
-```
-    {
-        "username":"foo",
-        "email":"foobar@mail.com",
-        "password":"fobar125",
-        "session_type": "web" or "native"
-    }
-```
 ### Sign-in:
 ```
     {
-        "email":"foobar@mail.com",
-        "password":"fobar125",
+        "username":"admin",
+        "password":"admin",
         "session_type": "web" or "native"
     }
 ```
@@ -31,8 +22,8 @@
 
 ### WebSocket urls:
 
-- [GET] authentication (before the WebSocket comunication): `/auth`
-- [GET] application: `/app`
+- [GET] authentication (before the WebSocket comunication): `/ws/auth`
+- [GET] application: `/ws/app`
 
 
 ### instruction:
