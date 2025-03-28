@@ -1,12 +1,18 @@
-use super::defs::{datas::mute_status::MuteStatus, status_codes::StatusCodes};
+use super::{
+    defs::{datas::mute_status::MuteStatus, status_codes::StatusCodes},
+    mute, presets, volume,
+};
 use errors::Error;
 use serde::{Deserialize, Serialize};
 
-use crate::engine::{
-    defs::{datas::io::SRC, fncodes::FNCODE, *},
-    mute::read_mute_all,
-    presets::read_current_preset,
-    volume::read_volume_all,
+use crate::{
+    engine::{
+        defs::{datas::io::SRC, fncodes::FNCODE, *},
+        mute::read_mute_all,
+        presets::read_current_preset,
+        volume::read_volume_all,
+    },
+    services::private::app::schemas::SetState,
 };
 
 use core::fmt;
@@ -59,16 +65,16 @@ pub struct MatrixReturnCode {
 }
 
 impl MatrixCommand {
-    pub fn new(rw: String, fcode: String, data: Option<Vec<String>>) -> Result<Self, String> {
+    pub fn new(rw: String, fcode: String, data: Option<Vec<String>>) -> Result<Self, Error> {
         if !rw.is_valid_format() || !fcode.is_valid_format() || FNCODE::from_str(&fcode).is_err() {
-            return Err("Format not valid".to_string());
+            return Err(Error::ConversionError("Format not valid".to_string()));
         }
 
         let mut data_length: Option<String> = None;
 
         if let Some(ref vec) = data {
             if !vec.iter().all(|val| val.is_valid_format()) {
-                return Err("Invalid data format".to_string());
+                return Err(Error::InvalidFormat("Invalid data format".to_string()));
             }
             data_length = Some(format!("{:02}", vec.len()));
         }
@@ -83,6 +89,42 @@ impl MatrixCommand {
             end: END_CODE.to_string(),
         })
     }
+    pub fn check_channel(ch: String) -> Result<u16, Error> {
+        match ch.parse::<u16>() {
+            Ok(v) => {
+                if v > 16 {
+                    return Err(Error::InvalidChannel);
+                }
+                return Ok(v);
+            }
+            Err(e) => return Err(Error::ConversionError(e.to_string())),
+        }
+    }
+    pub fn new_from_client(rw: String, data: SetState) -> Result<Self, Error> {
+        let (mut datas, mut data_length): (Option<Vec<String>>, Option<String>) = (None, None);
+        let fcode = FNCODE::from_str(&data.section);
+        match fcode {
+            Ok(FNCODE::MUTE) => datas = Some(mute::into_data(data)?),
+            Ok(FNCODE::SCENE) => datas = Some(presets::into_data(data)?),
+            Ok(FNCODE::VOLUME) => datas = Some(volume::into_data(data)?),
+            Ok(_) => {}
+            Err(_) => return Err(Error::InvalidFunctionCode),
+        };
+        if datas.is_some() {
+            data_length = Some(format!("{:02}", datas.clone().unwrap().len()));
+        }
+
+        Ok(Self {
+            start: START_CODE.to_string(),
+            id: "FF".to_string(),
+            rw,
+            fcode: fcode.unwrap().to_string(),
+            data_length,
+            data: datas,
+            end: END_CODE.to_string(),
+        })
+    }
+
     pub fn to_byte_hex(&self) -> Result<Vec<u8>, ParseIntError> {
         let cmd = self.to_string();
         cmd.split_whitespace()
@@ -107,13 +149,13 @@ impl From<MatrixCommand> for MatrixCommandDatas {
         let (mut io, mut ch, mut v, mut muted, mut preset) = (None, None, None, None, None);
 
         if let Some(mut data) = value.data {
-            if function != fncodes::FNCODE::SCENE.to_label(){
-            io = Some(
-                SRC::from_str(&data.remove(0))
-                    .expect("Cannot retrieve io code")
-                    .to_label(),
-            );
-            }else{
+            if function != fncodes::FNCODE::SCENE.to_label() {
+                io = Some(
+                    SRC::from_str(&data.remove(0))
+                        .expect("Cannot retrieve io code")
+                        .to_label(),
+                );
+            } else {
                 let value = data.remove(0);
                 preset = Some(u8::from_str_radix(&value, 10).unwrap())
             }
@@ -126,7 +168,7 @@ impl From<MatrixCommand> for MatrixCommandDatas {
                     let decimal = u16::from_str_radix(&data.concat(), 16)
                         .expect("Cannot convert data code")
                         as i16;
-                    v = Some(decimal as f32 * 0.1)
+                    v = Some(decimal as f32 * STEP_UNIT)
                 } else if !data.is_empty() && function == FNCODE::MUTE.to_label() {
                     let value = data.get(0).unwrap();
                     let status = MuteStatus::from_str(value).expect("Cannot convert mute code");
@@ -263,7 +305,7 @@ impl FromStr for MatrixCommand {
     }
 }
 
-pub fn read_all_states() -> Result<Vec<MatrixCommand>, String> {
+pub fn read_all_states() -> Result<Vec<MatrixCommand>, Error> {
     let (in_volume_states, out_volume_sates) =
         (read_volume_all(SRC::INPUT)?, read_volume_all(SRC::OUTPUT)?);
     let (in_mute_states, out_mute_states) =
