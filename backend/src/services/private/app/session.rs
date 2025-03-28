@@ -1,9 +1,15 @@
-use crate::services::private::app::{messages, tcp_manager};
+use crate::{
+    engine::{defs::{datas, errors::Error}, lib::MatrixCommand},
+    services::private::app::{messages, tcp_manager},
+};
 use actix::prelude::*;
 use actix_web_actors::ws;
 use std::time::{Duration, Instant};
 
-use super::{messages::{ClosedByRemotePeer, MatrixReady, StreamFailed}, schemas::StreamError};
+use super::{
+    messages::{ClosedByRemotePeer, MatrixReady, SetCommand, StreamFailed},
+    schemas::{SetState, StreamError},
+};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
 const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
@@ -37,6 +43,13 @@ impl WsSession {
         self.srv.do_send(messages::Connect { addr, socket: None });
     }
 }
+impl WsSession {
+    pub fn handle_text(&mut self, text: String) -> Result<MatrixCommand, Error> {
+        let serialized: SetState = serde_json::from_str(&text).unwrap();
+        let rw = datas::rw::WRITE.to_string();
+        return MatrixCommand::new_from_client(rw, serialized)
+    }
+}
 
 impl Actor for WsSession {
     type Context = ws::WebsocketContext<Self>;
@@ -61,13 +74,12 @@ impl Handler<StreamFailed> for WsSession {
             fail_reason: msg.error,
             at_socket: failed_socket,
         };
-        
 
         ctx.text(serde_json::to_string_pretty(&message).unwrap());
         ctx.stop();
     }
 }
-impl Handler<ClosedByRemotePeer> for WsSession{
+impl Handler<ClosedByRemotePeer> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: ClosedByRemotePeer, ctx: &mut Self::Context) -> Self::Result {
         let failed_socket = msg.socket.to_string();
@@ -80,14 +92,14 @@ impl Handler<ClosedByRemotePeer> for WsSession{
     }
 }
 
-impl Handler<MatrixReady> for WsSession{
+impl Handler<MatrixReady> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
         let message = serde_json::to_string_pretty(&msg.states).unwrap();
         ctx.text(message);
     }
 }
-    
+
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
         let msg = match msg {
@@ -107,8 +119,18 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
             }
             ws::Message::Text(text) => {
                 self.hb = Instant::now();
-                ctx.text(text.clone());
-                println!("{}", text.to_string());
+                match self.handle_text(text.to_string()) {
+                    Ok(cmd) => {
+                        let msg = SetCommand {
+                            addr: ctx.address(),
+                            command: cmd,
+                        };
+                        self.srv.do_send(msg);
+                    }
+                    Err(e) => {
+                        ctx.text(e.to_string());
+                    }
+                }
             }
             ws::Message::Binary(_) => println!("Unexpected binary"),
             ws::Message::Close(reason) => {
