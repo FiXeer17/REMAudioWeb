@@ -6,32 +6,37 @@ import { Button as Audio_Video } from "@/components/ui/audio_video";
 import { useNavigate } from "react-router-dom";
 import { SwipeChannels } from "../lib/swipeChannels";
 import { useState,useContext,useEffect } from "react";
-import SocketContext from "@/lib/socket/context"
+import SocketContext from "@/lib/socket/context";
+import { GetData } from "@/lib/WebSocketData";
+import { Circle } from "@phosphor-icons/react";
+
+
 
 export default function Volume() {
-
-  const {socket}=useContext(SocketContext).socketState
+  const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
+  const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
+  const {socketState,socketDispatch}=useContext(SocketContext)
   const [message, setMessage]=useState("")
   
   useEffect(() => {
-      if (!socket) return;
-  
-      socket.onmessage = (event) => {
-        setMessage(event.data);
-      };
-  
-    });
+    if (!socketState.socket) return;
 
-  const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
-  const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
+    socketState.socket.onmessage = (event) => {
+        const {inputChannelStates,outputChannelStates} = GetData(event.data);
+        setInputChannelStates(inputChannelStates)
+        setOutputChannelStates(outputChannelStates)        
+    };
+
+}, [socketState.socket]);
+
 
   const navigate = useNavigate();
 
-  const inputChannels1 = ["CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8",];
-  const inputChannels2 = ["CH9","CH10","CH11","CH12","CH13","CH14","CH15","CH16",];
+  const inputChannels1 = ["1","2","3","4","5","6","7","8",];
+  const inputChannels2 = ["9","10","11","12","13","14","15","16",];
 
-  const outputChannels1 = ["CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8",];
-  const outputChannels2 = ["CH9","CH10","CH11","CH12","CH13","CH14","CH15","CH16",];
+  const outputChannels1 = ["1","2","3","4","5","6","7","8",];
+  const outputChannels2 = ["9","10","11","12","13","14","15","16",];
 
   const {
     displayedChannels: displayedInputChannels,
@@ -47,24 +52,12 @@ export default function Volume() {
     handleTouchMove: handleOutputTouchMove,
     handleTouchEnd: handleOutputTouchEnd,
   } = SwipeChannels(outputChannels1, outputChannels2);
-
+  /*
   const handleState = (channel: string, type: string) => {
-    if (type === "I") {
-      setInputChannelStates((prev) => {
-        return {
-          ...prev,
-          [channel]: !prev[channel],
-        };
-      });
-    } else {
-      setOutputChannelStates((prev) => {
-        return {
-          ...prev,
-          [channel]: !prev[channel],
-        };
-      });
+    if (type === "I") {;
     }
   };
+  */
 
   return (
     <div className="grid grid-rows-[auto,1fr,1fr,auto] min-h-svh ">
@@ -77,7 +70,9 @@ export default function Volume() {
         </div>
       </div>
       <div className="flex flex-col px-7 py-6">
+      
         <div
+        
           className="relative w-full h-full "
           style={{
             transform: `translateX(${inputOffset}px)`,
@@ -88,21 +83,22 @@ export default function Volume() {
             INPUT
           </Badge>
           <div
-            className=" grid grid-cols-4  w-full h-full  items-center justify-items-center px-4 py-1 bg-home_colors-Navbar/Selection_Bg rounded-3xl"
-            onTouchStart={handleInputTouchStart}
-            onTouchMove={handleInputTouchMove}
-            onTouchEnd={handleInputTouchEnd}
-          >
+              className="grid grid-cols-4 w-full h-full items-center justify-items-center px-4 py-1 bg-home_colors-Navbar/Selection_Bg rounded-3xl"
+              onTouchStart={handleInputTouchStart}
+              onTouchMove={handleInputTouchMove}
+              onTouchEnd={handleInputTouchEnd}
+            >
             {displayedInputChannels.map((channel: string) => (
-              <Channel
-                key={channel}
-                variant={inputChannelStates[channel] ? "channels_activated" : "channels_disabled"}
-                onClick={() => handleState(channel, "I")}
-              >
-                {channel}
+              <Channel key={channel} variant={inputChannelStates[channel] ? "channels_activated" : "channels_disabled"}>  
+                {`CH${channel}`}
               </Channel>
             ))}
+          <div className="col-span-4 flex justify-center w-full">
+            <Circle size={14}  color="#ffffff" />
+            <Circle size={14}  color="#ffffff" />
           </div>
+        </div>
+
         </div>
       </div>
       <div className="flex flex-col px-7 py-6">
@@ -126,12 +122,13 @@ export default function Volume() {
               <Channel
                 key={channel}
                 variant={outputChannelStates[channel] ? "channels_activated" : "channels_disabled"}
-                onClick={() => handleState(channel, "O")}
+                
               >
-                {channel}
+                {`CH${channel}`}
               </Channel>
             ))}
           </div>
+          
         </div>
       </div>
       <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3">

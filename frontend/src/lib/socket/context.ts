@@ -1,4 +1,4 @@
-import { createContext} from "react";
+import { act, createContext} from "react";
 
 // Stato iniziale del WebSocket
 export interface ISocketContextState {

@@ -16,10 +16,11 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const socket = new WebSocket(socketServerUrl)
 
     useEffect(()=>{
-      socket.onopen=()=>{
+      socket.onopen=()=>{};
+      socket.onmessage=(event)=>{
+        //console.log(event.data)
         setLoading(false)
-
-      };
+      }
       
       socketDispatch({ type: 'update_socket', payload: socket })
 

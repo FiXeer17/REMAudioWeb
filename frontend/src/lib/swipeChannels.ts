@@ -9,8 +9,8 @@ interface SwipeChannelsReturn {
 }
 
 export const SwipeChannels = (
-  channels1: string[] = ["CH1", "CH2", "CH3", "CH4", "CH5", "CH6", "CH7", "CH8"],
-  channels2: string[] = ["CH9", "CH10", "CH11", "CH12", "CH13", "CH14", "CH15", "CH16"]
+  channels1: string[] = ["1", "2", "3", "4", "5", "6", "7", "8"],
+  channels2: string[] = ["9", "10", "11", "12", "13", "14", "15", "16"]
 ): SwipeChannelsReturn => {
   const [currentSet, setCurrentSet] = useState(0);
   const [offset, setOffset] = useState(0);
