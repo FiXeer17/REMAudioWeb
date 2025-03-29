@@ -604,6 +604,14 @@ body {
   position: relative;
 }
 
+.bottom-20 {
+  bottom: 5rem;
+}
+
+.left-1\/2 {
+  left: 50%;
+}
+
 .left-5 {
   left: 1.25rem;
 }

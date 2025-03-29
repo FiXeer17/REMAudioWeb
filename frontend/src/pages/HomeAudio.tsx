@@ -72,33 +72,34 @@ export default function Volume() {
       <div className="flex flex-col px-7 py-6">
       
         <div
-        
-          className="relative w-full h-full "
+          className="relative w-full h-full  "
           style={{
             transform: `translateX(${inputOffset}px)`,
             transition: inputOffset === 0 ? "transform 0.3s ease" : "none",
           }}
         >
-          <Badge className="absolute top-[-10px] left-5 transform -translate-x-1/2">
-            INPUT
-          </Badge>
-          <div
-              className="grid grid-cols-4 w-full h-full items-center justify-items-center px-4 py-1 bg-home_colors-Navbar/Selection_Bg rounded-3xl"
-              onTouchStart={handleInputTouchStart}
-              onTouchMove={handleInputTouchMove}
-              onTouchEnd={handleInputTouchEnd}
-            >
-            {displayedInputChannels.map((channel: string) => (
-              <Channel key={channel} variant={inputChannelStates[channel] ? "channels_activated" : "channels_disabled"}>  
-                {`CH${channel}`}
-              </Channel>
-            ))}
-          <div className="col-span-4 flex justify-center w-full">
-            <Circle size={14}  color="#ffffff" />
-            <Circle size={14}  color="#ffffff" />
+            <Badge className="absolute top-[-10px] left-5 transform -translate-x-1/2">
+              INPUT
+            </Badge>
+            <div
+                className="grid grid-cols-4  w-full h-full  items-center justify-items-center px-4 py-1 bg-home_colors-Navbar/Selection_Bg rounded-3xl"
+                onTouchStart={handleInputTouchStart}
+                onTouchMove={handleInputTouchMove}
+                onTouchEnd={handleInputTouchEnd}
+              >
+                
+              {displayedInputChannels.map((channel: string) => (
+                <Channel key={channel} variant={inputChannelStates[channel] ? "channels_activated" : "channels_disabled"}>  
+                  {`CH${channel}`}
+                </Channel>
+              ))} 
+              <div></div>
+              <div></div>
+              <div className="flex justify-center gap-4">
+                <Circle size={14} color="#ffffff" />
+                <Circle size={14} color="#ffffff" />
+              </div>
           </div>
-        </div>
-
         </div>
       </div>
       <div className="flex flex-col px-7 py-6">
