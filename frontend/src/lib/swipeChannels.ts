@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 
 interface SwipeChannelsReturn {
+  currentSet:number;
   displayedChannels: string[];
   offset: number;
   handleTouchStart: (e: React.TouchEvent) => void;
@@ -46,7 +47,9 @@ export const SwipeChannels = (
     isDragging.current = false;
   };
 
+
   return {
+    currentSet,
     displayedChannels,
     offset,
     handleTouchStart,
