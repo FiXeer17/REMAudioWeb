@@ -36,6 +36,13 @@ services:
       - ./backend/.env
     environment:
       - RUST_LOG=info
+  matrix-simulator:
+    build:
+      context: ./devmatrix-simulator
+      dockerfile: Dockerfile
+    ports:
+      - "2000:2000"
+    command: ./matrix-engine
            
 volumes:
   postgres_data:
