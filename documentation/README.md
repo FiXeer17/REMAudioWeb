@@ -16,6 +16,32 @@
         "password":"admin",
         "session_type": "web" or "native"
     }
+    
+```
+
+## Responses body:
+`/api`:
+```
+{
+	"sockets": [
+		{
+			"ip": "172.18.0.2",
+			"port": 2000
+		}
+	]
+}
+{
+	"sockets": null
+}
+
+```
+`/api/auth/signin`:
+```
+{
+	"access_token": "eyJ0eXAiOiJKV1QiLCJhbOiJIUzI1NiJ9.eyJOYXRpdmUViIjoxLCJzZXNzaW9uX3R5cGUiOiJuYXRpdmUifX0.YQ1SE1b-97clmOFSdEyiPPuv1VHdeDmF-2w",
+	"admin": true
+}
+
 ```
 
 ### For WebSocket urls the prefix is `/ws`
@@ -30,6 +56,13 @@
 
 To start a comunication with WebSocket protocol you'll need a UUID that certify that you are actually authenticated, to do so, before make a request to the `authentication` url with the header: `Authorization: Bearer [YOUR TOKEN]`, you'll get a UUID into put as a query parameter inside the `application` url
 
+## Responses body:
+`/ws/auth`:
+```
+{
+	"uuid": "80e1a00b-fb26-4e36-89d0-9df7e920b041"
+}
+```
 ### Application request:
 
 ```
