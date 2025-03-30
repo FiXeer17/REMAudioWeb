@@ -8,7 +8,7 @@ use actix::{ Actor, Addr, AsyncContext, Context, Handler};
 use uuid::Uuid;
 
 use std::{
-    collections::{HashMap, HashSet}, net::SocketAddrV4, str::FromStr
+    collections::{HashMap, HashSet}, net::SocketAddrV4
 };
 
 
@@ -38,7 +38,7 @@ impl Handler<Connect> for TcpStreamsManager {
         let default_socket = Env::get_default_socket();
         let socket = &msg
             .socket
-            .unwrap_or(SocketAddrV4::from_str(&default_socket).unwrap());
+            .unwrap_or(default_socket);
         if let Some(open_stream) = self.streams.get_mut(socket) {
             open_stream.insert(msg.addr.clone());
             let mut message = msg.clone();
