@@ -159,6 +159,7 @@ impl Actor for TcpStreamActor {
                             println!("cannot create tcp stream (elapsed), closing...");
                             return;
                         }
+                        retries+=1;
                     }
                 };
             }
