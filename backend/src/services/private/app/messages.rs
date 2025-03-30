@@ -1,13 +1,18 @@
 use crate::engine::lib::MatrixCommand;
 
 use super::schemas::MatrixStates;
-use super::session::WsSession;
+use super::ws_session::session::WsSession;
 use actix::prelude::*;
 use actix::Message;
 use tokio::net::TcpStream;
 use uuid::Uuid;
 use std::net::SocketAddrV4;
 
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct Disconnect {
+    pub addr: Addr<WsSession>,
+}
 
 #[derive(Message, Debug,Clone)]
 #[rtype(result = "()")]

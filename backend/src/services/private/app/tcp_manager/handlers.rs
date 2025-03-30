@@ -1,36 +1,10 @@
-use super::{
-    messages::{CheckSessionUUID, ClosedByRemotePeer, Connect, GetConnections, MatrixReady, SessionOpened, SetCommand, StartStream, StreamFailed},
-    session::{Disconnect, WsSession},
-    tcp_handler::TcpStreamActor,
-};
-use crate::utils::configs::Env;
-use actix::{ Actor, Addr, AsyncContext, Context, Handler};
+use std::{collections::HashSet, net::SocketAddrV4};
+
+use actix::{Actor, Addr, AsyncContext, Handler};
 use uuid::Uuid;
+use crate::{services::private::app::tcp_handler::tcp_handler::TcpStreamActor, utils::configs::Env};
 
-use std::{
-    collections::{HashMap, HashSet}, net::SocketAddrV4
-};
-
-
-pub struct TcpStreamsManager {
-    pub streams: HashMap<SocketAddrV4, HashSet<Addr<WsSession>>>,
-    pub streams_actors: HashMap<SocketAddrV4, Addr<TcpStreamActor>>,
-    pub uuids: HashSet<Uuid>
-}
-
-impl TcpStreamsManager {
-    pub fn new() -> Self {
-        Self {
-            streams: HashMap::with_capacity(1),
-            streams_actors: HashMap::with_capacity(1),
-            uuids: HashSet::new()
-        }
-    }
-}
-
-impl Actor for TcpStreamsManager {
-    type Context = Context<Self>;
-}
+use super::{super::messages::*, tcp_manager::TcpStreamsManager};
 
 impl Handler<Connect> for TcpStreamsManager {
     type Result = ();

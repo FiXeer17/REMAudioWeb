@@ -1,4 +1,4 @@
-use crate::services::private::app::{messages::CheckSessionUUID, schemas::SessionUUID, session::WsSession, tcp_manager::TcpStreamsManager};
+use crate::services::private::app::{messages::CheckSessionUUID, schemas::SessionUUID, tcp_manager::tcp_manager::TcpStreamsManager, ws_session::session::WsSession, };
 use actix_web::{get, web, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 use uuid::Uuid;

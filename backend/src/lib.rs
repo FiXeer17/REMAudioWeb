@@ -7,7 +7,7 @@ use actix_web::{
     App, HttpServer,
 };
 use services::{
-    private::{self, app::tcp_manager},
+    private::{self, app::tcp_manager::tcp_manager::TcpStreamsManager},
     public::{self, interfaces::insert_default_user},
 };
 use sqlx::{Pool, Postgres};
@@ -31,7 +31,7 @@ pub async fn crate_app() -> Result<(), std::io::Error> {
     let _ = sqlx::migrate!("./migrations").run(&pool).await.unwrap(); // migrate
     let app_state = AppState { db: pool.clone() };
     insert_default_user(&app_state).await.unwrap();
-    let server = tcp_manager::TcpStreamsManager::new().start(); // start tcp connections manager
+    let server = TcpStreamsManager::new().start(); // start tcp connections manager
     HttpServer::new(move || {
         let cors = actix_cors::Cors::permissive();
 

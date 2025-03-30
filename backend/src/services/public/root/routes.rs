@@ -2,7 +2,7 @@ use actix_web::{
     get, web::{self}, HttpRequest, HttpResponse, Responder
 };
 
-use crate::services::{private::app::{messages::GetConnections, tcp_manager::TcpStreamsManager}, public::root::schemas::ReturnSockets};
+use crate::services::{private::app::{messages::GetConnections, tcp_manager::tcp_manager::TcpStreamsManager} , public::root::schemas::ReturnSockets};
 
 #[get("")]
 pub async fn root(
