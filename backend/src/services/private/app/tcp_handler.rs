@@ -5,7 +5,10 @@ use super::{
 };
 
 use crate::{
-    engine::lib::{read_all_states, MatrixCommand},
+    engine::{
+        defs::fncodes::FNCODE,
+        lib::{read_all_states, MatrixCommand},
+    },
     services::private::app::messages::ClosedByRemotePeer,
 };
 use actix::{Actor, ActorContext, Addr, AsyncContext, Context, Handler};
@@ -83,8 +86,7 @@ impl TcpStreamActor {
                     socket,
                     error: e.to_string(),
                 });
-                return; 
-                
+                return;
             }
 
             if let Ok(Err(e)) = read_bytes {
@@ -96,7 +98,6 @@ impl TcpStreamActor {
                 return;
             }
 
-            
             let read_bytes = read_bytes.unwrap();
 
             let buffer = &buffer[..read_bytes.unwrap()];
@@ -174,9 +175,7 @@ impl Handler<StreamStarted> for TcpStreamActor {
                 tokio::spawn(async move {
                     let written_bytes = {
                         let mut steram_guard = stream.lock().await;
-                        steram_guard
-                            .write(&cmd.to_byte_hex().unwrap())
-                            .await
+                        steram_guard.write(&cmd.to_byte_hex().unwrap()).await
                     };
 
                     if let Err(e) = written_bytes {
@@ -202,14 +201,21 @@ impl Handler<StreamStarted> for TcpStreamActor {
                                     socket,
                                 };
                                 ctx_addr.do_send(message);
-                            }else{
+                            } else {
                                 let buffer = &buffer[..n];
-                                let converted = buffer.iter().map(|byte|{format!("{:02X}",byte)}).collect::<Vec<String>>();
-                                if converted.get(0) == Some(&"00".to_string()){ 
-                                    states.set_changes(cmd);
-                                    let message = MatrixReady{socket,states};
-                                    ctx_addr.do_send(message);
-                                } 
+                                let converted = buffer
+                                    .iter()
+                                    .map(|byte| format!("{:02X}", byte))
+                                    .collect::<Vec<String>>();
+                                if converted.get(0) == Some(&"00".to_string()) {
+                                    if cmd.fcode != FNCODE::SCENE.to_string() {
+                                        states.set_changes(cmd);
+                                        let message = MatrixReady { socket, states };
+                                        ctx_addr.do_send(message);
+                                    }else{
+                                        TcpStreamActor::read_states(ctx_addr, socket, stream).await;
+                                    }
+                                }
                             }
                         }
                         Ok(Err(e)) => {
@@ -234,8 +240,7 @@ impl Handler<StreamStarted> for TcpStreamActor {
     }
 }
 
-
-impl Handler<SetCommand> for TcpStreamActor{
+impl Handler<SetCommand> for TcpStreamActor {
     type Result = ();
     fn handle(&mut self, msg: SetCommand, _: &mut Self::Context) -> Self::Result {
         self.commands_queue.push_front(msg.command);
@@ -268,8 +273,8 @@ impl Handler<MatrixReady> for TcpStreamActor {
 impl Handler<Connect> for TcpStreamActor {
     type Result = ();
     fn handle(&mut self, msg: Connect, _: &mut Self::Context) -> Self::Result {
-        if self.machine_states.is_none(){
-            return ;
+        if self.machine_states.is_none() {
+            return;
         }
         let states = self.machine_states.clone().unwrap();
         let message = MatrixReady {
