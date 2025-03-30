@@ -26,7 +26,7 @@ pub struct Connect {
 pub struct SessionOpened{}
 
 #[derive(Message,Clone)]
-#[rtype(result="Result<(),String>")]
+#[rtype(result="bool")]
 pub struct CheckSessionUUID{
     pub uuid: Uuid
 }

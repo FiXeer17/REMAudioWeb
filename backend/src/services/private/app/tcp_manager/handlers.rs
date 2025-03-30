@@ -123,11 +123,11 @@ impl Handler<MatrixReady> for TcpStreamsManager {
 }
 
 impl Handler<CheckSessionUUID> for TcpStreamsManager{
-    type Result = Result<(),String>;
+    type Result = bool;
     fn handle(&mut self, msg: CheckSessionUUID, _ctx: &mut Self::Context) -> Self::Result {
         match self.uuids.get(&msg.uuid){
-            Some(_) => return Ok(()),
-            None => return Err("UUID not found.".to_string()) 
+            Some(_) => return true,
+            None => return false 
         }
     }
 }

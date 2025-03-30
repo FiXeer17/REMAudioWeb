@@ -17,8 +17,12 @@ pub async fn app(
         return Ok(HttpResponse::Unauthorized().json(return_json_reason("Invalid uuid found")));
     }
     let uuid = Uuid::from_str(&uuid.uuid).unwrap();
-    if let Err(e) =srv.send(CheckSessionUUID{uuid}).await{
-        return Ok(HttpResponse::Unauthorized().json(return_json_reason(&format!("{}",e))));
+    let checked = srv.send(CheckSessionUUID{uuid}).await;
+    if let Err(e) = checked{
+        return Ok(HttpResponse::InternalServerError().json(return_json_reason(&format!("{}",e))));
+    }
+    if let Ok(false) = checked{
+        return  Ok(HttpResponse::Unauthorized().finish());
     }
 
     ws::start(
