@@ -4,7 +4,7 @@
 
 
 ### Backend env variables
-enter the backend folder and create a .env file where you have to store the database user password and name variables and the jwt_secret variable used to generate the jwt_token so:
+enter the backend folder and create a .env file where you have to store all principal settings that the application will use (database options, connectivity options, default users ...)
 
 ```
 cd backend
@@ -14,10 +14,13 @@ nano .env
 now you need to write this line:
 
 ```
-POSTGRES_USER=[your username] 
-POSTGRES_PASSWORD=[your password]  
-POSTGRES_DB=[your db name]
-JWT_SECRET=[STRONG SECRET PASSWORD]
+JWT_SECRET=[STRONG KEY!!!]
+POSTGRES_USER=[DATABASE USER]
+POSTGRES_PASSWORD=[DATABASE USER PASSWORD] 
+POSTGRES_DB=[DATABASE NAME]
+DEFAULT_SOCKET=[TO THE MATRIX] for dev simulation use -> matrix-simulator:2000
+DEFAULT_ADMIN=[APPLICATION ADMIN USERNAME]
+DEFAULT_ADMIN_PASSWORD=[APPLICATION ADMIN PASSWORD]
 
 
 ```
