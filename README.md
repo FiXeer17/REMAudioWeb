@@ -25,6 +25,18 @@ DEFAULT_ADMIN_PASSWORD=[APPLICATION ADMIN PASSWORD]
 
 ```
 
+configuration example: 
+
+```
+JWT_SECRET=30247432903281965233239807424244205335774652113094630819941797969296964439814
+POSTGRES_USER=user
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=users
+DEFAULT_SOCKET=matrix-simulator:2000
+DEFAULT_ADMIN=admin
+DEFAULT_ADMIN_PASSWORD=admin1234
+```
+
 ## Run:
 
 go inside the folder where the `docker-compose.yml` file is located and then type:
