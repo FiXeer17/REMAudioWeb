@@ -36,18 +36,14 @@ services:
       - ./backend/.env
     environment:
       - RUST_LOG=info
-  
-  frontend:
-    build: 
-      context: ./frontend
+  matrix-simulator:
+    build:
+      context: ./devmatrix-simulator
       dockerfile: Dockerfile
-    volumes:
-      - ./frontend:/app
     ports:
-      - "5173:5173"
-    depends_on:
-      - backend
-      
+      - "2000:2000"
+    command: ./matrix-engine
+           
 volumes:
   postgres_data:
   cargo_target:
