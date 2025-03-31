@@ -104,3 +104,8 @@ pub struct SetCommandOk{
 #[rtype(result="Option<Vec<SocketAddrV4>>")]
 pub struct GetConnections{}
 
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct ReCache{
+    pub addr: Addr<WsSession>
+}
