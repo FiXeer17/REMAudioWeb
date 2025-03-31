@@ -106,6 +106,7 @@ impl Handler<StreamFailed> for TcpStreamsManager {
 impl Handler<ClosedByRemotePeer> for TcpStreamsManager{
     type Result = ();
     fn handle(&mut self, msg: ClosedByRemotePeer, _: &mut Self::Context) -> Self::Result {
+        self.streams_actors.remove(&msg.socket);
         for session in self.streams.remove(&msg.socket).unwrap(){
             session.do_send(msg.clone());
         }
