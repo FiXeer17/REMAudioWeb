@@ -131,3 +131,17 @@ impl Handler<CheckSessionUUID> for TcpStreamsManager{
         }
     }
 }
+
+impl Handler<ReCache> for TcpStreamsManager{
+    type Result = ();
+    fn handle(&mut self, msg: ReCache, _: &mut Self::Context) -> Self::Result {
+        let addr = &msg.addr;
+        for stream in &self.streams{
+            if stream.1.contains(addr){
+                let socket = stream.0;
+                let tcp_actor = self.streams_actors.get(socket).unwrap();
+                tcp_actor.do_send(msg.clone());
+            }
+        }
+    }
+}

@@ -1,17 +1,14 @@
-use super::{
-    super::{
+use super::super::{
         messages::{MatrixReady, StreamFailed, StreamStarted},
         schemas::MatrixStates,
-    },
-    utils::command_polling,
-};
+    };
 
 use super::configs::*;
 use crate::{
     engine::lib::{read_all_states, MatrixCommand},
     services::private::app::{messages::ClosedByRemotePeer, tcp_manager::tcp_manager::TcpStreamsManager},
 };
-use actix::{Actor, Addr, AsyncContext, Context, Handler};
+use actix::{Actor, Addr, AsyncContext, Context, SpawnHandle};
 use futures_util::lock::Mutex;
 use std::{collections::VecDeque, net::SocketAddrV4, sync::Arc};
 use tokio::{
@@ -25,6 +22,7 @@ pub struct TcpStreamActor {
     pub stream: Option<Arc<Mutex<TcpStream>>>,
     pub commands_queue: VecDeque<MatrixCommand>,
     pub machine_states: Option<MatrixStates>,
+    pub cmd_poller: Option<SpawnHandle>
 }
 
 impl TcpStreamActor {
@@ -35,6 +33,7 @@ impl TcpStreamActor {
             stream: None,
             commands_queue: VecDeque::new(),
             machine_states: None,
+            cmd_poller: None,
         }
     }
     pub async fn read_states(
@@ -168,19 +167,3 @@ impl Actor for TcpStreamActor {
 }
 
 
-
-impl Handler<StreamStarted> for TcpStreamActor {
-    type Result = ();
-    fn handle(&mut self, msg: StreamStarted, ctx: &mut Self::Context) -> Self::Result {
-        let socket = self.stream_socket.clone();
-        let stream = Arc::new(Mutex::new(msg.tcp_stream));
-        let ctx_addr = ctx.address().clone();
-        self.stream = Some(stream.clone());
-
-        tokio::spawn(async move {
-            TcpStreamActor::read_states(ctx_addr, socket, stream).await;
-        });
-
-        ctx.run_interval(COMMAND_DELAY, command_polling);
-    }
-}

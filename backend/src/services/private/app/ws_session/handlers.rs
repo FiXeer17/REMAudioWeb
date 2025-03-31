@@ -1,11 +1,12 @@
 use std::time::Instant;
 
-use actix::{Handler, StreamHandler,ActorContext, AsyncContext};
-use actix_web_actors::ws;
 use crate::services::private::app::schemas::StreamError;
+use actix::{ActorContext, AsyncContext, Handler, StreamHandler};
+use actix_web_actors::ws;
 
 use super::super::messages::*;
 use super::session::WsSession;
+use super::utils::HandleText;
 
 impl Handler<BroadcastMessage> for WsSession {
     type Result = ();
@@ -67,17 +68,20 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
             }
             ws::Message::Text(text) => {
                 self.hb = Instant::now();
-                match self.handle_text(text.to_string()) {
-                    Ok(cmd) => {
-                        let msg = SetCommand {
-                            addr: ctx.address(),
-                            command: cmd,
-                        };
-                        self.srv.do_send(msg);
-                    }
-                    Err(e) => {
-                        ctx.text(e.to_string());
-                    }
+                match self.handle_text(text.to_string(), ctx.address()) {
+                    HandleText::Command(cmd) => match cmd {
+                        Ok(cmd) => {
+                            let msg = SetCommand {
+                                addr: ctx.address(),
+                                command: cmd,
+                            };
+                            self.srv.do_send(msg);
+                        }
+                        Err(e) => {
+                            ctx.text(e.to_string());
+                        }
+                    },
+                    HandleText::Recache => println!("recaching..."),
                 }
             }
             ws::Message::Binary(_) => println!("Unexpected binary"),

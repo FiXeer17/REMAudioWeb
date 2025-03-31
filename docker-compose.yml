@@ -38,7 +38,7 @@ services:
       - RUST_LOG=info
   matrix-simulator:
     build:
-      context: ./devmatrix-simulator
+      context: ./matrix-simulator
       dockerfile: Dockerfile
     ports:
       - "2000:2000"
