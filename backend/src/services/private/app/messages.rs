@@ -1,13 +1,18 @@
 use crate::engine::lib::MatrixCommand;
 
 use super::schemas::MatrixStates;
-use super::session::WsSession;
+use super::ws_session::session::WsSession;
 use actix::prelude::*;
 use actix::Message;
 use tokio::net::TcpStream;
 use uuid::Uuid;
 use std::net::SocketAddrV4;
 
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct Disconnect {
+    pub addr: Addr<WsSession>,
+}
 
 #[derive(Message, Debug,Clone)]
 #[rtype(result = "()")]
@@ -21,7 +26,7 @@ pub struct Connect {
 pub struct SessionOpened{}
 
 #[derive(Message,Clone)]
-#[rtype(result="Result<(),String>")]
+#[rtype(result="bool")]
 pub struct CheckSessionUUID{
     pub uuid: Uuid
 }
@@ -82,3 +87,25 @@ pub struct CommandError{
     pub command: MatrixCommand
 }
 
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct SetCommand{
+    pub command: MatrixCommand,
+    pub addr: Addr<WsSession>
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct SetCommandOk{
+    pub cmd: MatrixCommand,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="Option<Vec<SocketAddrV4>>")]
+pub struct GetConnections{}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct ReCache{
+    pub addr: Addr<WsSession>
+}

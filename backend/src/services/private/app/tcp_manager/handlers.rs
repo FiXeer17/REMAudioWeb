@@ -1,38 +1,10 @@
-use super::{
-    messages::{CheckSessionUUID, ClosedByRemotePeer, Connect, MatrixReady, SessionOpened, StartStream, StreamFailed},
-    session::{Disconnect, WsSession},
-    tcp_handler::TcpStreamActor,
-};
-use crate::utils::configs::Env;
-use actix::{ Actor, Addr, AsyncContext, Context, Handler};
+use std::{collections::HashSet, net::SocketAddrV4};
+
+use actix::{Actor, Addr, AsyncContext, Handler};
 use uuid::Uuid;
+use crate::{services::private::app::tcp_handler::tcp_handler::TcpStreamActor, utils::configs::Env};
 
-use std::{
-    collections::{HashMap, HashSet},
-    net::SocketAddrV4,
-    str::FromStr,
-};
-
-
-pub struct TcpStreamsManager {
-    pub streams: HashMap<SocketAddrV4, HashSet<Addr<WsSession>>>,
-    pub streams_actors: HashMap<SocketAddrV4, Addr<TcpStreamActor>>,
-    pub uuids: HashSet<Uuid>
-}
-
-impl TcpStreamsManager {
-    pub fn new() -> Self {
-        Self {
-            streams: HashMap::with_capacity(1),
-            streams_actors: HashMap::with_capacity(1),
-            uuids: HashSet::new()
-        }
-    }
-}
-
-impl Actor for TcpStreamsManager {
-    type Context = Context<Self>;
-}
+use super::{super::messages::*, tcp_manager::TcpStreamsManager};
 
 impl Handler<Connect> for TcpStreamsManager {
     type Result = ();
@@ -40,7 +12,7 @@ impl Handler<Connect> for TcpStreamsManager {
         let default_socket = Env::get_default_socket();
         let socket = &msg
             .socket
-            .unwrap_or(SocketAddrV4::from_str(&default_socket).unwrap());
+            .unwrap_or(default_socket);
         if let Some(open_stream) = self.streams.get_mut(socket) {
             open_stream.insert(msg.addr.clone());
             let mut message = msg.clone();
@@ -56,6 +28,31 @@ impl Handler<Connect> for TcpStreamsManager {
             };
             ctx.address().do_send(message);
         }
+    }
+}
+impl Handler<SetCommand> for TcpStreamsManager{
+    type Result = ();
+    fn handle(&mut self, msg: SetCommand, _: &mut Self::Context) -> Self::Result {
+        let address = &msg.addr;
+        let streams = self.streams.clone();
+        for stream in streams{
+            if stream.1.contains(&address){
+                let socket = stream.0;
+                let tcp_act: &Addr<TcpStreamActor> = self.streams_actors.get(&socket).unwrap();
+                tcp_act.do_send(msg.clone());
+            }
+        }
+    }
+}
+
+impl Handler<GetConnections> for TcpStreamsManager{
+    type Result = Option<Vec<SocketAddrV4>>;
+    fn handle(&mut self, _: GetConnections, _: &mut Self::Context) -> Self::Result {
+        let socket_vec : Vec<SocketAddrV4> = self.streams_actors.keys().cloned().collect();
+        if socket_vec.is_empty(){
+            return None
+        }
+        Some(socket_vec)
     }
 }
 
@@ -126,11 +123,25 @@ impl Handler<MatrixReady> for TcpStreamsManager {
 }
 
 impl Handler<CheckSessionUUID> for TcpStreamsManager{
-    type Result = Result<(),String>;
+    type Result = bool;
     fn handle(&mut self, msg: CheckSessionUUID, _ctx: &mut Self::Context) -> Self::Result {
         match self.uuids.get(&msg.uuid){
-            Some(_) => return Ok(()),
-            None => return Err("UUID not found.".to_string()) 
+            Some(_) => return true,
+            None => return false 
+        }
+    }
+}
+
+impl Handler<ReCache> for TcpStreamsManager{
+    type Result = ();
+    fn handle(&mut self, msg: ReCache, _: &mut Self::Context) -> Self::Result {
+        let addr = &msg.addr;
+        for stream in &self.streams{
+            if stream.1.contains(addr){
+                let socket = stream.0;
+                let tcp_actor = self.streams_actors.get(socket).unwrap();
+                tcp_actor.do_send(msg.clone());
+            }
         }
     }
 }

@@ -1,8 +1,9 @@
 use std::str::FromStr;
 
-use backend::engine::defs::datas::io::*;
+use backend::engine::defs::{errors::Error,datas::{io::*, rw}};
 use backend::engine::{mute::*, presets::read_current_preset, volume::*};
 use backend::engine::lib::*;
+use backend::services::private::app::schemas::SetState;
 
 #[test]
 fn ok_read_mute_cmd() {
@@ -46,11 +47,11 @@ A5 C3 3C 5A FF 63 03 02 01 16 EE"
 fn err_read_mute_cmd_over() {
     let cmd = read_mute_ch(SRC::OUTPUT, 43);
 
-    assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string());
+    assert_eq!(cmd.unwrap_err().to_string(),Error::InvalidChannel.to_string());
 
     let cmd = read_mute_ch(SRC::INPUT, 17);
 
-    assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string());
+    assert_eq!(cmd.unwrap_err().to_string(), Error::InvalidChannel.to_string());
 }
 
 
@@ -58,22 +59,22 @@ fn err_read_mute_cmd_over() {
 fn err_read_volume_cmd_over() {
     let cmd = read_volume_ch(SRC::OUTPUT, 43);
 
-    assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string());
+    assert_eq!(cmd.unwrap_err().to_string(), Error::InvalidChannel.to_string());
 
     let cmd = read_volume_ch(SRC::INPUT, 17);
 
-    assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string());
+    assert_eq!(cmd.unwrap_err().to_string(), Error::InvalidChannel.to_string());
 }
 
 #[test]
 fn err_read_mute_cmd_under() {
     let cmd = read_mute_ch(SRC::INPUT, 0);
 
-    assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string());
+    assert_eq!(cmd.unwrap_err().to_string(), Error::InvalidChannel.to_string());
 
     let cmd = read_mute_ch(SRC::OUTPUT, 0);
 
-    assert_eq!(cmd.unwrap_err().to_string(), "Invalid channel".to_string())
+    assert_eq!(cmd.unwrap_err().to_string(), Error::InvalidChannel.to_string())
 }
 
 #[test]
@@ -245,4 +246,19 @@ fn parse_preset_to_cmd(){
     let raw_cmd = "A5 C3 3C 5A FF 63 02 00 EE";
     let bytes = MatrixCommand::from_str(raw_cmd).unwrap().to_byte_hex().unwrap();
     MatrixCommand::try_from(&bytes[..]).unwrap();
+}
+
+#[test]
+fn ok_cmd_from_wsclient_simulation(){
+    let set_states = SetState{
+        section: "volume".to_string(),
+        io:Some("output".to_string()),
+        channel: Some("16".to_string()),
+        value:Some("-60.0".to_string())
+    };
+
+    let cmd = MatrixCommand::new_from_client(rw::WRITE.to_string(),set_states);
+    assert!(cmd.is_ok());
+    println!("{}",cmd.clone().unwrap().to_string());
+    assert_eq!(cmd.unwrap().to_string(),"A5 C3 3C 5A FF 36 04 04 02 16 A8 FD EE".to_string())
 }
