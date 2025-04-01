@@ -56,6 +56,15 @@
 ### instruction:
 
 To start a comunication with WebSocket protocol you'll need a UUID that certify that you are actually authenticated, to do so, before make a request to the `authentication` url with the header: `Authorization: Bearer [YOUR TOKEN]`, you'll get a UUID into put as a query parameter inside the `application` url
+## Json body:
+
+### set socket:
+```
+{
+	"socket":"matrix-simulator:2000"
+}
+    
+```
 
 ## Responses body:
 `/ws/auth`:
