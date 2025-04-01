@@ -23,7 +23,15 @@ pub struct Connect {
 
 #[derive(Message,Clone)]
 #[rtype(result="String")]
-pub struct SessionOpened{}
+pub struct SessionOpened{
+    pub socket : Option<String>
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="Option<String>")]
+pub struct RetrieveSocket{
+    pub uuid: Uuid
+}
 
 #[derive(Message,Clone)]
 #[rtype(result="bool")]
@@ -85,6 +93,12 @@ pub struct MatrixReady{
 #[rtype(result="()")]
 pub struct CommandError{
     pub command: MatrixCommand
+}
+#[derive(Message,Clone)]
+#[rtype(result="bool")]
+pub struct SetSocket{
+    pub socket: String,
+    pub uuid: String
 }
 
 #[derive(Message,Clone)]

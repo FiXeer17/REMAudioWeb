@@ -4,7 +4,7 @@ use crate::{
 };
 use actix::prelude::*;
 use actix_web_actors::ws;
-use std::time::Instant;
+use std::{net::SocketAddrV4, time::Instant};
 use super::{configs::*, utils::HandleText};
 
 use super::{
@@ -14,6 +14,7 @@ use super::{
 pub struct WsSession {
     pub hb: Instant,
     pub srv: Addr<TcpStreamsManager>,
+    pub socket: Option<SocketAddrV4>
 }
 
 impl WsSession {
@@ -32,9 +33,10 @@ impl WsSession {
     }
     fn on_connect(&self, ctx: &mut ws::WebsocketContext<Self>) {
         let addr = ctx.address();
-        self.srv.do_send(messages::Connect { addr, socket: None });
+        self.srv.do_send(messages::Connect { addr, socket:self.socket });
     }
 }
+
 impl WsSession {
     pub fn handle_text(&mut self, text: String, addr: Addr<WsSession>) -> HandleText {
         if text == String::from("recache"){
