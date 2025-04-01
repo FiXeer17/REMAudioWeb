@@ -1,4 +1,4 @@
-use std::{collections::HashSet, net::SocketAddrV4};
+use std::{collections::HashSet, net::SocketAddrV4, str::FromStr};
 
 use actix::{Actor, Addr, AsyncContext, Handler};
 use uuid::Uuid;
@@ -13,6 +13,7 @@ impl Handler<Connect> for TcpStreamsManager {
         let socket = &msg
             .socket
             .unwrap_or(default_socket);
+        println!("connecting {:?}",socket);
         if let Some(open_stream) = self.streams.get_mut(socket) {
             open_stream.insert(msg.addr.clone());
             let mut message = msg.clone();
@@ -30,6 +31,27 @@ impl Handler<Connect> for TcpStreamsManager {
         }
     }
 }
+impl Handler<SetSocket> for TcpStreamsManager{
+    type Result = bool;
+    fn handle(&mut self, msg: SetSocket, _: &mut Self::Context) -> Self::Result {
+        if let Ok(uuid) = Uuid::from_str(&msg.uuid) {
+            if let Some(socket) = self.uuids.get_mut(&uuid) {
+                *socket = Some(msg.socket);
+                return true;
+            }
+        }
+        false
+    }
+
+}
+
+impl Handler<RetrieveSocket> for TcpStreamsManager{
+    type Result = Option<String>;
+    fn handle(&mut self, msg: RetrieveSocket, _: &mut Self::Context) -> Self::Result {
+        return self.uuids.get(&msg.uuid).cloned().unwrap();
+    }
+}
+
 impl Handler<SetCommand> for TcpStreamsManager{
     type Result = ();
     fn handle(&mut self, msg: SetCommand, _: &mut Self::Context) -> Self::Result {
@@ -63,7 +85,7 @@ impl Handler<SessionOpened> for TcpStreamsManager{
        while self.uuids.get(&uuid).is_some(){
          uuid = Uuid::new_v4();
        }
-       self.uuids.insert(uuid);
+       self.uuids.insert(uuid, None);
        uuid.to_string()
     }
 }
@@ -106,6 +128,7 @@ impl Handler<StreamFailed> for TcpStreamsManager {
 impl Handler<ClosedByRemotePeer> for TcpStreamsManager{
     type Result = ();
     fn handle(&mut self, msg: ClosedByRemotePeer, _: &mut Self::Context) -> Self::Result {
+        self.streams_actors.remove(&msg.socket);
         for session in self.streams.remove(&msg.socket).unwrap(){
             session.do_send(msg.clone());
         }
@@ -125,10 +148,7 @@ impl Handler<MatrixReady> for TcpStreamsManager {
 impl Handler<CheckSessionUUID> for TcpStreamsManager{
     type Result = bool;
     fn handle(&mut self, msg: CheckSessionUUID, _ctx: &mut Self::Context) -> Self::Result {
-        match self.uuids.get(&msg.uuid){
-            Some(_) => return true,
-            None => return false 
-        }
+        self.uuids.contains_key(&msg.uuid)
     }
 }
 

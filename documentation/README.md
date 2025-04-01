@@ -50,6 +50,7 @@
 
 - [GET] authentication (before the WebSocket comunication): `/ws/auth`
 - [GET] application: `/ws/app`
+- [POST] set socket: `/ws/socket?uuid=[YOUR UUID FROM AUTH]`
 
 
 ### instruction:
@@ -63,11 +64,17 @@ To start a comunication with WebSocket protocol you'll need a UUID that certify 
 	"uuid": "80e1a00b-fb26-4e36-89d0-9df7e920b041"
 }
 ```
+`/ws/socket?uuid=[YOUR UUID FROM AUTH]`:
+```
+{
+    "socket":"127.0.0.1:2000"
+}
+```
+(if socket isn't set the application will connect automatically to the DEFAULT_SOCKET set in the .env file).
+
 ### Application request:
 
-```
-[GET] http://localhost:8000/ws/app?uuid=[YOUR UUID FROM AUTH]
-```
+`[GET] http://localhost:8000/ws/app?uuid=[YOUR UUID FROM AUTH]`
 
 ## Commands:
 

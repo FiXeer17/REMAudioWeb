@@ -1,16 +1,17 @@
-use crate::services::private::app::{messages::CheckSessionUUID, schemas::SessionUUID, tcp_manager::tcp_manager::TcpStreamsManager, ws_session::session::WsSession, };
+use crate::{services::private::app::{messages::{CheckSessionUUID, RetrieveSocket}, schemas::SessionUUID, tcp_manager::tcp_manager::TcpStreamsManager, ws_session::session::WsSession, }, utils::common::check_socket};
 use actix_web::{get, web, HttpRequest, HttpResponse};
+
 use actix_web_actors::ws;
 use uuid::Uuid;
 use crate::utils::common::return_json_reason;
-use std::{str::FromStr, time::Instant};
+use std::{net::SocketAddrV4, str::FromStr, time::Instant};
 
 #[get("/app")]
 pub async fn app(
     req: HttpRequest,
     stream: web::Payload,
     srv: web::Data<actix::Addr<TcpStreamsManager>>,
-    uuid: web::Query<SessionUUID>
+    uuid: web::Query<SessionUUID>,
 ) -> Result<HttpResponse, actix_web::Error> {
 
     if let Err(_) = Uuid::from_str(&uuid.uuid){
@@ -25,10 +26,21 @@ pub async fn app(
         return  Ok(HttpResponse::Unauthorized().finish());
     }
 
+    let socket = srv.send(RetrieveSocket{uuid}).await;
+    if let Err(e) = socket{
+        return Ok(HttpResponse::InternalServerError().json(return_json_reason(&format!("{}",e))));
+    }
+    let socket = socket.unwrap();
+    let mut sockv4: Option<SocketAddrV4> = None;
+    if socket.is_some(){
+        sockv4 = check_socket(socket.unwrap()).unwrap();
+    }
+    
     ws::start(
         WsSession {
             hb: Instant::now(),
             srv: srv.get_ref().clone(),
+            socket:sockv4,
         },
         &req,
         stream,

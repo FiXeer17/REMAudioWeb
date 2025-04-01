@@ -12,7 +12,7 @@ use std::{
 pub struct TcpStreamsManager {
     pub streams: HashMap<SocketAddrV4, HashSet<Addr<WsSession>>>,
     pub streams_actors: HashMap<SocketAddrV4, Addr<TcpStreamActor>>,
-    pub uuids: HashSet<Uuid>,
+    pub uuids: HashMap<Uuid,Option<String>>,
 }
 
 impl TcpStreamsManager {
@@ -20,7 +20,7 @@ impl TcpStreamsManager {
         Self {
             streams: HashMap::with_capacity(1),
             streams_actors: HashMap::with_capacity(1),
-            uuids: HashSet::new(),
+            uuids: HashMap::new(),
         }
     }
 }
