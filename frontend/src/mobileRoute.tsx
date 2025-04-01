@@ -4,7 +4,6 @@ import { clientLoader } from './lib/clientLoader'
 import SocketContextComponent from './lib/socket/Component'
 
 import SignIn from "./pages/SignIn"
-import Register from "./pages/Register"
 import HomeAudio from './pages/HomeAudio'
 import Test from './pages/Test'
 import Test2 from './pages/Test2'
@@ -26,11 +25,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <SignIn/> 
-  },
-  {
-    path: "/register",
-    element: <Register/>
+    element: <SignIn isLoading={false}/> 
   },
   {
     element: <SocketLayout/>,

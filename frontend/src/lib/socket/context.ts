@@ -1,37 +1,41 @@
-import { act, createContext} from "react";
+import {createContext} from "react";
 
-// Stato iniziale del WebSocket
+
 export interface ISocketContextState {
   socket: WebSocket | undefined;
+  message: string
  
 }
 
 export const defaultSocketContextState: ISocketContextState = {
   socket: undefined,
+  message: ""
   
 };
 
-// Tipi di azioni
-export type TSocketContextActions = "update_socket";
 
-export type TSocketContextPayolad= WebSocket
+export type TSocketContextActions = "update_socket"|"new_message";
+
+export type TSocketContextPayload= WebSocket|string
 
 export interface ISocketContextActions {
   type: TSocketContextActions;
-  payload: TSocketContextPayolad;
+  payload: TSocketContextPayload;
 }
 
-// Reducer per aggiornare lo stato
+
 export const SocketReducer = (state: ISocketContextState, action: ISocketContextActions) => {
   switch (action.type) {
     case "update_socket":
-      return { ...state, socket: action.payload };
+      return { ...state, socket: action.payload as WebSocket };
+    case "new_message":
+      return { ...state, message: action.payload as string };
     default:
       return state;
   }
 };
 
-// Proprietà del Context
+
 export interface ISocketContextProps {
   socketState: ISocketContextState;
   socketDispatch: React.Dispatch<ISocketContextActions>;

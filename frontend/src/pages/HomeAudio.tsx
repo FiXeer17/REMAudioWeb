@@ -11,25 +11,15 @@ import { GetData } from "@/lib/WebSocketData";
 import { Circle } from "@phosphor-icons/react";
 
 export default function Volume() {
-  const [inputChannelStates, setInputChannelStates] = useState<{
-    [key: string]: boolean;
-  }>({});
-  const [outputChannelStates, setOutputChannelStates] = useState<{
-    [key: string]: boolean;
-  }>({});
-  const { socketState, socketDispatch } = useContext(SocketContext);
-  const [message, setMessage] = useState("");
+  const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
+  const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
+  const {socket,message} = useContext(SocketContext).socketState
 
-  useEffect(() => {
-    if (!socketState.socket) return;
-
-    socketState.socket.onmessage = (event) => {
-      const { inputChannelStates, outputChannelStates } = GetData(event.data);
+  useEffect(()=>{
+    const { inputChannelStates, outputChannelStates } = GetData(message);
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
-    };
-  }, [socketState.socket]);
-
+  },[message])
   const navigate = useNavigate();
 
   const inputChannels1 = ["1", "2", "3", "4", "5", "6", "7", "8"];

@@ -37,5 +37,5 @@ class AxiosInterceptor {
   
 
   export const client = new AxiosInterceptor({
-    baseURL: "http://localhost:8000/api/auth",
+    baseURL: "http://localhost:8000/",
   });
