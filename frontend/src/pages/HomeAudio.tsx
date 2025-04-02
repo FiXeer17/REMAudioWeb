@@ -16,6 +16,7 @@ export default function Volume() {
   const {socket,message} = useContext(SocketContext).socketState
 
   useEffect(()=>{
+
     const { inputChannelStates, outputChannelStates } = GetData(message);
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
@@ -44,12 +45,17 @@ export default function Volume() {
     handleTouchMove: handleOutputTouchMove,
     handleTouchEnd: handleOutputTouchEnd,
   } = SwipeChannels(outputChannels1, outputChannels2);
-  /*
+  
   const handleState = (channel: string, type: string) => {
     if (type === "I") {;
+      const data={"section":"mute","io":"input","channel":channel,"value":(!inputChannelStates[channel]).toString()}
+      socket?.send(JSON.stringify(data))
+    }else if(type==="O"){
+      const data={"section":"mute","io":"output","channel":channel,"value":(!outputChannelStates[channel]).toString()}
+      socket?.send(JSON.stringify(data))
     }
   };
-  */
+  
 
   return (
     <div className="grid grid-rows-[auto,1fr,1fr,auto] min-h-svh ">
@@ -88,6 +94,7 @@ export default function Volume() {
                       ? "channels_activated"
                       : "channels_disabled"
                   }
+                  onClick={() => handleState(channel, "I")}
                 >
                   {`CH${channel}`}
                 </Channel>
@@ -134,6 +141,7 @@ export default function Volume() {
                       ? "channels_activated"
                       : "channels_disabled"
                   }
+                  onClick={() => handleState(channel, "O")}
                 >
                   {`CH${channel}`}
                 </Channel>
