@@ -2,7 +2,6 @@ import React, { PropsWithChildren, useEffect, useReducer, useState } from "react
 import { defaultSocketContextState,SocketReducer,SocketContextProvider } from "./context";
 import SignIn from "@/pages/SignIn";
 import { getUUID } from "../services";
-import axios from "axios";
 import { useSocket } from "@/lib/useSocket";
 
 
@@ -16,17 +15,6 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const [loading, setLoading]= useState(true)
     const [uuid, setUuid] = useState<string>()
     
-  /*
-    const fetchUUID = async () => {
-      try {
-        const value = await getUUID();
-        setUuid(value.data.uuid); // Imposta il valore dell'UUID
-        console.log(value.data.uuid)
-      } catch (error) {
-        console.error("Error fetching UUID:", error);
-      }
-    };
-    */
    useEffect(()=>{
     const fetchUUID = async () => {
       try {
@@ -39,19 +27,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     }
     fetchUUID()
    },[])
-   /*
-    const fetchUUID = () => {
-      getUUID()
-        .then(value => {
-          setUuid(value.data.uuid); // Imposta il valore dell'UUID
-          console.log(value.data.uuid);
-        })
-        .catch(error => {
-          console.error("Error fetching UUID:", error);
-        });
-    };
-    */
-    
+
 
     useEffect(()=>{
 

@@ -5,9 +5,11 @@ import SocketContextComponent from './lib/socket/Component'
 
 import SignIn from "./pages/SignIn"
 import HomeAudio from './pages/HomeAudio'
-import Test from './pages/Test'
-import Test2 from './pages/Test2'
+import Test from './pages/test/Test'
+import Test2 from './pages/test/Test2'
 import HomeVideo from "./pages/HomeVideo"
+import NewConnetions from "./pages/connections_socket/NewConnections"
+import CreateConnections from "./pages/connections_socket/CreateConnections"
 
 const SocketLayout=()=>{
   return (
@@ -37,6 +39,14 @@ export const router = createBrowserRouter([
     {
       path: "/homeVideo",
       element: <HomeVideo/>
+    },
+    {
+      path: "/newconnections",
+      element: <NewConnetions/>
+    },
+    {
+      path: "/createconnections",
+      element: <CreateConnections/>
     },
     {
       path: "/test",
