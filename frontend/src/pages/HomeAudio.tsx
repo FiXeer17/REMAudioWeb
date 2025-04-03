@@ -53,6 +53,13 @@ export default function Volume() {
     }else if(type==="O"){
       const data={"section":"mute","io":"output","channel":channel,"value":(!outputChannelStates[channel]).toString()}
       socket?.send(JSON.stringify(data))
+    }else if(type==="all"){
+      for (let channel=1;channel<=16;channel++){
+        const dataoutput={"section":"mute","io":"output","channel":channel.toString(),"value":"false"}
+        socket?.send(JSON.stringify(dataoutput))
+        const datainput={"section":"mute","io":"input","channel":channel.toString(),"value":"false"}
+        socket?.send(JSON.stringify(datainput))
+      }
     }
   };
   
@@ -163,7 +170,7 @@ export default function Volume() {
         </div>
       </div>
       <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3">
-        <Mute>MUTE ALL</Mute>
+        <Mute onClick={()=>handleState("","all")}>MUTE ALL</Mute>
         <Navbar />
       </div>
     </div>
