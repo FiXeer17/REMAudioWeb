@@ -10,6 +10,7 @@ import Test2 from './pages/test/Test2'
 import HomeVideo from "./pages/HomeVideo"
 import NewConnetions from "./pages/connections_socket/NewConnections"
 import CreateConnections from "./pages/connections_socket/CreateConnections"
+import RecentConnections from "./pages/connections_socket/RecentConnections"
 
 const SocketLayout=()=>{
   return (
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
     element: <SignIn isLoading={false}/> 
   },
   {
+    path: "/recentconnections",
+    element: <RecentConnections/>
+  },
+  {
     element: <SocketLayout/>,
     children:[{
       path: "/homeAudio",
@@ -48,6 +53,7 @@ export const router = createBrowserRouter([
       path: "/createconnections",
       element: <CreateConnections/>
     },
+    
     {
       path: "/test",
       element: <Test/>

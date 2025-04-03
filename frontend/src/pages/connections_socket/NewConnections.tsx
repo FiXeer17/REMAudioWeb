@@ -12,9 +12,22 @@ export default function NewConnetions(){
                 </Link>
             </div>
             <div className="flex justify-center items-center ">
-        <div className="flex justify-center w-screen aspect-square rounded-full border-2 blur-sm border-home_colors-Selected_Borders/text  text-home_colors-Enabled_Channels">
-            
-        </div>
+            <div className="relative w-screen h-screen flex justify-center items-center">
+        
+        {/* Cerchi concentrici */}
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className={`absolute rounded-full border border-home_colors-Selected_Borders/text opacity-${100 - i * 10} `}
+            style={{
+              width: `${100 - i * 10}vw`, // Riduzione progressiva della larghezza
+              height: `${100 - i * 10}vw`,
+            }}
+          />
+        ))}
+
+       
+      </div>
         </div>
             
         </div>

@@ -63,7 +63,8 @@ export default {
 				'Enabled_Channels':'#87FF77',
 				'Disabled_Channels':'#FF3030',
 				'Navbar/Selection_Bg':'#101011',
-				'Similar_White':'#FAFAFA'
+				'Similar_White':'#FAFAFA',
+				'Border_Connections':'#444444'
 
 			}
 			

@@ -92,7 +92,7 @@ export default function Volume() {
             onTouchMove={handleInputTouchMove}
             onTouchEnd={handleInputTouchEnd}
           >
-            <div className="grid grid-cols-4 w-full items-center justify-items-center pt-3">
+            <div className="grid grid-cols-4 w-full items-center justify-items-center pt-2">
               {displayedInputChannels.map((channel: string) => (
                 <Channel
                   key={channel}
@@ -139,7 +139,7 @@ export default function Volume() {
             onTouchMove={handleOutputTouchMove}
             onTouchEnd={handleOutputTouchEnd}
           >
-            <div className="grid grid-cols-4 w-full items-center justify-items-center pt-3">
+            <div className="grid grid-cols-4 w-full items-center justify-items-center pt-2">
               {displayedOutputChannels.map((channel: string) => (
                 <Channel
                   key={channel}
