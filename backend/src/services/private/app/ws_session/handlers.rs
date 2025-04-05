@@ -8,13 +8,6 @@ use super::super::messages::*;
 use super::session::WsSession;
 use super::utils::HandleText;
 
-impl Handler<BroadcastMessage> for WsSession {
-    type Result = ();
-    fn handle(&mut self, msg: BroadcastMessage, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(msg.message);
-    }
-}
-
 impl Handler<StreamFailed> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: StreamFailed, ctx: &mut Self::Context) -> Self::Result {
@@ -49,6 +42,8 @@ impl Handler<MatrixReady> for WsSession {
     }
 }
 
+
+
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
         let msg = match msg {
@@ -72,10 +67,10 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                     HandleText::Command(cmd) => match cmd {
                         Ok(cmd) => {
                             let msg = SetCommand {
-                                addr: ctx.address(),
                                 command: cmd,
                             };
-                            self.srv.do_send(msg);
+                            let addr = ctx.address();
+                            self.srv.do_send(SetMessage{ addr, command: Commands::SetCommand(msg)});
                         }
                         Err(e) => {
                             ctx.text(e.to_string());
