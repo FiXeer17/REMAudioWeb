@@ -41,8 +41,16 @@ pub struct CheckSessionUUID{
 
 #[derive(Message, Debug, Clone)]
 #[rtype(result = "()")]
-pub struct BroadcastMessage {
-    pub message: String,
+pub struct SetHandlerState {
+    pub socket: SocketAddrV4,
+    pub state: Option<Addr<WsSession>>,
+}
+
+
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct HandlerState {
+    pub available: bool
 }
 
 
@@ -100,13 +108,25 @@ pub struct SetSocket{
     pub socket: String,
     pub uuid: String
 }
-
-#[derive(Message,Clone)]
+#[derive(Message,Clone,Debug)]
 #[rtype(result="()")]
+pub struct SetMessage{
+    pub addr: Addr<WsSession>,
+    pub command: Commands
+}
+
+#[derive(Debug,Clone)]
+pub enum Commands{
+    SetCommand(SetCommand),
+    ReCache
+}
+
+#[derive(Debug,Clone)]
 pub struct SetCommand{
     pub command: MatrixCommand,
-    pub addr: Addr<WsSession>
+    
 }
+
 
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -118,8 +138,3 @@ pub struct SetCommandOk{
 #[rtype(result="Option<Vec<SocketAddrV4>>")]
 pub struct GetConnections{}
 
-#[derive(Message,Clone)]
-#[rtype(result="()")]
-pub struct ReCache{
-    pub addr: Addr<WsSession>
-}
