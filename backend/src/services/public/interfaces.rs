@@ -1,5 +1,5 @@
 use crate::utils::hasher::argon2_enc;
-use crate::{utils::configs::Env,services::public::signin::schemas::ReturnFullUser};
+use crate::{utils::configs::DatabaseEnv,services::public::signin::schemas::ReturnFullUser};
 use crate::AppState;
 use actix_web::web::Data;
 
@@ -42,7 +42,7 @@ pub async fn from_id(pgpool: &Data<AppState>, id: i32) -> Result<ReturnFullUser,
 
 pub async fn insert_default_user(
     pgpool: &AppState) -> Result<(), sqlx::Error> {
-    let (username,password) = (Env::get_default_admin(),Env::get_default_admin_password());
+    let (username,password) = (DatabaseEnv::get_default_admin(),DatabaseEnv::get_default_admin_password());
     match check_username(pgpool, username.as_str()).await {
             Ok(true) => {return Ok(())},
             Ok(false) => (),

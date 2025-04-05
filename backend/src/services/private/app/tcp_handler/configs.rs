@@ -1,8 +1,8 @@
-use std::time::Duration;
 
 
-pub const COMMAND_DELAY: Duration = Duration::from_millis(20);
-pub const RECONNECT_DELAY: Duration = Duration::from_secs(1);
-pub const READ_TIMEOUT: Duration = Duration::from_secs(10);
-pub const TIMEDOUT_TIME: Duration = Duration::from_secs(10);
+pub const COMMAND_DELAY: i32=20;
+pub const RECONNECT_DELAY: i32 =1000;
+pub const READ_TIMEOUT: i32 =10000;
+pub const CONNECTION_TIMEOUT_TIME:i32 = 10000;
+pub const INACTIVITY_TIMEOUT_TIME:i32=25000;
 pub const MAX_RETRIES: u8 = 3;
