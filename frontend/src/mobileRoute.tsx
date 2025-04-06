@@ -35,6 +35,14 @@ export const router = createBrowserRouter([
     element: <RecentConnections/>
   },
   {
+    path: "/newconnections",
+    element: <NewConnetions/>
+  },
+  {
+    path: "/createconnections",
+    element: <CreateConnections/>
+  },
+  {
     element: <SocketLayout/>,
     children:[{
       path: "/homeAudio",
@@ -45,14 +53,8 @@ export const router = createBrowserRouter([
       path: "/homeVideo",
       element: <HomeVideo/>
     },
-    {
-      path: "/newconnections",
-      element: <NewConnetions/>
-    },
-    {
-      path: "/createconnections",
-      element: <CreateConnections/>
-    },
+    
+    
     
     {
       path: "/test",
