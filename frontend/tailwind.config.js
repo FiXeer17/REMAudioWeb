@@ -64,7 +64,8 @@ export default {
 				'Disabled_Channels':'#FF3030',
 				'Navbar/Selection_Bg':'#101011',
 				'Similar_White':'#FAFAFA',
-				'Border_Connections':'#444444'
+				'Border_Connections':'#444444',
+				'newconnections':'#007AFF'
 
 			}
 			

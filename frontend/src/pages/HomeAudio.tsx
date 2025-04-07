@@ -14,12 +14,14 @@ export default function Volume() {
   const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
   const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
   const {socket,message} = useContext(SocketContext).socketState
+  const [isAvailable, setIsAvailable] = useState(true)
 
   useEffect(()=>{
 
-    const { inputChannelStates, outputChannelStates } = GetData(message);
+    const { inputChannelStates, outputChannelStates,isAvailable } = GetData(message);
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
+      setIsAvailable(isAvailable)
   },[message])
   const navigate = useNavigate();
 
@@ -65,9 +67,16 @@ export default function Volume() {
   
 
   return (
-    <div className="grid grid-rows-[auto,1fr,1fr,auto] min-h-svh ">
+    <>
+    {isAvailable ? <div className="absolute inset-0 bg-green-300 z-10"></div>:
+    <div className="absolute inset-0 bg-green-300 z-30"></div>}
+    
+    <div className="absolute inset-0 bg-black z-20">
+    
+    <div className="grid grid-rows-[auto,1fr,1fr,auto] min-h-svh" >
+      
       <div className="flex justify-start px-2 pb-5 pt-3 ">
-        <div className=" grid grid-cols-2 px-5 py-3 w-full items-center justify-items-center bg-home_colors-Navbar/Selection_Bg rounded-full">
+        <div className=" grid grid-cols-2 px-5 py-3 w-full items-center justify-items-center  bg-home_colors-Navbar/Selection_Bg rounded-full">
           <Audio_Video variant={"blue"}>AUDIO</Audio_Video>
           <Audio_Video variant={"white"} onClick={() => navigate("/homeVideo")}>
             VIDEO
@@ -169,10 +178,13 @@ export default function Volume() {
           </div>
         </div>
       </div>
+      
       <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3">
         <Mute onClick={()=>handleState("","all")}>MUTE ALL</Mute>
         <Navbar />
       </div>
+      </div>
     </div>
+    </>
   );
 }

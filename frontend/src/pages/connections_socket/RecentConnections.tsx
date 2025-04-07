@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Circle } from "@phosphor-icons/react";
 import { SwipeConnections } from "@/lib/swipeConnections";
 
+
 type Connection = {
     ip: string;
     port: number;

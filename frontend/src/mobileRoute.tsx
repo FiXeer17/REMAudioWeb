@@ -43,8 +43,13 @@ export const router = createBrowserRouter([
     element: <CreateConnections/>
   },
   {
+    path: "/test",
+    element: <Test/>
+  },
+  {
     element: <SocketLayout/>,
-    children:[{
+    children:[
+    {
       path: "/homeAudio",
       element: <HomeAudio/>,
       //loader: clientLoader
@@ -56,10 +61,7 @@ export const router = createBrowserRouter([
     
     
     
-    {
-      path: "/test",
-      element: <Test/>
-    },
+    
     {
       path: "/test2",
       element: <Test2/>
