@@ -48,9 +48,7 @@ services:
     depends_on:
       - backend
   matrix-simulator:
-    build:
-      context: ./matrix-simulator
-      dockerfile: Dockerfile
+    image: i3elle/matrix-simulator
     ports:
       - "2000:2000"
     command: ./matrix-engine

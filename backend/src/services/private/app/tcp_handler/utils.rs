@@ -4,13 +4,13 @@ use std::{net::SocketAddrV4, sync::Arc};
 use actix::{Addr, AsyncContext, Context};
 use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::TcpStream};
 
-use crate::engine::{defs::fncodes::FNCODE, lib::MatrixCommand};
+use crate::{engine::{defs::fncodes::FNCODE, lib::MatrixCommand}, utils::configs::ComunicationEnv};
 
 use super::{
     super::{
         messages::{ClosedByRemotePeer, MatrixReady, StreamFailed},
         schemas::MatrixStates,
-    }, configs::READ_TIMEOUT, tcp_handler::TcpStreamActor
+    },  tcp_handler::TcpStreamActor
 };
 
 pub async fn process_response(
@@ -39,7 +39,7 @@ pub async fn process_response(
                 if converted.get(0) == Some(&"00".to_string()) {
                     if cmd.fcode != FNCODE::SCENE.to_string() {
                         states.set_changes(cmd);
-                        let message = MatrixReady { socket, states };
+                        let message = MatrixReady { socket, states, };
                         ctx_addr.do_send(message);
                     } else {
                         TcpStreamActor::read_states(ctx_addr, socket, stream).await;
@@ -83,7 +83,7 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
 
             let read_bytes = {
                 let mut stream_guard = stream.lock().await;
-                tokio::time::timeout(READ_TIMEOUT, stream_guard.read(&mut buffer)).await
+                tokio::time::timeout(ComunicationEnv::get_read_timeout(), stream_guard.read(&mut buffer)).await
             };
 
             match read_bytes {

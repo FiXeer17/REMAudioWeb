@@ -3,11 +3,11 @@ use std::sync::Arc;
 use actix::{ActorContext, AsyncContext, Handler};
 use futures_util::lock::Mutex;
 
-use super::configs::COMMAND_DELAY;
-use super::tcp_handler::TcpStreamActor;
-use super::super::messages::*;
-use super::utils::command_polling;
+use crate::utils::configs::ComunicationEnv;
 
+use super::super::messages::*;
+use super::tcp_handler::TcpStreamActor;
+use super::utils::command_polling;
 
 impl Handler<StreamStarted> for TcpStreamActor {
     type Result = ();
@@ -20,16 +20,6 @@ impl Handler<StreamStarted> for TcpStreamActor {
         tokio::spawn(async move {
             TcpStreamActor::read_states(ctx_addr, socket, stream).await;
         });
-
-    let cmd_poller = ctx.run_interval(COMMAND_DELAY, command_polling);
-    self.cmd_poller = Some(cmd_poller);
-    }
-}
-
-impl Handler<SetCommand> for TcpStreamActor {
-    type Result = ();
-    fn handle(&mut self, msg: SetCommand, _: &mut Self::Context) -> Self::Result {
-        self.commands_queue.push_front(msg.command);
     }
 }
 
@@ -53,8 +43,8 @@ impl Handler<MatrixReady> for TcpStreamActor {
     fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
         self.machine_states = Some(msg.states.clone());
         self.tcp_manager.do_send(msg);
-        if self.cmd_poller.is_none(){
-            let cmd_poller = ctx.run_interval(COMMAND_DELAY, command_polling);
+        if self.cmd_poller.is_none() {
+            let cmd_poller = ctx.run_interval(ComunicationEnv::get_command_delay(), command_polling);
             self.cmd_poller = Some(cmd_poller);
         }
     }
@@ -75,20 +65,13 @@ impl Handler<Connect> for TcpStreamActor {
     }
 }
 
-impl Handler<ReCache> for TcpStreamActor{
+impl Handler<SetMessage> for TcpStreamActor{
     type Result = ();
-    fn handle(&mut self, _: ReCache, ctx: &mut Self::Context) -> Self::Result {
-        if self.machine_states.is_some(){
-            if let Some(poller) = self.cmd_poller{
-                ctx.cancel_future(poller);
-                self.cmd_poller = None;
-            }
-            let ctx_addr = ctx.address().clone();
-            let socket = self.stream_socket.clone();
-            let stream = self.stream.as_mut().unwrap().clone();
-            tokio::spawn(async move {
-                TcpStreamActor::read_states(ctx_addr, socket, stream).await;
-            });
+    fn handle(&mut self, msg: SetMessage, ctx: &mut Self::Context) -> Self::Result {
+        self.watch_inactive(ctx, msg.addr);
+        match msg.command{
+            Commands::SetCommand(sc) => self.handle_set_command(sc),
+            Commands::ReCache => self.handle_recache(ctx),
         }
     }
 }

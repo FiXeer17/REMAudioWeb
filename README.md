@@ -56,3 +56,35 @@ docker compose up db
         or
 docker compose up backend
 ```
+
+
+## Extra customizations:
+
+if you start the application like that you have default websocket and matrix comunication configurations, if you desire you can change them in the `.env` file, here is an example of all customizable settings:
+
+```
+### DATABASE SETTINGS ###
+JWT_SECRET=92368843446958883401368835169004584754983166754091679294489897723038422606962
+POSTGRES_USER=belle
+POSTGRES_PASSWORD=postgres 
+POSTGRES_DB=user
+DEFAULT_ADMIN=admin
+DEFAULT_ADMIN_PASSWORD=admin
+
+### OPTIONAL SETTINGS ###
+
+### CONNECTIVITY SETTINGS ###
+DEFAULT_SOCKET=matrix-simulator:2000 
+
+### TCP COMUNICATION SETTINGS ###
+COMMAND_DELAY=20                #(milliseconds) Command delay.
+RECONNECT_DELAY=1500            #(milliseconds) Reconnect delay after a fail.
+READ_TIMEOUT =500               #(milliseconds) Wait for a response from the machine.
+CONNECTION_TIMEOUT_TIME=2000    #(milliseconds) Wait for the connection to be established.
+INACTIVITY_TIMEOUT_TIME=5000    #(milliseconds) Client inactivity time (free the matrix to other users).
+MAX_RETRIES=3                   #(positive integer) Retries ammount if the connection request fail. 
+
+### WEBSOCKET SETTINGS ###
+HEARTBEAT_INTERVAL=5000         #(milliseconds) Time for ping interval (detect dead sessions).
+CLIENT_TIMEOUT=10000            #(milliseconds) Time to wait for a client response to the ping request.
+```

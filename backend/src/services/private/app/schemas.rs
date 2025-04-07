@@ -34,6 +34,7 @@ pub struct MatrixStates {
     pub i_volumes: HashMap<u32, f32>,
     pub o_volumes: HashMap<u32, f32>,
     pub current_preset: u8,
+    pub available: Option<bool>,
 }
 impl MatrixStates {
     pub fn new(cmds: Vec<MatrixCommand>) -> Self {
@@ -87,6 +88,7 @@ impl MatrixStates {
             i_volumes,
             o_volumes,
             current_preset,
+            available:None
         }
     }
 
@@ -116,6 +118,5 @@ impl MatrixStates {
         }
         
     }
-
     
 }
