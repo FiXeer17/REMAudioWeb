@@ -1,8 +1,6 @@
 use std::{collections::HashSet, net::SocketAddrV4, str::FromStr};
 
-use crate::{
-    services::private::app::tcp_handler::tcp_handler::TcpStreamActor, utils::configs::ConnectivityEnv,
-};
+use crate::{services::private::app::tcp_handler::tcp_handler::TcpStreamActor, utils::common::check_socket};
 use actix::{Actor, AsyncContext, Handler};
 use uuid::Uuid;
 
@@ -11,22 +9,27 @@ use super::{super::messages::*, tcp_manager::TcpStreamsManager};
 impl Handler<Connect> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: Connect, ctx: &mut Self::Context) -> Self::Result {
-        let default_socket = ConnectivityEnv::get_default_socket();
-        let socket = &msg.socket.unwrap_or(default_socket);
-        println!("connecting {:?}", socket);
-        if let Some(open_stream) = self.streams.get_mut(socket) {
+        let socket = match &msg.socket{
+            Some(socket) => *socket,
+            None => match self.latest_socket {
+                Some(socket) => socket,
+                None => {msg.addr.do_send(GeneralConnectionError{socket:None, error:"Cannot find available socket.".to_string()});return;}
+            }
+        };
+        println!("Connecting to {:?}", socket);
+        if let Some(open_stream) = self.streams.get_mut(&socket) {
             open_stream.insert(msg.addr.clone());
             let mut message = msg.clone();
             if msg.socket.is_none() {
                 message = Connect {
                     addr: msg.addr,
-                    socket: Some(*socket),
+                    socket: Some(socket),
                 };
             }
-            self.streams_actors.get(socket).unwrap().do_send(message);
+            self.streams_actors.get(&socket).unwrap().do_send(message);
         } else {
             let message = StartStream {
-                socket: Some(*socket),
+                socket: Some(socket),
                 client: msg.addr,
             };
             ctx.address().do_send(message);
@@ -38,7 +41,9 @@ impl Handler<SetSocket> for TcpStreamsManager {
     fn handle(&mut self, msg: SetSocket, _: &mut Self::Context) -> Self::Result {
         if let Ok(uuid) = Uuid::from_str(&msg.uuid) {
             if let Some(socket) = self.uuids.get_mut(&uuid) {
-                *socket = Some(msg.socket);
+                *socket = Some(msg.socket.clone());
+                let sockv4 =check_socket(msg.socket).unwrap();
+                self.latest_socket = sockv4;
                 return true;
             }
         }

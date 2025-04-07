@@ -16,7 +16,9 @@ pub struct TcpStreamsManager {
     pub streams: HashMap<SocketAddrV4, HashSet<Addr<WsSession>>>,
     pub streams_actors: HashMap<SocketAddrV4, Addr<TcpStreamActor>>,
     pub uuids: HashMap<Uuid, Option<String>>,
+    pub latest_socket: Option<SocketAddrV4>,
     pub avail_map: HashMap<SocketAddrV4, Option<Addr<WsSession>>>,
+
 }
 
 impl TcpStreamsManager {
@@ -25,6 +27,7 @@ impl TcpStreamsManager {
             streams: HashMap::with_capacity(1),
             streams_actors: HashMap::with_capacity(1),
             uuids: HashMap::new(),
+            latest_socket: None,
             avail_map: HashMap::new(),
         }
     }
