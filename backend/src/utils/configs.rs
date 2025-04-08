@@ -14,6 +14,14 @@ pub const DATABASE_PASSWORD: &str = "POSTGRES_PASSWORD";
 pub const DATABASE_USER: &str = "POSTGRES_USER";
 pub const DEFAULT_ADMIN: &str = "DEFAULT_ADMIN";
 pub const DEFAULT_ADMIN_PASSWORD: &str = "DEFAULT_ADMIN_PASSWORD";
+pub const DEFAULT_USER: &str = "DEFAULT_USER";
+pub const DEFAULT_USER_PASSWORD: &str = "DEFAULT_USER_PASSWORD";
+//MATRIX CHANNEL CONFIGS
+pub const CHANNEL_DEFAULT_PREFIX: &str = "CHANNEL_DEFAULT_PREFIX";
+pub const I_CHANNEL_NUMBER: &str = "I_CHANNEL_NUMBER";
+pub const O_CHANNEL_NUMBER: &str = "O_CHANNEL_NUMBER";
+pub const DEFAULT_VISIBILITY: &str = "DEFAULT_VISIBILITY";
+
 //CONNECTIVITY
 pub const DEFAULT_SOCKET: &str = "DEFAULT_SOCKET";
 //TCP
@@ -39,7 +47,16 @@ pub struct DatabaseEnv {
     database_password: String,
     default_admin: String,
     default_admin_password: String,
+    default_user: String,
+    default_user_password: String,
     jwt_secret: String,
+}
+
+pub struct ChannelsEnv {
+    channel_default_prefix: String,
+    i_channel_number: u32,
+    o_channel_number: u32,
+    default_visibility: bool,
 }
 pub struct ComunicationEnv {
     command_delay: Duration,
@@ -63,6 +80,7 @@ pub struct Env {
     pub database_settings: DatabaseEnv,
     pub tcp_comunication_settings: ComunicationEnv,
     pub websocket_settings: WebsocketEnv,
+    pub channels_settings:ChannelsEnv
 }
 #[allow(dead_code, unused_variables)]
 impl DatabaseEnv {
@@ -93,6 +111,11 @@ impl DatabaseEnv {
             std::env::var(DEFAULT_ADMIN).expect("failed to retrieve default admin user");
         let default_admin_password = std::env::var(DEFAULT_ADMIN_PASSWORD)
             .expect("failed to retrieve default admin user password");
+
+        let default_user =
+            std::env::var(DEFAULT_USER).expect("failed to retrieve default user username");
+        let default_user_password =
+            std::env::var(DEFAULT_USER_PASSWORD).expect("failed to retrieve default user password");
         DatabaseEnv {
             database_url,
             database_name,
@@ -100,6 +123,8 @@ impl DatabaseEnv {
             database_password,
             default_admin,
             default_admin_password,
+            default_user,
+            default_user_password,
             jwt_secret,
         }
     }
@@ -117,6 +142,49 @@ impl DatabaseEnv {
     }
     pub fn get_default_admin_password() -> String {
         DatabaseEnv::get_vars().default_admin_password
+    }
+    pub fn get_default_user() -> String {
+        DatabaseEnv::get_vars().default_user
+    }
+    pub fn get_default_user_password() -> String {
+        DatabaseEnv::get_vars().default_user_password
+    }
+}
+
+impl ChannelsEnv {
+    pub fn get_vars() -> Self {
+        let channel_default_prefix = std::env::var(CHANNEL_DEFAULT_PREFIX)
+            .expect("failed to retrieve CHANNEL_DEAFAULT_PREFIX");
+        let i_channel_number = std::env::var(I_CHANNEL_NUMBER)
+            .expect("failed to retrieve I_CHANNEL_NUMBER")
+            .parse::<u32>()
+            .expect("I_CHANNEL_NUMBER expected as a positive integer");
+        let o_channel_number = std::env::var(O_CHANNEL_NUMBER)
+            .expect("failed to retrieve O_CHANNEL_NUMBER")
+            .parse::<u32>()
+            .expect("O_CHANNEL_NUMBER expected as a positive integer");
+        let default_visibility = std::env::var(DEFAULT_VISIBILITY)
+            .expect("failed to retrieve DEFAULT_VISIBILITY")
+            .parse::<bool>()
+            .expect("DEFAULT_VISIBILITY expected as a boolean");
+        ChannelsEnv {
+            channel_default_prefix,
+            i_channel_number,
+            o_channel_number,
+            default_visibility,
+        }
+    }
+    pub fn get_channel_default_prefix()->String{
+        ChannelsEnv::get_vars().channel_default_prefix
+    }
+    pub fn get_i_channel_number()->u32{
+        ChannelsEnv::get_vars().i_channel_number
+    }
+    pub fn get_o_channel_number()->u32{
+        ChannelsEnv::get_vars().o_channel_number
+    }
+    pub fn get_default_visibility()->bool{
+        ChannelsEnv::get_vars().default_visibility
     }
 }
 
@@ -222,7 +290,7 @@ impl PingEnv {
             .unwrap_or(socket::configs::PING_SOCKET_TIMEOUT.to_string())
             .parse::<u64>()
             .expect("PING_SOCKET_TIMEOUT expected as a positive integer.");
-        let ping_socket_max_retries:u8 = std::env::var(PING_SOCKET_MAX_RETRIES)
+        let ping_socket_max_retries: u8 = std::env::var(PING_SOCKET_MAX_RETRIES)
             .unwrap_or(socket::configs::PING_SOCKET_MAX_RETRIES.to_string())
             .parse::<u8>()
             .expect("PING_SOCKET_MAX_RETRIES expected as a positive integer");
@@ -232,10 +300,10 @@ impl PingEnv {
             ping_socket_max_retries,
         }
     }
-    pub fn get_ping_socket_timeout()-> Duration{
+    pub fn get_ping_socket_timeout() -> Duration {
         PingEnv::get_vars().ping_socket_timeout
     }
-    pub fn get_ping_socket_max_retries() -> u8{
+    pub fn get_ping_socket_max_retries() -> u8 {
         PingEnv::get_vars().ping_socket_max_retries
     }
 }
@@ -244,11 +312,13 @@ impl Env {
         let database_settings = DatabaseEnv::get_vars();
         let tcp_comunication_settings = ComunicationEnv::get_vars();
         let websocket_settings = WebsocketEnv::get_vars();
+        let channels_settings = ChannelsEnv::get_vars();
 
         Env {
             database_settings,
             tcp_comunication_settings,
             websocket_settings,
+            channels_settings
         }
     }
 }
