@@ -59,17 +59,12 @@ pub async fn retrieve_all_channels(
     pgpool: &AppState,
 ) -> Result<Option<Vec<Channel>>, sqlx::Error> {
     let mut results: Vec<Channel> = Vec::new();
-    results.extend(
-        retrieve_channels(pgpool, user_id, SRC::INPUT)
-            .await?
-            .unwrap()
-            .into_iter(),
-    );
-    results.extend(
-        retrieve_channels(pgpool, user_id, SRC::OUTPUT)
-            .await?
-            .unwrap()
-            .into_iter(),
-    );
+    let i_channels = retrieve_channels(pgpool, user_id, SRC::INPUT).await?;
+    let o_channels = retrieve_channels(pgpool, user_id, SRC::OUTPUT).await?;
+    if i_channels.is_none() || o_channels.is_none(){
+        return Ok(None);
+    }
+    results.extend(i_channels.unwrap().into_iter());
+    results.extend(o_channels.unwrap().into_iter());
     Ok(Some(results))
 }

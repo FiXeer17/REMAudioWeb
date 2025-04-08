@@ -79,7 +79,7 @@ pub async fn retrieve_channels(
     return Ok(Some(channels));
 }
 
-pub async fn add_channel(pgpool: &AppState, user_id: i32) -> Result<(),sqlx::Error>{
+pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx::Error>{
     let query_string: &str ="INSERT INTO channels (channel_name,visible,src,user_id) VALUES ($1,$2,$3,$4);";
 
     let (i_channels, o_channels, default_visibility, channel_prefix) = (

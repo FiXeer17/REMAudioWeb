@@ -1,4 +1,4 @@
-use crate::services::public::interfaces::add_channel;
+use crate::services::public::interfaces::add_io_channels;
 use crate::services::public::signin::schemas::SignInReturn;
 use crate::services::public::utils::retrieve_all_channels;
 use crate::services::public::{interfaces::from_username, signin::schemas};
@@ -35,7 +35,7 @@ pub async fn signin(
                 let to_return = SignInReturn{access_token:token,admin};
                 if let Ok(channels) = retrieve_all_channels(user.id,&pgpool).await{
                     if channels.is_none(){
-                        if let Err(_) =add_channel(&pgpool, user.id).await{
+                        if let Err(_) = add_io_channels(&pgpool, user.id).await{
                             return HttpResponse::InternalServerError().json(return_json_reason("Failed to create default channels."))
                         } 
                         
