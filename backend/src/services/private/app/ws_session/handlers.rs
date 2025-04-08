@@ -35,10 +35,14 @@ impl Handler<ClosedByRemotePeer> for WsSession {
     }
 }
 
+// POST-MIDDLEWARE 
 impl Handler<MatrixReady> for WsSession {
     type Result = ();
-    fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
-        let message = serde_json::to_string_pretty(&msg.states).unwrap();
+    fn handle(&mut self, msg:MatrixReady, ctx: &mut Self::Context) -> Self::Result {
+        let mut states = msg.states;
+        let matrix_states = self.attach_channel_visibility(&mut states);
+        let message = serde_json::to_string_pretty(&matrix_states).unwrap();
+
         ctx.text(message);
     }
 }
