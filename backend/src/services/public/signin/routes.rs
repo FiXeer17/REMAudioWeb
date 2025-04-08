@@ -1,4 +1,6 @@
+use crate::services::public::interfaces::add_channel;
 use crate::services::public::signin::schemas::SignInReturn;
+use crate::services::public::utils::retrieve_all_channels;
 use crate::services::public::{interfaces::from_username, signin::schemas};
 use crate::{
     utils::{common::return_json_reason, hasher::argon2_verify, jwt_utils::id_to_jwt},
@@ -31,6 +33,14 @@ pub async fn signin(
                 };
                 let admin = user.admin;
                 let to_return = SignInReturn{access_token:token,admin};
+                if let Ok(channels) = retrieve_all_channels(user.id,&pgpool).await{
+                    if channels.is_none(){
+                        if let Err(_) =add_channel(&pgpool, user.id).await{
+                            return HttpResponse::InternalServerError().json(return_json_reason("Failed to create default channels."))
+                        } 
+                        
+                    }
+                }
                 return HttpResponse::Ok().json(to_return);
             }
             Ok(false) => {
