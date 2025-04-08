@@ -33,9 +33,13 @@ pub struct MatrixStates {
     pub o_mute: HashMap<u32, bool>,
     pub i_volumes: HashMap<u32, f32>,
     pub o_volumes: HashMap<u32, f32>,
+    pub i_visibility: Option<HashMap<u32, bool>>,
+    pub o_visibility:Option<HashMap<u32, bool>>,
     pub current_preset: u8,
     pub available: Option<bool>,
     pub matrix_socket: String,
+
+    
 }
 impl MatrixStates {
     pub fn new(cmds: Vec<MatrixCommand>,matrix_socket:String) -> Self {
@@ -88,9 +92,12 @@ impl MatrixStates {
             o_mute,
             i_volumes,
             o_volumes,
+            i_visibility:None,
+            o_visibility:None,
             current_preset,
             available:None,
             matrix_socket,
+ 
         }
     }
 

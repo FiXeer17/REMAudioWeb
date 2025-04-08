@@ -40,7 +40,7 @@ impl Handler<SetSocket> for TcpStreamsManager {
     type Result = bool;
     fn handle(&mut self, msg: SetSocket, _: &mut Self::Context) -> Self::Result {
         if let Ok(uuid) = Uuid::from_str(&msg.uuid) {
-            if let Some(socket) = self.uuids.get_mut(&uuid) {
+            if let Some(socket) = self.uuids_sockets.get_mut(&uuid) {
                 *socket = Some(msg.socket.clone());
                 let sockv4 =check_socket(msg.socket).unwrap();
                 self.latest_socket = sockv4;
@@ -54,7 +54,7 @@ impl Handler<SetSocket> for TcpStreamsManager {
 impl Handler<RetrieveSocket> for TcpStreamsManager {
     type Result = Option<String>;
     fn handle(&mut self, msg: RetrieveSocket, _: &mut Self::Context) -> Self::Result {
-        return self.uuids.get(&msg.uuid).cloned().unwrap();
+        return self.uuids_sockets.get(&msg.uuid).cloned().unwrap();
     }
 }
 
@@ -71,16 +71,23 @@ impl Handler<GetConnections> for TcpStreamsManager {
 
 impl Handler<SessionOpened> for TcpStreamsManager {
     type Result = String;
-    fn handle(&mut self, _: SessionOpened, _: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: SessionOpened, _: &mut Self::Context) -> Self::Result {
         let mut uuid = Uuid::new_v4();
-        while self.uuids.get(&uuid).is_some() {
+        while self.uuids_sockets.get(&uuid).is_some() {
             uuid = Uuid::new_v4();
         }
-        self.uuids.insert(uuid, None);
+        self.uuids_sockets.insert(uuid, None);
+        self.uuids_users.insert(uuid, msg.user_id);
         uuid.to_string()
     }
 }
 
+impl Handler<RetrieveUserFromUuid> for TcpStreamsManager{
+    type Result = i32;
+    fn handle(&mut self, msg: RetrieveUserFromUuid, _ctx: &mut Self::Context) -> Self::Result {
+        *self.uuids_users.get(&msg.uuid).unwrap()
+    }
+}
 impl Handler<StartStream> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, message: StartStream, ctx: &mut Self::Context) -> Self::Result {
@@ -144,7 +151,7 @@ impl Handler<MatrixReady> for TcpStreamsManager {
 impl Handler<CheckSessionUUID> for TcpStreamsManager {
     type Result = bool;
     fn handle(&mut self, msg: CheckSessionUUID, _ctx: &mut Self::Context) -> Self::Result {
-        self.uuids.contains_key(&msg.uuid)
+        self.uuids_sockets.contains_key(&msg.uuid)
     }
 }
 

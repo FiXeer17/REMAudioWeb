@@ -25,7 +25,8 @@ pub struct Connect {
 #[derive(Message,Clone)]
 #[rtype(result="String")]
 pub struct SessionOpened{
-    pub socket : Option<String>
+    pub socket : Option<String>,
+    pub user_id: i32,
 }
 
 #[derive(Message,Clone)]
@@ -143,3 +144,8 @@ pub struct SetCommandOk{
 #[rtype(result="Option<Vec<SocketAddrV4>>")]
 pub struct GetConnections{}
 
+#[derive(Message,Clone)]
+#[rtype(result="i32")]
+pub struct RetrieveUserFromUuid{
+    pub uuid:Uuid,
+}
