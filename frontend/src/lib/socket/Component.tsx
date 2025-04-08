@@ -1,8 +1,7 @@
 import React, { PropsWithChildren, useEffect, useReducer, useState } from "react";
 import { defaultSocketContextState,SocketReducer,SocketContextProvider } from "./context";
-import SignIn from "@/pages/SignIn";
-import { getUUID } from "../services";
-import { useSocket } from "@/lib/useSocket";
+import { useUUID } from "./ComponentUuid";
+
 
 
 export interface ISocketContextComponentProps extends PropsWithChildren{}
@@ -13,20 +12,8 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const { children } = props
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
     const [loading, setLoading]= useState(true)
-    const [uuid, setUuid] = useState<string>()
     
-   useEffect(()=>{
-    const fetchUUID = async () => {
-      try {
-        const value = await getUUID();
-        setUuid(value.data.uuid); // Imposta il valore dell'UUID
-        console.log(value.data.uuid)
-      } catch (error) {
-        console.error("Error fetching UUID:", error);
-      }
-    }
-    fetchUUID()
-   },[])
+    const {uuid}=useUUID()
 
 
     useEffect(()=>{
@@ -44,13 +31,10 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         setLoading(false)
       }
       
-      
-
       StartListeners()
 
       SendHandshake()
       return () => {
-        console.log("Chiusura WebSocket...");
         socket.close();
       };
     },[uuid])
@@ -61,7 +45,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     
     const SendHandshake = ()=>{}
 
-    if(loading) return <SignIn isLoading={true}/>
+    if(loading) return <div>Caricamento socket in corso...</div>
 
     return <SocketContextProvider value={{ socketState,socketDispatch }}>
         {children}

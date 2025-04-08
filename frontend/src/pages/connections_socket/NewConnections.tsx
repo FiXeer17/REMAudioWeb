@@ -15,7 +15,6 @@ export default function NewConnetions() {
         <div className="flex justify-center items-center">
           {[1, 2, 3, 4, 5].map((i, index, array) => {
             const isLast = index === array.length - 1; // Verifica se è l'ultimo cerchio
-
             return (
               <div
                 key={i}

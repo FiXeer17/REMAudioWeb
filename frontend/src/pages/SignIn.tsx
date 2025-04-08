@@ -7,7 +7,7 @@ import { useForm,SubmitHandler } from "react-hook-form";
 import { toast,Toaster } from "sonner";
 import axios from "axios";
 import { login as loginUser } from "@/lib/services";
-import LoadingButtonDemo from "@/components/customized/button/button-06";
+
 
 type FormFields = {
   username:string;
@@ -41,7 +41,7 @@ export default function SignInPage({isLoading}:pageProps) {
       const accessToken=response.data.access_token
       localStorage.setItem("accessToken",accessToken)
 
-      return navigate("/homeAudio")
+      return navigate("/uuidprovider")
     }catch(error){
       
         if (axios.isAxiosError(error) && error.response?.status !== 200) {

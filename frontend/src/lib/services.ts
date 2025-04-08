@@ -23,4 +23,7 @@ export function getUUID():Promise<AxiosResponse<{uuid:string}>>{
   return client.get("ws/auth")
 }
 
+export function getSocket():Promise<AxiosResponse<{ sockets: { ip: string; port: number }[] | null }>>{
+  return client.get("api")
+}
 

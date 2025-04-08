@@ -68,8 +68,10 @@ export default function Volume() {
 
   return (
     <>
-    {isAvailable ? <div className="absolute inset-0 bg-green-300 z-10"></div>:
-    <div className="absolute inset-0 bg-green-300 z-30"></div>}
+    {isAvailable ? <div className="absolute inset-0 z-10"></div>:
+      <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
+        <div className=" border-yellow-600 border-2 text-white">Matrix not available</div>
+      </div>}
     
     <div className="absolute inset-0 bg-black z-20">
     
