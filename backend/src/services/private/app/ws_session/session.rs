@@ -1,10 +1,10 @@
 use crate::{
     engine::{defs::datas, lib::MatrixCommand},
-    services::private::app::messages::{self, Commands, Disconnect, SetMessage}, utils::configs::WebsocketEnv,
+    services::{private::app::{messages::{self, Commands, Disconnect, SetMessage}, schemas::MatrixStates}, public::utils::Channel}, utils::configs::WebsocketEnv,
 };
 use actix::prelude::*;
 use actix_web_actors::ws;
-use std::{net::SocketAddrV4, time::Instant};
+use std::{collections::HashMap, net::SocketAddrV4, time::Instant};
 use super::utils::HandleText;
 
 use super::{
@@ -15,6 +15,9 @@ pub struct WsSession {
     pub hb: Instant,
     pub srv: Addr<TcpStreamsManager>,
     pub socket: Option<SocketAddrV4>,
+    pub user_id: i32,
+    pub i_channels: Vec<Channel>,
+    pub o_channels: Vec<Channel>,
 }
 
 impl WsSession {
@@ -46,6 +49,20 @@ impl WsSession {
         let serialized: SetState = serde_json::from_str(&text).unwrap();
         let rw = datas::rw::WRITE.to_string();
         return HandleText::Command(MatrixCommand::new_from_client(rw, serialized));
+    }
+    pub fn attach_channel_visibility(&self, states:&mut MatrixStates)->MatrixStates{ 
+        let mut i_visibility_map: HashMap<u32, bool> = HashMap::new();
+        let mut o_visibility_map: HashMap<u32, bool> = HashMap::new();
+        self.i_channels.iter().enumerate().for_each(|(i,channel)|{
+            i_visibility_map.entry(i as u32).or_insert(channel.visible);
+        });
+        self.o_channels.iter().enumerate().for_each(|(i,channel)|{
+            o_visibility_map.entry(i as u32).or_insert(channel.visible);
+        });
+
+        states.i_visibility = Some(i_visibility_map);
+        states.o_visibility = Some(o_visibility_map);
+        states.clone()
     }
 }
 

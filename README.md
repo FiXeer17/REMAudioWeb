@@ -18,7 +18,6 @@ JWT_SECRET=[STRONG KEY!!!]
 POSTGRES_USER=[DATABASE USER]
 POSTGRES_PASSWORD=[DATABASE USER PASSWORD] 
 POSTGRES_DB=[DATABASE NAME]
-DEFAULT_SOCKET=[TO THE MATRIX] for dev simulation use -> matrix-simulator:2000
 DEFAULT_ADMIN=[APPLICATION ADMIN USERNAME]
 DEFAULT_ADMIN_PASSWORD=[APPLICATION ADMIN PASSWORD]
 
@@ -32,9 +31,12 @@ JWT_SECRET=302474329032819652332398074242442053357746521130946308199417979692969
 POSTGRES_USER=user
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=users
-DEFAULT_SOCKET=matrix-simulator:2000
 DEFAULT_ADMIN=admin
 DEFAULT_ADMIN_PASSWORD=admin1234
+CHANNEL_DEFAULT_PREFIX=ch
+I_CHANNEL_NUMBER=16
+O_CHANNEL_NUMBER=16
+DEFAULT_VISIBILITY=true
 ```
 
 ## Run:
@@ -64,6 +66,9 @@ if you start the application like that you have default websocket and matrix com
 
 ```
 ### DATABASE SETTINGS ###
+
+### DATABASE SETTINGS ###
+
 JWT_SECRET=92368843446958883401368835169004584754983166754091679294489897723038422606962
 POSTGRES_USER=belle
 POSTGRES_PASSWORD=postgres 
@@ -73,16 +78,18 @@ DEFAULT_ADMIN_PASSWORD=admin
 
 ### OPTIONAL SETTINGS ###
 
-### CONNECTIVITY SETTINGS ###
-DEFAULT_SOCKET=matrix-simulator:2000 
-
 ### TCP COMUNICATION SETTINGS ###
 COMMAND_DELAY=20                #(milliseconds) Command delay.
 RECONNECT_DELAY=1500            #(milliseconds) Reconnect delay after a fail.
 READ_TIMEOUT =500               #(milliseconds) Wait for a response from the machine.
-CONNECTION_TIMEOUT_TIME=2000    #(milliseconds) Wait for the connection to be established.
-INACTIVITY_TIMEOUT_TIME=5000    #(milliseconds) Client inactivity time (free the matrix to other users).
+CONNECTION_TIMEOUT=2000         #(milliseconds) Wait for the connection to be established.
+INACTIVITY_TIMEOUT=5000         #(milliseconds) Client inactivity time (free the matrix to other users).
 MAX_RETRIES=3                   #(positive integer) Retries ammount if the connection request fail. 
+
+### PING SOCKET SETTINGS ###
+PING_SOCKET_TIMEOUT=1000        #(milliseconds) Wait for the connection to be established.
+PING_SOCKET_MAX_RETRIES=2       #(positive integer) Retries ammount if the ping request fail.
+
 
 ### WEBSOCKET SETTINGS ###
 HEARTBEAT_INTERVAL=5000         #(milliseconds) Time for ping interval (detect dead sessions).

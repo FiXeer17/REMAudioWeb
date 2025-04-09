@@ -73,3 +73,10 @@ pub fn jwt_to_id(jwt_token: String) -> Result<i32, jsonwebtoken::errors::Error> 
         }
     }
 }
+
+
+pub fn bearertkn_to_id(bearer_token:&str) -> i32{
+    let prefix = "Bearer ";
+    let jwt_token = bearer_token.strip_prefix(prefix).unwrap();
+    jwt_to_id(jwt_token.to_string()).unwrap()
+}

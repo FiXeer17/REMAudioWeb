@@ -109,7 +109,7 @@ impl TcpStreamActor {
             responses.push(cmd_from_buffer.unwrap());
             tokio::time::sleep(ComunicationEnv::get_command_delay()).await;
         }
-        let states = MatrixStates::new(responses);
+        let states = MatrixStates::new(responses,socket.to_string());
 
         ctx_addr.clone().do_send(MatrixReady { states, socket });
     }

@@ -4,6 +4,7 @@ use super::schemas::MatrixStates;
 use super::ws_session::session::WsSession;
 use actix::prelude::*;
 use actix::Message;
+use serde::Serialize;
 use tokio::net::TcpStream;
 use uuid::Uuid;
 use std::net::SocketAddrV4;
@@ -24,7 +25,8 @@ pub struct Connect {
 #[derive(Message,Clone)]
 #[rtype(result="String")]
 pub struct SessionOpened{
-    pub socket : Option<String>
+    pub socket : Option<String>,
+    pub user_id: i32,
 }
 
 #[derive(Message,Clone)]
@@ -96,6 +98,12 @@ pub struct MatrixReady{
     pub socket: SocketAddrV4,
     pub states: MatrixStates
 }
+#[derive(Message,Clone,Serialize)]
+#[rtype(result="()")]
+pub struct GeneralConnectionError{
+    pub socket: Option<SocketAddrV4>,
+    pub error: String, 
+}
 
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -126,8 +134,6 @@ pub struct SetCommand{
     pub command: MatrixCommand,
     
 }
-
-
 #[derive(Message,Clone)]
 #[rtype(result="()")]
 pub struct SetCommandOk{
@@ -138,3 +144,8 @@ pub struct SetCommandOk{
 #[rtype(result="Option<Vec<SocketAddrV4>>")]
 pub struct GetConnections{}
 
+#[derive(Message,Clone)]
+#[rtype(result="i32")]
+pub struct RetrieveUserFromUuid{
+    pub uuid:Uuid,
+}

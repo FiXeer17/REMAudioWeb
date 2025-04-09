@@ -1,0 +1,2 @@
+pub const PING_SOCKET_TIMEOUT:u64 = 1000;
+pub const PING_SOCKET_MAX_RETRIES: u8 = 2;

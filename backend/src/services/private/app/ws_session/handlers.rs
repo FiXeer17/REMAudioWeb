@@ -3,6 +3,7 @@ use std::time::Instant;
 use crate::services::private::app::schemas::StreamError;
 use actix::{ActorContext, AsyncContext, Handler, StreamHandler};
 use actix_web_actors::ws;
+use serde_json::json;
 
 use super::super::messages::*;
 use super::session::WsSession;
@@ -34,15 +35,28 @@ impl Handler<ClosedByRemotePeer> for WsSession {
     }
 }
 
+// POST-MIDDLEWARE 
 impl Handler<MatrixReady> for WsSession {
     type Result = ();
-    fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
-        let message = serde_json::to_string_pretty(&msg.states).unwrap();
+    fn handle(&mut self, msg:MatrixReady, ctx: &mut Self::Context) -> Self::Result {
+        let mut states = msg.states;
+        let matrix_states = self.attach_channel_visibility(&mut states);
+        let message = serde_json::to_string_pretty(&matrix_states).unwrap();
+
         ctx.text(message);
     }
 }
 
-
+impl Handler<GeneralConnectionError> for WsSession{
+    type Result = ();
+    fn handle(&mut self, msg: GeneralConnectionError, ctx: &mut Self::Context) -> Self::Result {
+        match msg.socket{
+            Some(_) => {ctx.text(json!(msg).to_string());}
+            None => {ctx.text(json!({"error":msg.error}).to_string());}
+        }
+        ctx.stop();
+    }
+}
 
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
@@ -88,3 +102,4 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
         }
     }
 }
+
