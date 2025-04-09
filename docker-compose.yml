@@ -36,6 +36,13 @@ services:
       - ./backend/.env
     environment:
       - RUST_LOG=info
+  matrix-simulator:
+    image: i3elle/matrix-simulator
+    ports:
+      - "2000:2000"
+    command: ./matrix-engine
+           
+  
     
   frontend:
     build: 
@@ -47,6 +54,7 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+      
   matrix-simulator:
     image: i3elle/matrix-simulator
     ports:
