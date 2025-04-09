@@ -154,7 +154,7 @@ impl DatabaseEnv {
 impl ChannelsEnv {
     pub fn get_vars() -> Self {
         let channel_default_prefix = std::env::var(CHANNEL_DEFAULT_PREFIX)
-            .expect("failed to retrieve CHANNEL_DEAFAULT_PREFIX");
+            .expect("failed to retrieve CHANNEL_DEFAULT_PREFIX");
         let i_channel_number = std::env::var(I_CHANNEL_NUMBER)
             .expect("failed to retrieve I_CHANNEL_NUMBER")
             .parse::<u32>()
