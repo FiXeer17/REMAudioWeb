@@ -24,7 +24,7 @@ pub async fn from_username(
         .fetch_optional(&pgpool.db)
         .await?
     {
-        Some(user) => Ok(user),
+        Some(user) => {println!("{:?}",user);Ok(user)},
         None => Err(sqlx::Error::RowNotFound),
     }
 }
@@ -47,8 +47,8 @@ pub async fn insert_default_user(pgpool: &AppState) -> Result<(), sqlx::Error> {
     let default_admin_password = DatabaseEnv::get_default_admin_password();
     let default_user = DatabaseEnv::get_default_user();
     let default_user_password = DatabaseEnv::get_default_user_password();
-    insert_user(default_admin, default_admin_password, pgpool).await?;
-    insert_user(default_user, default_user_password, pgpool).await?;
+    insert_user(default_admin, default_admin_password,true, pgpool).await?;
+    insert_user(default_user, default_user_password, false,pgpool).await?;
     Ok(())
 }
 
