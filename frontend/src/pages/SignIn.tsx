@@ -1,4 +1,4 @@
-import {Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button as Button_sign } from "../components/ui/button_sign";
 import { Input as Input_username } from "../components/ui/input_email";
 import { Input as Input_pass } from "../components/ui/input_pass";

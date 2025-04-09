@@ -40,7 +40,10 @@ export const router = createBrowserRouter([
     path: "/login",
     element: <SignIn isLoading={false}/> 
   },
-  
+  {
+    path: "/test",
+    element: <Test/>
+  },
   
   {
     element: <UUIDLayout/>,
@@ -49,10 +52,7 @@ export const router = createBrowserRouter([
         path: "/uuidprovider",
         element: <UUIDLayout/>
       },
-      {
-        path: "/test",
-        element: <Test/>
-      },
+      
       {
         path: "/recentconnections",
         element: <RecentConnections/>

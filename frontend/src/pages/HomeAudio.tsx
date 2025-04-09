@@ -8,7 +8,7 @@ import { SwipeChannels } from "../lib/swipeChannels";
 import { useState, useContext, useEffect } from "react";
 import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
-import { Circle } from "@phosphor-icons/react";
+import { Circle, Clock } from "@phosphor-icons/react";
 
 export default function Volume() {
   const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
@@ -70,7 +70,15 @@ export default function Volume() {
     <>
     {isAvailable ? <div className="absolute inset-0 z-10"></div>:
       <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
-        <div className=" border-yellow-600 border-2 text-white">Matrix not available</div>
+        <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
+          <div className="mt-1">
+            <Clock weight="bold"></Clock>
+          </div>
+          <div>
+          <p>Matrix Unvailable</p>
+          <p>Please wait...</p>
+          </div>
+        </div>
       </div>}
     
     <div className="absolute inset-0 bg-black z-20">
@@ -118,7 +126,7 @@ export default function Volume() {
                 </Channel>
               ))}
             </div>
-            <div className="flex items-center justify-center ">
+            <div className="flex items-center justify-center pb-2">
               {colorInputCircle === 1 ? (
                 <Circle size={12} color="#ffffff" />
               ) : (
@@ -165,7 +173,7 @@ export default function Volume() {
                 </Channel>
               ))}
             </div>
-            <div className="flex items-center justify-center ">
+            <div className="flex items-center justify-center pb-2">
               {colorOutputCircle === 1 ? (
                 <Circle size={12} color="#ffffff" />
               ) : (

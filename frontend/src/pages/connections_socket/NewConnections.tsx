@@ -1,8 +1,7 @@
 import { ArrowLeft, LinkSimple } from "@phosphor-icons/react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function NewConnetions() {
-  const navigate = useNavigate();
 
   return (
     <div className="grid grid-rows-[auto,1fr] min-h-svh ">
@@ -11,10 +10,10 @@ export default function NewConnetions() {
           <ArrowLeft size={32} color="#FFFFFF" />
         </Link>
       </div>
-      <div className="flex justify-center items-center relative"> {/* Aggiungi relative per il posizionamento */}
+      <div className="flex justify-center items-center relative"> 
         <div className="flex justify-center items-center">
           {[1, 2, 3, 4, 5].map((i, index, array) => {
-            const isLast = index === array.length - 1; // Verifica se è l'ultimo cerchio
+            const isLast = index === array.length - 1; 
             return (
               <div
                 key={i}
