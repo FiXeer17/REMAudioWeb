@@ -1,7 +1,7 @@
 use crate::{
     services::{
         private::app::{
-            messages::{CheckSessionUUID, GetConnections, RetrieveSocket, RetrieveUserFromUuid},
+            messages::{CheckSessionUUID, PendingConnections, RetrieveSocket, RetrieveUserFromUuid},
             schemas::SessionUUID,
             tcp_manager::tcp_manager::TcpStreamsManager,
             ws_session::session::WsSession,
@@ -39,8 +39,8 @@ pub async fn app(
         return Ok(HttpResponse::Unauthorized().finish());
     }
 
-    if let Ok(None) = srv.send(GetConnections{}).await{
-        return Ok(HttpResponse::NotFound().finish())
+    if let Ok(false) = srv.send(PendingConnections{}).await{
+        return Ok(HttpResponse::NotFound().finish());
     }
 
     let socket = srv.send(RetrieveSocket { uuid }).await;

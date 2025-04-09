@@ -100,7 +100,17 @@ impl Handler<StartStream> for TcpStreamsManager {
             .or_insert(stream_actor_addr);
     }
 }
-
+impl Handler<PendingConnections> for TcpStreamsManager{
+    type Result = bool;
+    fn handle(&mut self, _msg: PendingConnections, _ctx: &mut Self::Context) -> Self::Result {
+        for socket in self.uuids_sockets.values(){
+            if socket.is_some(){
+                return true;
+            }
+        }
+        return false;
+    }
+}
 impl Handler<SetHandlerState> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: SetHandlerState, _: &mut Self::Context) -> Self::Result {
