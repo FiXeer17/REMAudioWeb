@@ -25,15 +25,19 @@
 {
 	"sockets": [
 		{
+            "name":"socket name"
 			"ip": "172.18.0.2",
-			"port": 2000
-		}
+			"port": "2000"
+		},
+        ...
+        ...
 	]
+    "latest_socket": {
+        "name":"socket name",
+        "ip":"172.18.0.2",
+        "port":"2000"
+    }
 }
-{
-	"sockets": null
-}
-
 ```
 `/api/auth/signin`:
 ```
@@ -50,36 +54,53 @@
 
 - [GET] authentication (before the WebSocket comunication): `/ws/auth`
 - [GET] application: `/ws/app`
-- [POST] set socket: `/ws/socket?uuid=[YOUR UUID FROM AUTH]`
+- [POST] add socket: `/ws/socket/add?uuid=[YOUR UUID FROM AUTH]`
+- [POST] remove socket: `/ws/socket/remove?uuid=[YOUR UUID FROM AUTH]`
 
 
 ### instruction:
 
 To start a comunication with WebSocket protocol you'll need a UUID that certify that you are actually authenticated, to do so, before make a request to the `authentication` url with the header: `Authorization: Bearer [YOUR TOKEN]`, you'll get a UUID into put as a query parameter inside the `application` url
-## Json body:
+## Requests JSON body:
 
-### set socket:
+### add socket:
+`/ws/socket/add?uuid=[YOUR UUID FROM AUTH]`
+```
+{
+    "socket_name":"socket name",
+	"socket":"matrix-simulator:2000"
+} 
+```
+### remove socket:
+`/ws/socket/remove?uuid=[YOUR UUID FROM AUTH]`
 ```
 {
 	"socket":"matrix-simulator:2000"
 }
-    
 ```
 
-## Responses body:
+
+
+## Responses JSON body:
 `/ws/auth`:
 ```
 {
 	"uuid": "80e1a00b-fb26-4e36-89d0-9df7e920b041"
 }
 ```
-`/ws/socket?uuid=[YOUR UUID FROM AUTH]`:
+`/ws/socket/add?uuid=[YOUR UUID FROM AUTH]`:
 ```
 {
-    "socket":"127.0.0.1:2000"
+	"name": "socket name",
+	"socket": "matrix-simulator-2:2001"
 }
 ```
-(if socket isn't set the application will connect automatically to the DEFAULT_SOCKET set in the .env file).
+`/ws/socket/remove?uuid=[YOUR UUID FROM AUTH]`:
+```
+{
+	"socket": "matrix-simulator-2:2001"
+}
+```
 
 ### Application request:
 
@@ -120,3 +141,9 @@ input/output sources are specific keywords, here is a list of ios that the engin
    input ->"input";
    output -> "output";
 ```
+### POSSIBLE VALUES:
+| section | value type |
+|-------|----------|
+| preset | n positive integer: 1<=n<=16 |
+| mute | boolean |
+| volume | integer |

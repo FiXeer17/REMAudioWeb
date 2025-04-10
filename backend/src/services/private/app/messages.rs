@@ -7,7 +7,8 @@ use actix::Message;
 use serde::Serialize;
 use tokio::net::TcpStream;
 use uuid::Uuid;
-use std::net::SocketAddrV4;
+use std::{net::SocketAddrV4,collections::HashMap};
+
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
@@ -113,7 +114,14 @@ pub struct CommandError{
 #[derive(Message,Clone)]
 #[rtype(result="bool")]
 pub struct SetSocket{
+    pub socket_name: String,
     pub socket: String,
+    pub uuid: String
+}
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct RemoveSocket{
+    pub socket:SocketAddrV4,
     pub uuid: String
 }
 #[derive(Message,Clone,Debug)]
@@ -122,6 +130,10 @@ pub struct SetMessage{
     pub addr: Addr<WsSession>,
     pub command: Commands
 }
+
+#[derive(Message,Clone,Debug)]
+#[rtype(result="()")]
+pub struct ClosedByAdmin{}
 
 #[derive(Debug,Clone)]
 pub enum Commands{
@@ -141,15 +153,20 @@ pub struct SetCommandOk{
 }
 
 #[derive(Message,Clone)]
-#[rtype(result="Option<Vec<SocketAddrV4>>")]
+#[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
 pub struct GetConnections{}
+
+#[derive(Message,Clone)]
+#[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
+pub struct GetLatestConnection{}
+
 
 #[derive(Message,Clone)]
 #[rtype(result="bool")]
 pub struct PendingConnections{}
 
 #[derive(Message,Clone)]
-#[rtype(result="i32")]
+#[rtype(result="Option<i32>")]
 pub struct RetrieveUserFromUuid{
     pub uuid:Uuid,
 }

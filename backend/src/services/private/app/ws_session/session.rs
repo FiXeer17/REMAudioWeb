@@ -54,10 +54,12 @@ impl WsSession {
         let mut i_visibility_map: HashMap<u32, bool> = HashMap::new();
         let mut o_visibility_map: HashMap<u32, bool> = HashMap::new();
         self.i_channels.iter().enumerate().for_each(|(i,channel)|{
-            i_visibility_map.entry(i as u32).or_insert(channel.visible);
+            let index = i+1;
+            i_visibility_map.entry(index as u32).or_insert(channel.visible);
         });
         self.o_channels.iter().enumerate().for_each(|(i,channel)|{
-            o_visibility_map.entry(i as u32).or_insert(channel.visible);
+            let index = i+1;
+            o_visibility_map.entry(index as u32).or_insert(channel.visible);
         });
 
         states.i_visibility = Some(i_visibility_map);

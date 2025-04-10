@@ -58,11 +58,14 @@ pub async fn app(
         return Ok(HttpResponse::InternalServerError().json(return_json_reason(&e.to_string())));
     }
     let user_id = user_id.unwrap();
-    let i_channels = interfaces::retrieve_channels(&pgpool, user_id, SRC::INPUT)
+    if user_id.is_none(){
+        HttpResponse::Unauthorized().finish();
+    }
+    let i_channels = interfaces::retrieve_channels(&pgpool, user_id.unwrap(), SRC::INPUT)
         .await
         .unwrap()
         .unwrap();
-    let o_channels = interfaces::retrieve_channels(&pgpool, user_id, SRC::OUTPUT)
+    let o_channels = interfaces::retrieve_channels(&pgpool, user_id.unwrap(), SRC::OUTPUT)
         .await
         .unwrap()
         .unwrap();
@@ -72,7 +75,7 @@ pub async fn app(
             hb: Instant::now(),
             srv: srv.get_ref().clone(),
             socket: sockv4,
-            user_id,
+            user_id:user_id.unwrap(),
             i_channels,
             o_channels,
         },

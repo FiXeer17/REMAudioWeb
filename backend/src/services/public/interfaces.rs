@@ -3,6 +3,7 @@ use crate::utils::configs::{channels_settings,DatabaseEnv};
 use crate::AppState;
 use crate::services::public::signin::schemas::ReturnFullUser;
 use actix_web::web::Data;
+use sqlx::Row;
 
 pub async fn check_username(pgpool: &AppState, username: &str) -> Result<bool, sqlx::Error> {
     let query_string: &str =
@@ -52,13 +53,21 @@ pub async fn insert_default_user(pgpool: &AppState) -> Result<(), sqlx::Error> {
     Ok(())
 }
 
-pub async fn retrieve_admin(pgpool: &Data<AppState>, username: &str) -> Result<bool, sqlx::Error> {
+pub async fn retrieve_admin_from_username(pgpool: &Data<AppState>, username: &str) -> Result<bool, sqlx::Error> {
     let query_string: &str = "SELECT admin FROM users WHERE username = $1 AND deleted_at IS NULL;";
-    let result = sqlx::query(query_string)
+    let result: sqlx::postgres::PgRow = sqlx::query(query_string)
         .bind(username.to_string())
-        .fetch_optional(&pgpool.db)
+        .fetch_one(&pgpool.db)
         .await?;
-    Ok(result.is_some())
+    Ok(result.get("admin"))
+}
+pub async fn retrieve_admin_from_id(pgpool: &Data<AppState>, id: i32) -> Result<bool, sqlx::Error> {
+    let query_string: &str = "SELECT admin FROM users WHERE id = $1 AND deleted_at IS NULL;";
+    let result = sqlx::query(query_string)
+        .bind(id)
+        .fetch_one(&pgpool.db)
+        .await?;
+    Ok(result.get("admin"))
 }
 
 pub async fn retrieve_channels(
@@ -89,14 +98,14 @@ pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx:
         channels_settings::get_channel_default_prefix(),
     );
     
-    for i in 1..i_channels{
+    for i in 1..i_channels+1{
         sqlx::query(query_string)
         .bind(format!("{}{}",channel_prefix,i))
         .bind(default_visibility)
         .bind(SRC::INPUT.to_string())
         .bind(user_id).fetch_optional(&pgpool.db).await?;
     }
-    for i in 1..o_channels{
+    for i in 1..o_channels+1{
         sqlx::query(query_string)
         .bind(format!("{}{}",channel_prefix,i))
         .bind(default_visibility)

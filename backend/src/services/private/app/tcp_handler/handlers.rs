@@ -38,6 +38,14 @@ impl Handler<ClosedByRemotePeer> for TcpStreamActor {
     }
 }
 
+impl Handler<ClosedByAdmin> for TcpStreamActor {
+    type Result = ();
+    fn handle(&mut self, _msg: ClosedByAdmin, ctx: &mut Self::Context) -> Self::Result {
+        ctx.stop();
+    }
+}
+
+
 impl Handler<MatrixReady> for TcpStreamActor {
     type Result = ();
     fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
