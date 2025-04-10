@@ -38,10 +38,11 @@ export default function SignInPage({isLoading}:pageProps) {
         session_type : "web" as string
       }
       const response= await loginUser(credential)
+      const isAdmin=response.data.admin
       const accessToken=response.data.access_token
       localStorage.setItem("accessToken",accessToken)
 
-      return navigate("/uuidprovider")
+      return navigate("/uuidprovider",{state:{isAdmin}})
     }catch(error){
       
         if (axios.isAxiosError(error) && error.response?.status !== 200) {

@@ -8,6 +8,12 @@ interface UserCredentials {
     session_type: string;
 
   }
+interface UserSocket{
+  uuid:string|undefined;
+  socket:string;
+  socket_name:string;
+
+}
   
 
 export function register({ username, email, password, session_type }: UserCredentials): Promise<AxiosResponse> {
@@ -23,7 +29,10 @@ export function getUUID():Promise<AxiosResponse<{uuid:string}>>{
   return client.get("ws/auth")
 }
 
-export function getSocket():Promise<AxiosResponse<{ sockets: { ip: string; port: number }[] | null }>>{
+export function getSocket():Promise<AxiosResponse<{ sockets: { name: string; ip: string; port: number }[] | null;latest_socket: { name: string; ip: string; port: number } | null;}>>{
   return client.get("api")
 }
 
+export function setSocket({uuid,socket_name,socket}: UserSocket): Promise<AxiosResponse> {
+  return client.post(`ws/socket/add?uuid=${uuid}`, {socket_name,socket});
+}

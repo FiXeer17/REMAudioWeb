@@ -11,6 +11,7 @@ interface SwipeConnectionsReturn {
 }
 
 type Connection = {
+  name:string,
   ip: string;
   port: number;
 };
