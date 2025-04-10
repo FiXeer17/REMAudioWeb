@@ -19,6 +19,7 @@ pub struct TcpStreamsManager {
     pub uuids_users: HashMap<Uuid,i32>,
     pub latest_socket: Option<SocketAddrV4>,
     pub avail_map: HashMap<SocketAddrV4, Option<Addr<WsSession>>>,
+    pub sockets: HashSet<SocketAddrV4>,
 
 }
 
@@ -31,6 +32,7 @@ impl TcpStreamsManager {
             uuids_users: HashMap::new(),
             latest_socket: None,
             avail_map: HashMap::new(),
+            sockets:HashSet::new(),
         }
     }
     pub fn handle_message(&self, msg: SetMessage) {

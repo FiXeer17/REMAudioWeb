@@ -1,11 +1,11 @@
 use std::net::SocketAddrV4;
 use tokio::net::TcpStream;
 use tokio::time::timeout;
-use crate::utils::configs::PingEnv;
+use crate::utils::configs::ping_socket_settings;
 
 pub async fn try_connection(socket: SocketAddrV4) -> bool {
-    let max_retries = PingEnv::get_ping_socket_max_retries();
-    let timeout_interval = PingEnv::get_ping_socket_timeout();
+    let max_retries = ping_socket_settings::get_ping_socket_max_retries();
+    let timeout_interval = ping_socket_settings::get_ping_socket_timeout();
     let mut i=0;
     while i < max_retries {
         match timeout(timeout_interval,TcpStream::connect(socket)).await {

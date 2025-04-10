@@ -52,7 +52,11 @@ impl Handler<SetSocket> for TcpStreamsManager {
                 *socket = Some(msg.socket.clone());
                 let sockv4 = check_socket(msg.socket).unwrap();
                 self.latest_socket = sockv4;
+                if sockv4.is_some(){
+                    self.sockets.insert(sockv4.unwrap());
+                }
                 return true;
+
             }
         }
         false
@@ -69,20 +73,11 @@ impl Handler<RetrieveSocket> for TcpStreamsManager {
 impl Handler<GetConnections> for TcpStreamsManager {
     type Result = Option<Vec<SocketAddrV4>>;
     fn handle(&mut self, _: GetConnections, _: &mut Self::Context) -> Self::Result {
-        let socket_vec: Vec<String> = self
-            .uuids_sockets
-            .values()
-            .filter_map(|s| s.as_ref())
-            .cloned()
-            .collect();
+        let socket_vec: Vec<SocketAddrV4> = self.sockets.clone().into_iter().collect();
         if socket_vec.is_empty() {
             return None;
         }
-        let socket_vec: Vec<SocketAddrV4> = socket_vec.into_iter().map(|strsock|{
-            check_socket(strsock).unwrap().unwrap()
-        }).collect();
         Some(socket_vec)
-        
     }
 }
 

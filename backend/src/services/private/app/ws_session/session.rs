@@ -1,6 +1,6 @@
 use crate::{
     engine::{defs::datas, lib::MatrixCommand},
-    services::{private::app::{messages::{self, Commands, Disconnect, SetMessage}, schemas::MatrixStates}, public::utils::Channel}, utils::configs::WebsocketEnv,
+    services::{private::app::{messages::{self, Commands, Disconnect, SetMessage}, schemas::MatrixStates}, public::utils::Channel}, utils::configs::websocket_settings,
 };
 use actix::prelude::*;
 use actix_web_actors::ws;
@@ -22,8 +22,8 @@ pub struct WsSession {
 
 impl WsSession {
     fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
-        ctx.run_interval(WebsocketEnv::get_heartbeat_interval(), |act, ctx| {
-            if Instant::now().duration_since(act.hb) > WebsocketEnv::get_client_timeout() {
+        ctx.run_interval(websocket_settings::get_heartbeat_interval(), |act, ctx| {
+            if Instant::now().duration_since(act.hb) > websocket_settings::get_client_timeout() {
                 println!("Websocket Client heartbeat failed, disconnecting!");
                 let address = ctx.address();
                 act.srv.do_send(Disconnect { addr: address });
