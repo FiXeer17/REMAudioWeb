@@ -4,7 +4,7 @@ use std::{net::SocketAddrV4, sync::Arc};
 use actix::{Addr, AsyncContext, Context};
 use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::TcpStream};
 
-use crate::{engine::{defs::fncodes::FNCODE, lib::MatrixCommand}, utils::configs::ComunicationEnv};
+use crate::{engine::{defs::fncodes::FNCODE, lib::MatrixCommand}, utils::configs::tcp_comunication_settings};
 
 use super::{
     super::{
@@ -83,7 +83,7 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
 
             let read_bytes = {
                 let mut stream_guard = stream.lock().await;
-                tokio::time::timeout(ComunicationEnv::get_read_timeout(), stream_guard.read(&mut buffer)).await
+                tokio::time::timeout(tcp_comunication_settings::get_read_timeout(), stream_guard.read(&mut buffer)).await
             };
 
             match read_bytes {

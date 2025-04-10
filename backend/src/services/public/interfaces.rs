@@ -1,7 +1,7 @@
 use super::utils::{insert_user, Channel, SRC};
-use crate::utils::configs::ChannelsEnv;
+use crate::utils::configs::{channels_settings,DatabaseEnv};
 use crate::AppState;
-use crate::{services::public::signin::schemas::ReturnFullUser, utils::configs::DatabaseEnv};
+use crate::services::public::signin::schemas::ReturnFullUser;
 use actix_web::web::Data;
 
 pub async fn check_username(pgpool: &AppState, username: &str) -> Result<bool, sqlx::Error> {
@@ -83,10 +83,10 @@ pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx:
     let query_string: &str ="INSERT INTO channels (channel_name,visible,src,user_id) VALUES ($1,$2,$3,$4);";
 
     let (i_channels, o_channels, default_visibility, channel_prefix) = (
-        ChannelsEnv::get_i_channel_number(),
-        ChannelsEnv::get_o_channel_number(),
-        ChannelsEnv::get_default_visibility(),
-        ChannelsEnv::get_channel_default_prefix(),
+        channels_settings::get_i_channel_number(),
+        channels_settings::get_o_channel_number(),
+        channels_settings::get_default_visibility(),
+        channels_settings::get_channel_default_prefix(),
     );
     
     for i in 1..i_channels{

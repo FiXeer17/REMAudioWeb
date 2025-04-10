@@ -3,7 +3,7 @@ use std::sync::Arc;
 use actix::{ActorContext, AsyncContext, Handler};
 use futures_util::lock::Mutex;
 
-use crate::utils::configs::ComunicationEnv;
+use crate::utils::configs::tcp_comunication_settings;
 
 use super::super::messages::*;
 use super::tcp_handler::TcpStreamActor;
@@ -44,7 +44,7 @@ impl Handler<MatrixReady> for TcpStreamActor {
         self.machine_states = Some(msg.states.clone());
         self.tcp_manager.do_send(msg);
         if self.cmd_poller.is_none() {
-            let cmd_poller = ctx.run_interval(ComunicationEnv::get_command_delay(), command_polling);
+            let cmd_poller = ctx.run_interval(tcp_comunication_settings::get_command_delay(), command_polling);
             self.cmd_poller = Some(cmd_poller);
         }
     }

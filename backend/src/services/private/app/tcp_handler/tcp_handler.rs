@@ -6,7 +6,7 @@ use super::super::{
 use super::configs::*;
 use crate::{
     engine::lib::{read_all_states, MatrixCommand},
-    services::private::app::{messages::{ClosedByRemotePeer, SetCommand, SetHandlerState}, tcp_manager::tcp_manager::TcpStreamsManager, ws_session::session::WsSession}, utils::configs::ComunicationEnv,
+    services::private::app::{messages::{ClosedByRemotePeer, SetCommand, SetHandlerState}, tcp_manager::tcp_manager::TcpStreamsManager, ws_session::session::WsSession}, utils::configs::tcp_comunication_settings,
 };
 use actix::{Actor, Addr, AsyncContext, Context, SpawnHandle};
 use futures_util::lock::Mutex;
@@ -65,7 +65,7 @@ impl TcpStreamActor {
 
             let read_bytes = {
                 let mut stream = stream.lock().await;
-                tokio::time::timeout(ComunicationEnv::get_read_timeout(), stream.read(&mut buffer)).await
+                tokio::time::timeout(tcp_comunication_settings::get_read_timeout(), stream.read(&mut buffer)).await
             };
             if let Ok(Ok(n)) = read_bytes {
                 if n == 0 {
@@ -107,7 +107,7 @@ impl TcpStreamActor {
                 return;
             }
             responses.push(cmd_from_buffer.unwrap());
-            tokio::time::sleep(ComunicationEnv::get_command_delay()).await;
+            tokio::time::sleep(tcp_comunication_settings::get_command_delay()).await;
         }
         let states = MatrixStates::new(responses,socket.to_string());
 
@@ -125,7 +125,7 @@ impl TcpStreamActor {
             ctx.cancel_future(self.owner.unwrap());
             self.owner = None;
         }
-        self.owner = Some(ctx.run_interval(ComunicationEnv::get_inactivity_timeout(), |act,ctx|{
+        self.owner = Some(ctx.run_interval(tcp_comunication_settings::get_inactivity_timeout(), |act,ctx|{
             if act.commands_queue.is_empty(){
                 if let Some(owner) = act.owner{
                     ctx.cancel_future(owner);
@@ -168,7 +168,7 @@ impl Actor for TcpStreamActor {
         tokio::spawn(async move {
             let mut retries: u8 = 0;
             while retries <= MAX_RETRIES {
-                match tokio::time::timeout(ComunicationEnv::get_connection_timeout(), TcpStream::connect(socket.to_string()))
+                match tokio::time::timeout(tcp_comunication_settings::get_connection_timeout(), TcpStream::connect(socket.to_string()))
                     .await
                 {
                     Ok(not_timedout) => match not_timedout {
@@ -189,7 +189,7 @@ impl Actor for TcpStreamActor {
                                 return;
                             } else {
                                 retries += 1;
-                                tokio::time::sleep(ComunicationEnv::get_reconnect_delay()).await;
+                                tokio::time::sleep(tcp_comunication_settings::get_reconnect_delay()).await;
                             }
                         }
                     },
