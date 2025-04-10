@@ -22,29 +22,24 @@ DEFAULT_ADMIN=[APPLICATION ADMIN USERNAME]
 DEFAULT_ADMIN_PASSWORD=[APPLICATION ADMIN PASSWORD]
 DEFAULT_USER=[APPLICATION USER USERNAME]
 DEFAULT_USER_PASSWORD=[APPLICATION USER USERNAME]
-CHANNEL_DEFAULT_PREFIX=[PREFIX FOR CHANNELS]
-I_CHANNEL_NUMBER=[NUMBER OF INPUT CHANNELS]
-O_CHANNEL_NUMBER=[NUMBER OF OUTPUT CHANNELS]
-DEFAULT_VISIBILITY=[DEFAULT VALUE OF VISIBILITY]
+SETTINGS_PATH=[PATH OF THE SETTINGS FILE, DEFAULT ./settings.json]
+```
 
+### .env example:
 
 ```
 
-configuration example: 
+### DATABASE SETTINGS ###
 
-```
-JWT_SECRET=30247432903281965233239807424244205335774652113094630819941797969296964439814
-POSTGRES_USER=user
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=users
+JWT_SECRET=92368843446958883401368835169004584754983166754091679294489897723038422606962
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres 
+POSTGRES_DB=user
 DEFAULT_ADMIN=admin
 DEFAULT_ADMIN_PASSWORD=admin
 DEFAULT_USER=user
 DEFAULT_USER_PASSWORD=user
-CHANNEL_DEFAULT_PREFIX=ch
-I_CHANNEL_NUMBER=16
-O_CHANNEL_NUMBER=16
-DEFAULT_VISIBILITY=true
+SETTINGS_PATH=./settings.json
 ```
 
 ## Run:
@@ -70,36 +65,24 @@ docker compose up backend
 
 ## Extra customizations:
 
-if you start the application like that you have default websocket and matrix comunication configurations, if you desire you can change them in the `.env` file, here is an example of all customizable settings:
-
-```
-### DATABASE SETTINGS ###
-
-### DATABASE SETTINGS ###
-
-JWT_SECRET=92368843446958883401368835169004584754983166754091679294489897723038422606962
-POSTGRES_USER=belle
-POSTGRES_PASSWORD=postgres 
-POSTGRES_DB=user
-DEFAULT_ADMIN=admin
-DEFAULT_ADMIN_PASSWORD=admin
-
-### OPTIONAL SETTINGS ###
-
-### TCP COMUNICATION SETTINGS ###
-COMMAND_DELAY=20                #(milliseconds) Command delay.
-RECONNECT_DELAY=1500            #(milliseconds) Reconnect delay after a fail.
-READ_TIMEOUT =500               #(milliseconds) Wait for a response from the machine.
-CONNECTION_TIMEOUT=2000         #(milliseconds) Wait for the connection to be established.
-INACTIVITY_TIMEOUT=5000         #(milliseconds) Client inactivity time (free the matrix to other users).
-MAX_RETRIES=3                   #(positive integer) Retries ammount if the connection request fail. 
-
-### PING SOCKET SETTINGS ###
-PING_SOCKET_TIMEOUT=1000        #(milliseconds) Wait for the connection to be established.
-PING_SOCKET_MAX_RETRIES=2       #(positive integer) Retries ammount if the ping request fail.
+You can start the application if you previously set the .env file with all the variables, but if you want
+to change some application behavior you can do it in the `settings.json` file in the `backend/` folder, here is a description of what those variables do in the application:
 
 
-### WEBSOCKET SETTINGS ###
-HEARTBEAT_INTERVAL=5000         #(milliseconds) Time for ping interval (detect dead sessions).
-CLIENT_TIMEOUT=10000            #(milliseconds) Time to wait for a client response to the ping request.
-```
+
+| variable |value type| Description |
+| --- | --- |---|
+| channel_label_prefix | String | set the default channel prefix e.g. ch -> (ch1,ch2, .., chN) |
+| i_channels_number | positive integer | default ammount of matrix input channels |
+| o_channels_number | positive integer | default ammount of matrix output channels |
+| default_visibility | boolean | default visibility of matrix channels |
+| command_delay | milliseconds (positive integer) | default delay for matrix commands |
+| reconnect_delay | milliseconds (positive integer) | retry time to wait after a failed connection attempt |
+| read_timeout | milliseconds (positive integer) | max time to wait for a response to a command |
+| connection_timeout | milliseconds (positive integer) | max time to wait for a matrix connection |
+| inactivity_timeout | milliseconds (positive integer) | max user inactivity time before freeing the matrix |
+| max_connection_retries | positive integer | max connection retries ammount after a failed attempt |
+| ping_socket_timeout | milliseconds (positive integer) | time to wait for a matrix response to the ping while adding a matrix socket |
+| ping_socket_max_retries | positive integer | max ping retries after a failed ping attempt. |
+| heartbeat_interval | milliseconds (positive integer) | time to wait before sending a ping to the WebSocket client |
+| client_timeout | milliseconds (positive integer) | time to wait for a response to the sent WebSocket ping |
