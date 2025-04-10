@@ -1,6 +1,8 @@
 use std::{collections::HashSet, net::SocketAddrV4, str::FromStr};
 
-use crate::{services::private::app::tcp_handler::tcp_handler::TcpStreamActor, utils::common::check_socket};
+use crate::{
+    services::private::app::tcp_handler::tcp_handler::TcpStreamActor, utils::common::check_socket,
+};
 use actix::{Actor, AsyncContext, Handler};
 use uuid::Uuid;
 
@@ -9,12 +11,18 @@ use super::{super::messages::*, tcp_manager::TcpStreamsManager};
 impl Handler<Connect> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: Connect, ctx: &mut Self::Context) -> Self::Result {
-        let socket = match &msg.socket{
+        let socket = match &msg.socket {
             Some(socket) => *socket,
             None => match self.latest_socket {
                 Some(socket) => socket,
-                None => {msg.addr.do_send(GeneralConnectionError{socket:None, error:"Cannot find available socket.".to_string()});return;}
-            }
+                None => {
+                    msg.addr.do_send(GeneralConnectionError {
+                        socket: None,
+                        error: "Cannot find available socket.".to_string(),
+                    });
+                    return;
+                }
+            },
         };
         println!("Connecting to {:?}", socket);
         if let Some(open_stream) = self.streams.get_mut(&socket) {
@@ -42,7 +50,7 @@ impl Handler<SetSocket> for TcpStreamsManager {
         if let Ok(uuid) = Uuid::from_str(&msg.uuid) {
             if let Some(socket) = self.uuids_sockets.get_mut(&uuid) {
                 *socket = Some(msg.socket.clone());
-                let sockv4 =check_socket(msg.socket).unwrap();
+                let sockv4 = check_socket(msg.socket).unwrap();
                 self.latest_socket = sockv4;
                 return true;
             }
@@ -61,11 +69,20 @@ impl Handler<RetrieveSocket> for TcpStreamsManager {
 impl Handler<GetConnections> for TcpStreamsManager {
     type Result = Option<Vec<SocketAddrV4>>;
     fn handle(&mut self, _: GetConnections, _: &mut Self::Context) -> Self::Result {
-        let socket_vec: Vec<SocketAddrV4> = self.streams_actors.keys().cloned().collect();
+        let socket_vec: Vec<String> = self
+            .uuids_sockets
+            .values()
+            .filter_map(|s| s.as_ref())
+            .cloned()
+            .collect();
         if socket_vec.is_empty() {
             return None;
         }
+        let socket_vec: Vec<SocketAddrV4> = socket_vec.into_iter().map(|strsock|{
+            check_socket(strsock).unwrap().unwrap()
+        }).collect();
         Some(socket_vec)
+        
     }
 }
 
@@ -82,7 +99,7 @@ impl Handler<SessionOpened> for TcpStreamsManager {
     }
 }
 
-impl Handler<RetrieveUserFromUuid> for TcpStreamsManager{
+impl Handler<RetrieveUserFromUuid> for TcpStreamsManager {
     type Result = i32;
     fn handle(&mut self, msg: RetrieveUserFromUuid, _ctx: &mut Self::Context) -> Self::Result {
         *self.uuids_users.get(&msg.uuid).unwrap()
@@ -100,11 +117,11 @@ impl Handler<StartStream> for TcpStreamsManager {
             .or_insert(stream_actor_addr);
     }
 }
-impl Handler<PendingConnections> for TcpStreamsManager{
+impl Handler<PendingConnections> for TcpStreamsManager {
     type Result = bool;
     fn handle(&mut self, _msg: PendingConnections, _ctx: &mut Self::Context) -> Self::Result {
-        for socket in self.uuids_sockets.values(){
-            if socket.is_some(){
+        for socket in self.uuids_sockets.values() {
+            if socket.is_some() {
                 return true;
             }
         }
