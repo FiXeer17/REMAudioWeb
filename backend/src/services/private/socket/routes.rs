@@ -1,7 +1,9 @@
+use std::str::FromStr;
+
 use crate::{
     services::private::{
         app::{
-            messages::{GetConnections, SetSocket},
+            messages::{CheckSessionUUID, GetConnections, SetSocket},
             schemas::SessionUUID,
             tcp_manager::tcp_manager::TcpStreamsManager,
         },
@@ -14,6 +16,7 @@ use crate::{
 };
 use actix_web::{post, web, HttpResponse, Responder};
 use serde_json::json;
+use uuid::Uuid;
 
 #[post("")]
 pub async fn socket(
@@ -22,6 +25,15 @@ pub async fn socket(
     uuid: web::Query<SessionUUID>,
 ) -> impl Responder {
     let socket = &request_body.socket;
+    let uuid_check = match Uuid::from_str(&uuid.uuid) {
+        Ok(uuid) => uuid,
+        Err(e) => return HttpResponse::UnprocessableEntity().json(return_json_reason(&e.to_string())) 
+    };
+    match srv.send(CheckSessionUUID{uuid:uuid_check}).await{
+        Ok(true) => (),
+        Ok(false) => return HttpResponse::Unauthorized().finish(),
+        Err(e) => return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
+    };
 
     let socket = match check_socket(socket.to_string()) {
         Ok(s) => {

@@ -57,7 +57,6 @@ pub async fn crate_app() -> Result<(), std::io::Error> {
                             .configure(private::auth::router)    
                     ).service(
                         web::scope("/socket")
-                        .wrap(from_fn(auth_middleware))
                         .configure(private::socket::router)
                     )
                     .configure(private::app::router),
