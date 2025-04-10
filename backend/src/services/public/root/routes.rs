@@ -12,6 +12,7 @@ pub async fn root(
     let message = GetConnections{};
     match srv.send(message).await{
         Ok(sockets) =>{
+            
             let return_mess =ReturnSockets::new(sockets);
             HttpResponse::Ok().json(return_mess)
         },

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize)]
 pub struct IpPortCouple {
     pub ip: String,
-    pub port: u16,
+    pub port: String,
 }
 #[derive(Deserialize, Serialize)]
 pub struct ReturnSockets {
@@ -19,7 +19,7 @@ impl ReturnSockets {
                     .into_iter()
                     .map(|socket| IpPortCouple {
                         ip: socket.ip().to_string(),
-                        port: socket.port(),
+                        port: socket.port().to_string(),
                     })
                     .collect()
             }),
