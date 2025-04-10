@@ -1,9 +1,10 @@
 import { ArrowLeft } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Circle } from "@phosphor-icons/react";
 import { SwipeConnections } from "@/lib/swipeConnections";
+import { useSockets } from "@/lib/socket/ComponentUuid";
 
 
 type Connection = {
@@ -12,18 +13,19 @@ type Connection = {
   };
 
 export default function RecentConnections(){
-    const [connections, setConnections] = useState([]);
-    const l: Connection[] = [
-        { ip: "172.18.0.3", port: 2001 },
-        { ip: "172.18.0.4", port: 2002 },
-        { ip: "172.18.0.5", port: 2003 },
-        { ip: "172.18.0.6", port: 2004 },
-        { ip: "172.18.0.7", port: 2005 },
-        { ip: "172.18.0.4", port: 2002 },
-        { ip: "172.18.0.5", port: 2003 },
-        { ip: "172.18.0.6", port: 2004 },
-        { ip: "172.18.0.7", port: 2005 }
-      ];
+    const [connections, setConnections] = useState<Connection[]>([]);
+    const {sockets}=useSockets()
+    
+    useEffect(()=>{
+        if (sockets==null){
+           setConnections([]) 
+        }else{
+            setConnections(sockets)
+        }
+        
+    },[sockets])
+
+
     const {
     currentSet:currentSet,
     displayedConnections:displayedConnections,
@@ -32,7 +34,8 @@ export default function RecentConnections(){
     handleTouchStart:handleTouchStart,
     handleTouchMove:handleTouchMove,
     handleTouchEnd:handleTouchEnd
-    }=SwipeConnections(l)
+    }=SwipeConnections(connections)
+    
 
     return(
         <div className="grid grid-rows-5 min-h-svh">

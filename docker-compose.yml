@@ -54,7 +54,10 @@ services:
       - backend
       
   matrix-simulator:
-    image: i3elle/matrix-simulator
+    image: i3elle/matrix-engine
+    environment:
+      - MATRIX_HOST=0.0.0.0
+      - MATRIX_PORT=2000
     ports:
       - "2000:2000"
     command: ./matrix-engine

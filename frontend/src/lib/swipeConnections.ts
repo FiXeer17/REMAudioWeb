@@ -19,13 +19,15 @@ export const SwipeConnections = (
   allconnections: Connection[]
 
 ): SwipeConnectionsReturn => {
+
   const [currentSet, setCurrentSet] = useState(0);
   const [offset, setOffset] = useState(0);
   const touchStartX = useRef(0);
   const isDragging = useRef(false);
 
   const [length, connections] =divideConnections(allconnections)
-  const displayedConnections:Connection []= connections[currentSet];
+  const displayedConnections:Connection []=  connections[currentSet] ? connections[currentSet] : []
+ 
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -67,6 +69,9 @@ export const SwipeConnections = (
 
 
 const divideConnections = (all:Connection[]):[number,Connection[][]]=>{
+  if (all.length === 0) {
+    return [0, []]; 
+  }
   const length= all.length
   let divided:Connection[][]=[]
   let single:Connection[]=[]
