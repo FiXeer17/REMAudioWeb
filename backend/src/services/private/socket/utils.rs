@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::net::SocketAddrV4;
 use tokio::net::TcpStream;
 use tokio::time::timeout;
@@ -26,10 +27,10 @@ pub async fn try_connection(socket: SocketAddrV4) -> bool {
     return false;
 }
 
-pub fn check_in_connections(socket:SocketAddrV4,connections:Option<Vec<SocketAddrV4>>)-> bool{
+pub fn check_in_connections(socket:SocketAddrV4,connections:Option<HashMap<SocketAddrV4,String>>)-> bool{
     match connections{
         Some(connections)=>{
-            connections.contains(&socket)
+            connections.keys().cloned().collect::<Vec<SocketAddrV4>>().contains(&socket)
         },
         None => false
     }

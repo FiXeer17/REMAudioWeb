@@ -1,4 +1,4 @@
-use std::{collections::HashSet, net::SocketAddrV4, str::FromStr};
+use std::{collections::{HashMap, HashSet}, net::SocketAddrV4, str::FromStr};
 
 use crate::{
     services::private::app::tcp_handler::tcp_handler::TcpStreamActor, utils::common::check_socket,
@@ -53,13 +53,50 @@ impl Handler<SetSocket> for TcpStreamsManager {
                 let sockv4 = check_socket(msg.socket).unwrap();
                 self.latest_socket = sockv4;
                 if sockv4.is_some(){
-                    self.sockets.insert(sockv4.unwrap());
+                    self.sockets.insert(sockv4.unwrap(), msg.socket_name);
                 }
                 return true;
 
             }
         }
         false
+    }
+}
+
+impl Handler<RemoveSocket> for TcpStreamsManager{
+    type Result = ();
+    fn handle(&mut self, msg: RemoveSocket, _ctx: &mut Self::Context) -> Self::Result {
+        let sessions= self.streams.remove(&msg.socket);
+        let message = ClosedByAdmin{};
+
+        if let Some(socket) = self.latest_socket{
+            if &socket == &msg.socket{
+                self.latest_socket = None;
+            }
+        }
+        if sessions.is_some(){
+            sessions.unwrap().iter().for_each(|addr|{
+                addr.do_send(message.clone());
+            });
+        }
+        if let Some(stream_actor) = self.streams_actors.remove(&msg.socket){
+            stream_actor.do_send(message.clone());
+        }
+        self.avail_map.remove(&msg.socket);
+        let to_remove:Vec<Uuid> = self.uuids_sockets.iter().filter_map(|(uuid,socket)|{
+            if let Some(socket) = socket{
+                if &check_socket(socket.clone()).unwrap().unwrap() == &msg.socket{
+                    return Some(*uuid);
+                }
+                return None;
+            }
+            None
+        }).collect();
+        to_remove.iter().for_each(|uuid|{
+            let to_reset = self.uuids_sockets.get_mut(uuid).unwrap();
+            *to_reset = None;
+        });
+        self.sockets.remove(&msg.socket);
     }
 }
 
@@ -71,16 +108,26 @@ impl Handler<RetrieveSocket> for TcpStreamsManager {
 }
 
 impl Handler<GetConnections> for TcpStreamsManager {
-    type Result = Option<Vec<SocketAddrV4>>;
+    type Result = Option<HashMap<SocketAddrV4,String>>;
     fn handle(&mut self, _: GetConnections, _: &mut Self::Context) -> Self::Result {
-        let socket_vec: Vec<SocketAddrV4> = self.sockets.clone().into_iter().collect();
-        if socket_vec.is_empty() {
+        if self.sockets.is_empty() {
             return None;
         }
-        Some(socket_vec)
+        Some(self.sockets.clone())
     }
 }
-
+impl Handler<GetLatestConnection> for TcpStreamsManager{
+    type Result = Option<HashMap<SocketAddrV4,String>>;
+    fn handle(&mut self, _msg: GetLatestConnection, _ctx: &mut Self::Context) -> Self::Result {
+        if self.latest_socket.is_some(){
+            let sock = self.latest_socket.unwrap();
+            let mut latest_socket: HashMap<SocketAddrV4, String> = HashMap::new();
+            latest_socket.insert(sock, self.sockets.get(&sock).cloned().unwrap());
+            return Some(latest_socket);
+        }
+        None
+    }
+}
 impl Handler<SessionOpened> for TcpStreamsManager {
     type Result = String;
     fn handle(&mut self, msg: SessionOpened, _: &mut Self::Context) -> Self::Result {
@@ -95,9 +142,9 @@ impl Handler<SessionOpened> for TcpStreamsManager {
 }
 
 impl Handler<RetrieveUserFromUuid> for TcpStreamsManager {
-    type Result = i32;
+    type Result = Option<i32>;
     fn handle(&mut self, msg: RetrieveUserFromUuid, _ctx: &mut Self::Context) -> Self::Result {
-        *self.uuids_users.get(&msg.uuid).unwrap()
+        self.uuids_users.get(&msg.uuid).cloned()
     }
 }
 impl Handler<StartStream> for TcpStreamsManager {

@@ -35,6 +35,15 @@ impl Handler<ClosedByRemotePeer> for WsSession {
     }
 }
 
+impl Handler<ClosedByAdmin> for WsSession{
+    type Result = ();
+    fn handle(&mut self, _msg: ClosedByAdmin, ctx: &mut Self::Context) -> Self::Result {
+        ctx.text(json!({"reason":"socket deleted by admin."}).to_string());
+        ctx.stop();
+    }
+}
+
+
 // POST-MIDDLEWARE 
 impl Handler<MatrixReady> for WsSession {
     type Result = ();
