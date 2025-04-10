@@ -33,7 +33,7 @@ export const UUIDProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if(value.data.sockets===null)
               return navigate("/newconnections")
             else
-              return navigate("/homeAudio")
+              return navigate("/recentonnections")
             
           } catch (error) {
             console.error("Error getting Socket:", error);
