@@ -65,3 +65,4 @@ pub async fn socket(
     let response = json!({"socket": socket});
     HttpResponse::Ok().json(response)
 }
+

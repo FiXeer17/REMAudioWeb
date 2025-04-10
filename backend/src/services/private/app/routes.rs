@@ -1,7 +1,7 @@
 use crate::{
     services::{
         private::app::{
-            messages::{CheckSessionUUID, RetrieveSocket, RetrieveUserFromUuid},
+            messages::{CheckSessionUUID, PendingConnections, RetrieveSocket, RetrieveUserFromUuid},
             schemas::SessionUUID,
             tcp_manager::tcp_manager::TcpStreamsManager,
             ws_session::session::WsSession,
@@ -26,6 +26,7 @@ pub async fn app(
     pgpool: web::Data<AppState>,
     uuid: web::Query<SessionUUID>,
 ) -> Result<HttpResponse, actix_web::Error> {
+
     if let Err(_) = Uuid::from_str(&uuid.uuid) {
         return Ok(HttpResponse::Unauthorized().json(return_json_reason("Invalid uuid found")));
     }
@@ -36,6 +37,10 @@ pub async fn app(
     }
     if let Ok(false) = checked {
         return Ok(HttpResponse::Unauthorized().finish());
+    }
+
+    if let Ok(false) = srv.send(PendingConnections{}).await{
+        return Ok(HttpResponse::NotFound().finish());
     }
 
     let socket = srv.send(RetrieveSocket { uuid }).await;

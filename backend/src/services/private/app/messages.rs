@@ -145,6 +145,10 @@ pub struct SetCommandOk{
 pub struct GetConnections{}
 
 #[derive(Message,Clone)]
+#[rtype(result="bool")]
+pub struct PendingConnections{}
+
+#[derive(Message,Clone)]
 #[rtype(result="i32")]
 pub struct RetrieveUserFromUuid{
     pub uuid:Uuid,

@@ -16,6 +16,7 @@ pub struct Channel {
 pub async fn insert_user(
     username: String,
     password: String,
+    admin: bool,
     pgpool: &AppState,
 ) -> Result<(), sqlx::Error> {
     let (user, password) = (username, password);
@@ -30,7 +31,7 @@ pub async fn insert_user(
     let query = sqlx::query(query_string)
         .bind(user)
         .bind(password.to_string())
-        .bind(true)
+        .bind(admin)
         .fetch_optional(&pgpool.db)
         .await;
     match query {
