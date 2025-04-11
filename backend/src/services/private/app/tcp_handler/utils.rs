@@ -4,7 +4,7 @@ use std::{net::SocketAddrV4, sync::Arc};
 use actix::{Addr, AsyncContext, Context};
 use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::TcpStream};
 
-use crate::{engine::{defs::fncodes::FNCODE, lib::MatrixCommand}, utils::configs::tcp_comunication_settings};
+use crate::{engine::{defs::{datas::io::SRC, fncodes::FNCODE}, lib::MatrixCommand}, services::private::app::schemas::SetVisibility, utils::configs::tcp_comunication_settings};
 
 use super::{
     super::{
@@ -109,5 +109,45 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
                 }
             }
         });
+    }
+}
+
+pub fn update_visibility(
+    mut states: MatrixStates,
+    cmd: SetVisibility,
+) -> Result<MatrixStates, errors::Error> {
+    let channel_map = match cmd.io.as_str() {
+        io if io == SRC::INPUT.to_label() => states.i_visibility.as_mut(),
+        io if io == SRC::OUTPUT.to_label() => states.o_visibility.as_mut(),
+        _ => return Err(errors::Error::InvalidSrc),
+    };
+    let channel = match cmd.channel.parse::<u32>(){
+        Ok(channel) => channel,
+        Err(_) => return Err(errors::Error::InvalidChannel)
+    };
+    let value = match cmd.value.parse::<bool>(){
+        Ok(channel) => channel,
+        Err(_) => return Err(errors::Error::InvalidValue)
+    };
+    
+    let Some(map) = channel_map else {
+        return Err(errors::Error::InvalidChannel);
+    };
+
+    let Some(channel) = map.get_mut(&channel) else {
+        return Err(errors::Error::InvalidChannel);
+    };
+
+    *channel = value;
+    Ok(states)
+}
+
+
+pub mod errors{
+    #[derive(Clone,Debug)]
+    pub enum Error{
+        InvalidSrc,
+        InvalidChannel,
+        InvalidValue,
     }
 }

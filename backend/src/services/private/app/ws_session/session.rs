@@ -1,15 +1,19 @@
+use super::utils::{deserialize_text, HandleText};
 use crate::{
-    engine::{defs::datas, lib::MatrixCommand},
-    services::{private::app::{messages::{self, Commands, Disconnect, SetMessage}, schemas::MatrixStates}, public::utils::Channel}, utils::configs::websocket_settings,
+    services::{
+        private::app::{
+            messages::{self, Disconnect},
+            schemas::MatrixStates,
+        },
+        public::utils::Channel,
+    },
+    utils::configs::websocket_settings,
 };
 use actix::prelude::*;
 use actix_web_actors::ws;
 use std::{collections::HashMap, net::SocketAddrV4, time::Instant};
-use super::utils::HandleText;
 
-use super::{
-    super::schemas::SetState, super::tcp_manager::tcp_manager::TcpStreamsManager,
-};
+use super::super::tcp_manager::tcp_manager::TcpStreamsManager;
 
 pub struct WsSession {
     pub hb: Instant,
@@ -36,30 +40,32 @@ impl WsSession {
     }
     fn on_connect(&self, ctx: &mut ws::WebsocketContext<Self>) {
         let addr = ctx.address();
-        self.srv.do_send(messages::Connect { addr, socket:self.socket });
+        self.srv.do_send(messages::Connect {
+            addr,
+            socket: self.socket,
+        });
     }
 }
 
 impl WsSession {
-    pub fn handle_text(&mut self, text: String, addr: Addr<WsSession>) -> HandleText {
-        if text == String::from("recache"){
-            self.srv.do_send(SetMessage{addr,command:Commands::ReCache});
-            return HandleText::Recache;
-        }
-        let serialized: SetState = serde_json::from_str(&text).unwrap();
-        let rw = datas::rw::WRITE.to_string();
-        return HandleText::Command(MatrixCommand::new_from_client(rw, serialized));
+    pub fn handle_text(&mut self, text: String, _addr: Addr<WsSession>) -> HandleText {
+        deserialize_text(text)
     }
-    pub fn attach_channel_visibility(&self, states:&mut MatrixStates)->MatrixStates{ 
+
+    pub fn attach_channel_visibility(&self, states: &mut MatrixStates) -> MatrixStates {
         let mut i_visibility_map: HashMap<u32, bool> = HashMap::new();
         let mut o_visibility_map: HashMap<u32, bool> = HashMap::new();
-        self.i_channels.iter().enumerate().for_each(|(i,channel)|{
-            let index = i+1;
-            i_visibility_map.entry(index as u32).or_insert(channel.visible);
+        self.i_channels.iter().enumerate().for_each(|(i, channel)| {
+            let index = i + 1;
+            i_visibility_map
+                .entry(index as u32)
+                .or_insert(channel.visible);
         });
-        self.o_channels.iter().enumerate().for_each(|(i,channel)|{
-            let index = i+1;
-            o_visibility_map.entry(index as u32).or_insert(channel.visible);
+        self.o_channels.iter().enumerate().for_each(|(i, channel)| {
+            let index = i + 1;
+            o_visibility_map
+                .entry(index as u32)
+                .or_insert(channel.visible);
         });
 
         states.i_visibility = Some(i_visibility_map);
@@ -75,4 +81,3 @@ impl Actor for WsSession {
         self.on_connect(ctx);
     }
 }
-

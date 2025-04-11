@@ -123,7 +123,17 @@ To do so you have to send a json formatted WebSocket message with this body:
     "channel": String,  -> OPTIONAL
     "value" : String, 
 }
+```
 
+### set visibility command
+
+```
+{
+    "io": "[POSSIBLE IO]", -> OPTIONAL                   
+    "channel": String,  -> OPTIONAL
+    "value" : String, 
+}
+value is a boolean string.
 ```
 
 #### POSSIBLE SECTIONS:
@@ -147,3 +157,5 @@ input/output sources are specific keywords, here is a list of ios that the engin
 | preset | n positive integer: 1<=n<=16 |
 | mute | boolean |
 | volume | integer |
+
+
