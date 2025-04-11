@@ -71,7 +71,7 @@ pub async fn add_socket(
             if let false = response.unwrap() {
                 return HttpResponse::BadRequest().json(return_json_reason("invalid uuid"));
             }
-            (socket.to_string(),request_body.socket_name.clone())
+            (s.unwrap().to_string(),request_body.socket_name.clone())
             
         }
         Err(e) => {

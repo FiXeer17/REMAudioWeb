@@ -44,7 +44,12 @@ impl Handler<ClosedByAdmin> for TcpStreamActor {
         ctx.stop();
     }
 }
-
+impl Handler<MatrixPostMiddleware> for TcpStreamActor{
+    type Result = ();
+    fn handle(&mut self, msg: MatrixPostMiddleware, _ctx: &mut Self::Context) -> Self::Result {
+        self.machine_states = Some(msg.states);
+    }
+}
 
 impl Handler<MatrixReady> for TcpStreamActor {
     type Result = ();
@@ -79,6 +84,7 @@ impl Handler<SetMessage> for TcpStreamActor{
         self.watch_inactive(ctx, msg.addr);
         match msg.command{
             Commands::SetCommand(sc) => self.handle_set_command(sc),
+            Commands::SetVisibility(sv) => self.handle_set_visibility(sv),
             Commands::ReCache => self.handle_recache(ctx),
         }
     }

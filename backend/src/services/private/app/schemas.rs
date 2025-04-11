@@ -13,6 +13,12 @@ pub struct SetState {
     pub value : Option<String>
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct SetVisibility {
+    pub io: String,                   
+    pub channel: String,
+    pub value: String,
+}
 
 
 #[derive(Serialize, Deserialize, Clone)]

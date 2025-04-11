@@ -1,6 +1,7 @@
 use crate::engine::lib::MatrixCommand;
 
 use super::schemas::MatrixStates;
+use super::schemas::SetVisibility;
 use super::ws_session::session::WsSession;
 use actix::prelude::*;
 use actix::Message;
@@ -8,7 +9,6 @@ use serde::Serialize;
 use tokio::net::TcpStream;
 use uuid::Uuid;
 use std::{net::SocketAddrV4,collections::HashMap};
-
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
@@ -138,6 +138,7 @@ pub struct ClosedByAdmin{}
 #[derive(Debug,Clone)]
 pub enum Commands{
     SetCommand(SetCommand),
+    SetVisibility(SetVisibility),
     ReCache
 }
 
@@ -160,7 +161,6 @@ pub struct GetConnections{}
 #[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
 pub struct GetLatestConnection{}
 
-
 #[derive(Message,Clone)]
 #[rtype(result="bool")]
 pub struct PendingConnections{}
@@ -170,3 +170,12 @@ pub struct PendingConnections{}
 pub struct RetrieveUserFromUuid{
     pub uuid:Uuid,
 }
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct MatrixPostMiddleware{
+    pub addr: Option<Addr<WsSession>>,
+    pub states: MatrixStates,
+}
+
+
