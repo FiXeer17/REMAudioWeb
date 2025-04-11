@@ -1,6 +1,7 @@
 import React, { PropsWithChildren, useEffect, useReducer, useState } from "react";
 import { defaultSocketContextState,SocketReducer,SocketContextProvider } from "./context";
-import { useUUID } from "./ComponentUuid";
+import { useUUID,useSockets } from "./ComponentUuid";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -8,12 +9,13 @@ export interface ISocketContextComponentProps extends PropsWithChildren{}
 
 const SocketContextComponent: React.FunctionComponent<ISocketContextComponentProps> = (props)=>
 {
-    
+    const navigate=useNavigate()
     const { children } = props
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
     const [loading, setLoading]= useState(true)
     
     const {uuid}=useUUID()
+    const {sockets}=useSockets()
 
 
     useEffect(()=>{
@@ -27,6 +29,12 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       socket.onopen=()=>{};
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
+        const datajson=JSON.parse(event.data)
+        if (datajson.hasOwnProperty('reason')){
+          socket.close()
+          navigate("/callAdministrator")
+
+        }
         socketDispatch({ type: 'new_message', payload: event.data })
         setLoading(false)
       }
@@ -38,6 +46,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         socket.close();
       };
     },[uuid])
+
 
     const StartListeners= ()=>{
 

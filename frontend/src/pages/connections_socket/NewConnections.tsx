@@ -28,18 +28,26 @@ export default function NewConnetions() {
                   backgroundColor: isLast
                     ? "rgba(0, 46, 153, 0.2)"
                     : "transparent",
+                  opacity:0.9,
+                  filter: isLast
+                  ?"blur(0px)"
+                  :`blur(${4-i}px)`,
                   left: "50%", 
                   transform: "translateX(-50%)"
                 }}
-              />
+              >
+              {isLast && (
+                <div className="flex items-center justify-center h-full">
+                  <Link to="/createconnections" className="flex flex-col justify-center items-center h-full w-full absolute z-10 text-home_colors-newconnections">
+                      new connections
+                    <LinkSimple size={32} color="#007AFF" />
+                  </Link>
+                </div>
+              )}
+              </div>
             );
           })}
         </div>
-
-        <Link to="/createconnections" className="flex flex-col justify-center items-center absolute z-10 text-home_colors-newconnections">
-            new connections
-          <LinkSimple size={32} color="#007AFF" />
-        </Link>
       </div>
     </div>
   );

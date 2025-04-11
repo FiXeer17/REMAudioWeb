@@ -37,34 +37,16 @@ export const UUIDProvider: React.FC<{ children: React.ReactNode }> = ({
         const value = await getSocket();
         if (isAdmin) {
           setSockets(value.data.sockets);
-          if (value.data.sockets === null) 
-            return navigate("/newconnections");
-          else 
-            return navigate("/recentconnections");
+          if (value.data.sockets === null) return navigate("/newconnections");
+          else return navigate("/recentconnections");
         } else {
-          
-          setSockets(
-            value.data.latest_socket ? [value.data.latest_socket] : null
-          );
-          
-          
-              if (value.data.latest_socket !== null) {
-                const headers = {
-                  uuid: uuid,
-                  socket_name: value.data.latest_socket.name,
-                  socket: `${value.data.latest_socket.ip}:${value.data.latest_socket.port}`,
-                };
-                console.log(headers)
-                const response = await setSocket(headers);
-                if (response.status === 200) {
-                  return navigate("/homeAudio");
-                }
-                
-              } else {
-                console.log("no socket")
-                return navigate("/login")
-              }
-              
+          setSockets(value.data.latest_socket ? [value.data.latest_socket] : null);
+
+          if (value.data.latest_socket !== null) {
+            return navigate("/homeAudio");
+          } else {
+            return navigate("/callAdministrator");
+          }
         }
       } catch (error) {
         console.error("Error getting Socket:", error);

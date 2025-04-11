@@ -12,6 +12,7 @@ import HomeVideo from "./pages/HomeVideo"
 import NewConnetions from "./pages/connections_socket/NewConnections"
 import CreateConnections from "./pages/connections_socket/CreateConnections"
 import RecentConnections from "./pages/connections_socket/RecentConnections"
+import CallAdministrator from "./pages/connections_socket/CallAdministrator"
 
 
 const UUIDLayout=()=>{
@@ -44,7 +45,10 @@ export const router = createBrowserRouter([
     path: "/test",
     element: <Test/>
   },
-  
+  {
+    path: "/callAdministrator",
+    element: <CallAdministrator/>
+  },
   {
     element: <UUIDLayout/>,
     children:[
