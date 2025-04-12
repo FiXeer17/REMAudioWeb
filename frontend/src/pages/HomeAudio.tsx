@@ -13,14 +13,18 @@ import { Circle, Clock } from "@phosphor-icons/react";
 export default function Volume() {
   const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
   const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
+  const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
+  const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
   const {socket,message} = useContext(SocketContext).socketState
   const [isAvailable, setIsAvailable] = useState(true)
 
   useEffect(()=>{
 
-    const { inputChannelStates, outputChannelStates,isAvailable } = GetData(message);
+    const { inputChannelStates, outputChannelStates,isAvailable,outputVisibility, inputVisibility } = GetData(message);
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
+      setInputVisibility(inputVisibility)
+      setOutputVisibility(outputVisibility)
       setIsAvailable(isAvailable)
   },[message])
   const navigate = useNavigate();
@@ -113,17 +117,22 @@ export default function Volume() {
           >
             <div className="grid grid-cols-4 w-full items-center justify-items-center pt-2">
               {displayedInputChannels.map((channel: string) => (
+                
                 <Channel
                   key={channel}
+                  disabled={!inputVisibility[channel]}
                   variant={
-                    inputChannelStates[channel]
-                      ? "channels_activated"
-                      : "channels_disabled"
+                    inputVisibility[channel]?
+                        inputChannelStates[channel]
+                        ? "channels_activated"
+                        : "channels_disabled"
+                      : "channels_notVisible"
                   }
                   onClick={() => handleState(channel, "I")}
                 >
                   {`CH${channel}`}
                 </Channel>
+                
               ))}
             </div>
             <div className="flex items-center justify-center pb-2">
@@ -162,10 +171,13 @@ export default function Volume() {
               {displayedOutputChannels.map((channel: string) => (
                 <Channel
                   key={channel}
+                  disabled={!outputVisibility[channel]}
                   variant={
-                    outputChannelStates[channel]
-                      ? "channels_activated"
-                      : "channels_disabled"
+                    outputVisibility[channel]?
+                        outputChannelStates[channel]
+                        ? "channels_activated"
+                        : "channels_disabled"
+                      : "channels_notVisible"
                   }
                   onClick={() => handleState(channel, "O")}
                 >

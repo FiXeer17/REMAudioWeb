@@ -68,7 +68,7 @@ export default function SignInPage({isLoading}:pageProps) {
           <Input_pass className="visible" Eye_state={"visible"} Forgot={"visible"} placeholder="Password" {...register("password")} />
         </div>
         <div className="flex flex-col items-center justify-start mt-8 ">
-         <Button_sign isLoading={isLoading} variant={"login"} size={"login"} type="submit">
+         <Button_sign isLoading={isLoading} variant={"login"} size={"login"} >
             Sign In
           </Button_sign>
           

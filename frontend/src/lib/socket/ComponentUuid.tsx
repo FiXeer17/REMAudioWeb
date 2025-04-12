@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getUUID, getSocket } from "../services";
 import { useNavigate, useLocation } from "react-router-dom";
-import { setSocket } from "../services";
+
 
 interface UUIDContextType {
   uuid: string | undefined;

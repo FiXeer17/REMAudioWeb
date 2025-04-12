@@ -36,3 +36,11 @@ export function getSocket():Promise<AxiosResponse<{ sockets: { name: string; ip:
 export function setSocket({uuid,socket_name,socket}: UserSocket): Promise<AxiosResponse> {
   return client.post(`ws/socket/add?uuid=${uuid}`, {socket_name,socket});
 }
+
+export function addSocket({uuid,socket_name,socket}: UserSocket): Promise<AxiosResponse> {
+  return client.post(`ws/socket/add?uuid=${uuid}`, {socket_name,socket});
+}
+
+export function removeSocket({uuid,socket_name,socket}: UserSocket): Promise<AxiosResponse> {
+  return client.post(`ws/socket/remove?uuid=${uuid}`, {socket_name,socket});
+}
