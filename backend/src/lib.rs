@@ -21,7 +21,7 @@ pub mod utils;
 pub const SERVER_ADDR: &str = "0.0.0.0";
 pub const SERVER_PORT: u16 = 8000;
 
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct AppState {
     pub db: Pool<Postgres>,
 }

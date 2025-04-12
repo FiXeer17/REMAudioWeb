@@ -1,12 +1,9 @@
 use crate::{
-    services::{
-        private::app::{
-            messages::{CheckSessionUUID, PendingConnections, RetrieveSocket, RetrieveUserFromUuid},
-            schemas::SessionUUID,
-            tcp_manager::tcp_manager::TcpStreamsManager,
-            ws_session::session::WsSession,
-        },
-        public::{interfaces, utils::SRC},
+    services::private::app::{
+        messages::{CheckSessionUUID, PendingConnections, RetrieveSocket, RetrieveUserFromUuid},
+        schemas::SessionUUID,
+        tcp_manager::tcp_manager::TcpStreamsManager,
+        ws_session::session::WsSession,
     },
     utils::common::check_socket,
     AppState,
@@ -22,11 +19,10 @@ use uuid::Uuid;
 pub async fn app(
     req: HttpRequest,
     stream: web::Payload,
-    srv: web::Data<actix::Addr<TcpStreamsManager>>,
     pgpool: web::Data<AppState>,
+    srv: web::Data<actix::Addr<TcpStreamsManager>>,
     uuid: web::Query<SessionUUID>,
 ) -> Result<HttpResponse, actix_web::Error> {
-
     if let Err(_) = Uuid::from_str(&uuid.uuid) {
         return Ok(HttpResponse::Unauthorized().json(return_json_reason("Invalid uuid found")));
     }
@@ -39,7 +35,7 @@ pub async fn app(
         return Ok(HttpResponse::Unauthorized().finish());
     }
 
-    if let Ok(false) = srv.send(PendingConnections{}).await{
+    if let Ok(false) = srv.send(PendingConnections {}).await {
         return Ok(HttpResponse::NotFound().finish());
     }
 
@@ -58,28 +54,16 @@ pub async fn app(
         return Ok(HttpResponse::InternalServerError().json(return_json_reason(&e.to_string())));
     }
     let user_id = user_id.unwrap();
-    if user_id.is_none(){
-        HttpResponse::Unauthorized().finish();
+    if user_id.is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
     }
-    let i_channels = interfaces::retrieve_channels(&pgpool, user_id.unwrap(), SRC::INPUT)
-        .await
-        .unwrap()
-        .unwrap();
-    let o_channels = interfaces::retrieve_channels(&pgpool, user_id.unwrap(), SRC::OUTPUT)
-        .await
-        .unwrap()
-        .unwrap();
 
-    ws::start(
-        WsSession {
-            hb: Instant::now(),
-            srv: srv.get_ref().clone(),
-            socket: sockv4,
-            user_id:user_id.unwrap(),
-            i_channels,
-            o_channels,
-        },
-        &req,
-        stream,
-    )
+    let session = WsSession {
+        hb: Instant::now(),
+        srv: srv.get_ref().clone(),
+        socket: sockv4,
+        pgpool: pgpool.clone(),
+        user_id: user_id.unwrap(),
+    };
+    ws::start(session, &req, stream)
 }

@@ -32,7 +32,7 @@ pub async fn add_socket(
     };
     match srv.send(RetrieveUserFromUuid{uuid:uuid_check}).await{
         Ok(Some(id)) => match retrieve_admin_from_id(&pgpool, id).await {
-            Ok(true) => {println!("{id}")},
+            Ok(true) => (),
             Ok(false) => return HttpResponse::Unauthorized().finish(),
             Err(e)=> return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
             
@@ -102,7 +102,7 @@ pub async fn remove_socket(
     };
     match srv.send(RetrieveUserFromUuid{uuid:uuid_check}).await{
         Ok(Some(id)) => match retrieve_admin_from_id(&pgpool, id).await {
-            Ok(true) => {println!("{id}")},
+            Ok(true) => (),
             Ok(false) => return HttpResponse::Unauthorized().finish(),
             Err(e)=> return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
             

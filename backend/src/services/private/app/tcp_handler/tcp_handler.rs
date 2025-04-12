@@ -1,21 +1,15 @@
-use super::{
-    super::{
-        messages::{MatrixReady, StreamFailed, StreamStarted},
-        schemas::MatrixStates,
-    },
-    utils::update_visibility,
+use super::super::{
+    messages::{MatrixReady, StreamFailed, StreamStarted},
+    schemas::MatrixStates,
 };
 
 use super::configs::*;
 use crate::{
     engine::lib::{read_all_states, MatrixCommand},
-    services::private::app::{
-        messages::{ClosedByRemotePeer, SetCommand, SetHandlerState},
-        schemas::SetVisibility,
-        tcp_manager::tcp_manager::TcpStreamsManager,
-        ws_session::session::WsSession,
-    },
-    utils::configs::tcp_comunication_settings,
+    services::{private::app::{
+        messages::{ClosedByRemotePeer, GeneralError, SetCommand, SetHandlerState}, schemas::SetVisibility, tcp_manager::tcp_manager::TcpStreamsManager, ws_session::session::WsSession
+    }, public::{interfaces::update_channel_visibility, utils::SRC}},
+    utils::configs::tcp_comunication_settings, AppState,
 };
 use actix::{Actor, Addr, AsyncContext, Context, SpawnHandle};
 use futures_util::lock::Mutex;
@@ -162,20 +156,6 @@ impl TcpStreamActor {
     pub fn handle_set_command(&mut self, sc: SetCommand) {
         self.commands_queue.push_front(sc.command);
     }
-    pub fn handle_set_visibility(&mut self, sv: SetVisibility) {
-        if let Some(machine_states) = &self.machine_states {
-            match update_visibility(machine_states.clone(), sv) {
-                Ok(states) => {
-                    self.machine_states = Some(states.clone());
-                    self.tcp_manager.do_send(MatrixReady {
-                        socket: self.stream_socket,
-                        states,
-                    });
-                }
-                Err(_) =>(),
-            }
-        }
-    }
     pub fn handle_recache(&mut self, ctx: &mut Context<Self>) {
         if self.machine_states.is_some() {
             if let Some(poller) = self.cmd_poller {
@@ -189,6 +169,42 @@ impl TcpStreamActor {
                 TcpStreamActor::read_states(ctx_addr, socket, stream).await;
             });
         }
+    }
+    pub fn handle_set_visibility_command(&mut self, sv: SetVisibility, pgpool: actix_web::web::Data<AppState>, user_id: i32, addr: Addr<WsSession>, selfaddr: Addr<TcpStreamActor>) {
+        let relative_identifier = sv.channel.parse::<i32>().unwrap();
+        let visibility = sv.value.parse::<bool>().unwrap();
+        let stream_socket = self.stream_socket.clone();
+        let states = self.machine_states.clone();
+        
+        let pgpool_clone = pgpool.clone();
+        let io_clone = sv.io.clone();
+        let addr_clone = addr.clone();
+        
+        tokio::spawn(async move {
+            let result = update_channel_visibility(&pgpool_clone, user_id, relative_identifier, visibility, io_clone).await;
+            if let Err(_) = result {
+                addr_clone.do_send(GeneralError{error: "cannot update channel visibility in database".to_string()});
+                return;
+            }
+            if let Some(states) = states.clone().as_mut() {
+                if sv.io == SRC::INPUT.to_string() {
+                    if let Some(i_visibility) = states.i_visibility.as_mut() {
+                        i_visibility.insert(relative_identifier as u32, visibility);
+                    }
+                } else {
+                    if let Some(o_visibility) = states.o_visibility.as_mut() {
+                        o_visibility.insert(relative_identifier as u32, visibility);
+                    }
+                }
+                
+                let states_clone = states.clone();
+                selfaddr.do_send(MatrixReady {
+                    socket: stream_socket,
+                    states: states_clone,
+                });
+            }
+
+        });
     }
 }
 

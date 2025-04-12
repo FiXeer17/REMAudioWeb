@@ -1,8 +1,9 @@
 use crate::engine::lib::MatrixCommand;
+use crate::AppState;
 
 use super::schemas::MatrixStates;
-use super::schemas::SetVisibility;
 use super::ws_session::session::WsSession;
+use super::ws_session::utils::UpdateVisibility;
 use actix::prelude::*;
 use actix::Message;
 use serde::Serialize;
@@ -105,6 +106,11 @@ pub struct GeneralConnectionError{
     pub socket: Option<SocketAddrV4>,
     pub error: String, 
 }
+#[derive(Message,Clone,Serialize)]
+#[rtype(result="()")]
+pub struct GeneralError{
+    pub error: String, 
+}
 
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -124,7 +130,7 @@ pub struct RemoveSocket{
     pub socket:SocketAddrV4,
     pub uuid: String
 }
-#[derive(Message,Clone,Debug)]
+#[derive(Message,Clone)]
 #[rtype(result="()")]
 pub struct SetMessage{
     pub addr: Addr<WsSession>,
@@ -135,17 +141,16 @@ pub struct SetMessage{
 #[rtype(result="()")]
 pub struct ClosedByAdmin{}
 
-#[derive(Debug,Clone)]
+#[derive(Clone)]
 pub enum Commands{
     SetCommand(SetCommand),
-    SetVisibility(SetVisibility),
+    SetVisibility(UpdateVisibility),
     ReCache
 }
 
 #[derive(Debug,Clone)]
 pub struct SetCommand{
     pub command: MatrixCommand,
-    
 }
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -176,6 +181,7 @@ pub struct RetrieveUserFromUuid{
 pub struct MatrixPostMiddleware{
     pub addr: Option<Addr<WsSession>>,
     pub states: MatrixStates,
+    pub pgpool : actix_web::web::Data<AppState>,
 }
 
 

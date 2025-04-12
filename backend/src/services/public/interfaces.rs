@@ -25,7 +25,7 @@ pub async fn from_username(
         .fetch_optional(&pgpool.db)
         .await?
     {
-        Some(user) => {println!("{:?}",user);Ok(user)},
+        Some(user) => Ok(user),
         None => Err(sqlx::Error::RowNotFound),
     }
 }
@@ -75,7 +75,7 @@ pub async fn retrieve_channels(
     user_id: i32,
     src: SRC,
 ) -> Result<Option<Vec<Channel>>, sqlx::Error> {
-    let query_string: &str = "SELECT * FROM channels WHERE user_id = $1 AND src=$2;";
+    let query_string: &str = "SELECT * FROM channels WHERE user_id = $1 AND src=$2 ORDER BY relative_identifier ASC;";
     let channels: Vec<Channel> = sqlx::query_as::<_, Channel>(query_string)
         .bind(user_id)
         .bind(src.to_string())
@@ -89,7 +89,7 @@ pub async fn retrieve_channels(
 }
 
 pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx::Error>{
-    let query_string: &str ="INSERT INTO channels (channel_name,visible,src,user_id) VALUES ($1,$2,$3,$4);";
+    let query_string: &str ="INSERT INTO channels (channel_name,visible,src,user_id,relative_identifier) VALUES ($1,$2,$3,$4,$5);";
 
     let (i_channels, o_channels, default_visibility, channel_prefix) = (
         channels_settings::get_i_channel_number(),
@@ -103,15 +103,31 @@ pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx:
         .bind(format!("{}{}",channel_prefix,i))
         .bind(default_visibility)
         .bind(SRC::INPUT.to_string())
-        .bind(user_id).fetch_optional(&pgpool.db).await?;
+        .bind(user_id)
+        .bind(i as i32)
+        .fetch_optional(&pgpool.db).await?;
     }
     for i in 1..o_channels+1{
         sqlx::query(query_string)
         .bind(format!("{}{}",channel_prefix,i))
         .bind(default_visibility)
         .bind(SRC::OUTPUT.to_string())
-        .bind(user_id).fetch_optional(&pgpool.db).await?;
+        .bind(user_id)
+        .bind(i as i32)
+        .fetch_optional(&pgpool.db).await?;
     }
+
+    Ok(())
+}
+
+pub async fn update_channel_visibility(pgpool: &AppState,user_id: i32,relative_identifier:i32,visibility:bool,src:String)->Result<(),sqlx::Error>{
+    let query_string: &str = "UPDATE channels SET visible=$1 WHERE user_id=$2 AND relative_identifier=$3 AND src=$4;";
+    sqlx::query(query_string)
+    .bind(visibility)
+    .bind(user_id)
+    .bind(relative_identifier)
+    .bind(src)
+    .fetch_optional(&pgpool.db).await?;
 
     Ok(())
 }
