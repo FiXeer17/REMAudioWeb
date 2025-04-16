@@ -72,18 +72,17 @@ impl WsSession {
 
     pub async fn attach_channel_visibility(
         states: &mut MatrixStates,
-        user_id: i32,
+        socket_id: i32,
         pgpool: web::Data<AppState>,
     ) -> Result<MatrixStates,()> {
         let pgpool = pgpool;
         let mut i_visibility_map: HashMap<u32, bool> = HashMap::new();
         let mut o_visibility_map: HashMap<u32, bool> = HashMap::new();
-        println!("{user_id}");
-        let i_channels = interfaces::retrieve_channels(&pgpool, user_id, SRC::INPUT)
+        let i_channels = interfaces::retrieve_channels(&pgpool, socket_id, SRC::INPUT)
             .await
             .unwrap();
             
-        let o_channels = interfaces::retrieve_channels(&pgpool, user_id, SRC::OUTPUT)
+        let o_channels = interfaces::retrieve_channels(&pgpool, socket_id, SRC::OUTPUT)
             .await
             .unwrap();
         if i_channels.is_none() || o_channels.is_none(){
