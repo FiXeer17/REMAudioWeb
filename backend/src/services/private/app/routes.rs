@@ -1,18 +1,17 @@
 use crate::{
     services::private::app::{
-        messages::{CheckSessionUUID, PendingConnections, RetrieveSocket, RetrieveUserFromUuid},
+        messages::{CheckSessionUUID, RetrieveSocket, RetrieveUserFromUuid},
         schemas::SessionUUID,
         tcp_manager::tcp_manager::TcpStreamsManager,
         ws_session::session::WsSession,
     },
-    utils::common::check_socket,
     AppState,
 };
 use actix_web::{get, web, HttpRequest, HttpResponse};
 
 use crate::utils::common::return_json_reason;
 use actix_web_actors::ws;
-use std::{net::SocketAddrV4, str::FromStr, time::Instant};
+use std::{str::FromStr, time::Instant};
 use uuid::Uuid;
 
 #[get("/app")]
@@ -35,18 +34,9 @@ pub async fn app(
         return Ok(HttpResponse::Unauthorized().finish());
     }
 
-    if let Ok(false) = srv.send(PendingConnections {}).await {
-        return Ok(HttpResponse::NotFound().finish());
-    }
-
     let socket = srv.send(RetrieveSocket { uuid }).await;
     if let Err(e) = socket {
         return Ok(HttpResponse::InternalServerError().json(return_json_reason(&format!("{}", e))));
-    }
-    let socket = socket.unwrap();
-    let mut sockv4: Option<SocketAddrV4> = None;
-    if socket.is_some() {
-        sockv4 = check_socket(socket.unwrap()).unwrap();
     }
 
     let user_id = srv.send(RetrieveUserFromUuid { uuid }).await;
@@ -61,7 +51,7 @@ pub async fn app(
     let session = WsSession {
         hb: Instant::now(),
         srv: srv.get_ref().clone(),
-        socket: sockv4,
+        socket: None,
         pgpool: pgpool.clone(),
         user_id: user_id.unwrap(),
     };
