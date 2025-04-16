@@ -1,4 +1,5 @@
 use crate::engine::lib::MatrixCommand;
+use crate::services::public::schemas::Socket;
 use crate::AppState;
 
 use super::schemas::MatrixStates;
@@ -9,6 +10,7 @@ use actix::Message;
 use serde::Serialize;
 use tokio::net::TcpStream;
 use uuid::Uuid;
+use std::collections::VecDeque;
 use std::{net::SocketAddrV4,collections::HashMap};
 
 #[derive(Message, Clone)]
@@ -166,9 +168,6 @@ pub struct GetConnections{}
 #[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
 pub struct GetLatestConnection{}
 
-#[derive(Message,Clone)]
-#[rtype(result="bool")]
-pub struct PendingConnections{}
 
 #[derive(Message,Clone)]
 #[rtype(result="Option<i32>")]
@@ -182,6 +181,25 @@ pub struct MatrixPostMiddleware{
     pub addr: Option<Addr<WsSession>>,
     pub states: MatrixStates,
     pub pgpool : actix_web::web::Data<AppState>,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct UnavailableSockets{
+    pub sockets: Vec<Socket>,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct SocketRestarted{
+    pub socket: Option<Socket>,
+    pub latest_socket:Option<Socket>
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct InactiveQueue{
+    pub queue: VecDeque<Socket>
 }
 
 
