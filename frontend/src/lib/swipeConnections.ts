@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface SwipeConnectionsReturn {
-  currentSet:number;
+  currentSet: number;
   displayedConnections: Connection[];
-  connections:Connection[][];
+  connections: Connection[][];
   offset: number;
   handleTouchStart: (e: React.TouchEvent) => void;
   handleTouchMove: (e: React.TouchEvent) => void;
@@ -11,56 +11,64 @@ interface SwipeConnectionsReturn {
 }
 
 type Connection = {
-  name:string,
+  name: string,
   ip: string;
   port: number;
 };
 
 export const SwipeConnections = (
   allconnections: Connection[]
-
 ): SwipeConnectionsReturn => {
-
   const [currentSet, setCurrentSet] = useState(0);
   const [offset, setOffset] = useState(0);
   const touchStartX = useRef(0);
   const isDragging = useRef(false);
-
-  const [length, connections] =divideConnections(allconnections)
-  const displayedConnections:Connection []=  connections[currentSet] ? connections[currentSet] : []
- 
-
+  
+  // Usa useState per memorizzare i risultati di divideConnections
+  const [dividedData, setDividedData] = useState<{
+    length: number;
+    connections: Connection[][];
+  }>({ length: 0, connections: [] });
+  
+  // Aggiungi questo useEffect per reagire ai cambiamenti di allconnections
+  useEffect(() => {
+    const [length, connections] = divideConnections(allconnections);
+    setDividedData({ length, connections });
+    // Resetta anche il currentSet quando le connessioni cambiano
+    setCurrentSet(0);
+  }, [allconnections]);
+  
+  const displayedConnections: Connection[] = 
+    dividedData.connections[currentSet] ? dividedData.connections[currentSet] : [];
+    
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     isDragging.current = true;
   };
-
+  
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging.current) return;
     const deltaX = e.touches[0].clientX - touchStartX.current;
-    
-    if ((currentSet === 0 && deltaX > 0) || (currentSet === length-1 && deltaX < 0)) {
+    if ((currentSet === 0 && deltaX > 0) || (currentSet === dividedData.length - 1 && deltaX < 0)) {
       return;
     }
-    
-    setOffset(deltaX); 
+    setOffset(deltaX);
   };
-
+  
   const handleTouchEnd = () => {
     if (offset > 70 && currentSet > 0) {
-      setCurrentSet(currentSet-1);
-    } else if (offset < -70 && currentSet < length-1) {
-      setCurrentSet(currentSet+1);
+      setCurrentSet(currentSet - 1);
+    } else if (offset < -70 && currentSet < dividedData.length - 1) {
+      setCurrentSet(currentSet + 1);
     }
-    setOffset(0); 
+    setOffset(0);
     isDragging.current = false;
   };
-
-
+  
   return {
     currentSet,
     displayedConnections,
-    connections,
+    connections: dividedData.connections,
     offset,
     handleTouchStart,
     handleTouchMove,
@@ -68,30 +76,32 @@ export const SwipeConnections = (
   };
 };
 
-
-const divideConnections = (all:Connection[]):[number,Connection[][]]=>{
+const divideConnections = (all: Connection[]): [number, Connection[][]] => {
   if (all.length === 0) {
-    return [0, []]; 
+    return [0, []];
   }
-  const length= all.length
-  let divided:Connection[][]=[]
-  let single:Connection[]=[]
-  let displayed:number
-  let cont=0
-  for (let c of all){
-    if (cont==4){
-        divided.push(single)
-        cont=0
-        single=[]
+  
+  const length = all.length;
+  let divided: Connection[][] = [];
+  let single: Connection[] = [];
+  let displayed: number;
+  let cont = 0;
+  
+  for (let c of all) {
+    if (cont == 4) {
+      divided.push(single);
+      cont = 0;
+      single = [];
     }
-    single.push(c)
-    if (c===all[length-1])
-        divided.push(single)
-    cont++
+    single.push(c);
+    if (c === all[length - 1])
+      divided.push(single);
+    cont++;
   }
-  displayed=divided.length
-  return[
+  
+  displayed = divided.length;
+  return [
     displayed,
     divided
-  ]
-}
+  ];
+};

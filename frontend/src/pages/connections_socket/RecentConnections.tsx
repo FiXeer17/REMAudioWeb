@@ -1,11 +1,12 @@
 import { ArrowLeft } from "@phosphor-icons/react";
-import { Link,useNavigate } from "react-router-dom";
+import { Link,useNavigate,useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Circle } from "@phosphor-icons/react";
 import { SwipeConnections } from "@/lib/swipeConnections";
-import { useSockets,useUUID } from "@/lib/socket/ComponentUuid";
+import { useConnections } from "@/lib/socket/ComponentUuid";
 import { setSocket } from "@/lib/services";
+import { toast, Toaster } from "sonner";
 
 
 
@@ -17,9 +18,11 @@ type Connection = {
 
 export default function RecentConnections(){
     const navigate=useNavigate()
+    const location=useLocation()
+    const [show] = useState<boolean>(() => location.state?.show);
     const [connections, setConnections] = useState<Connection[]>([]);
-    const {sockets}=useSockets()
-    const {uuid}=useUUID()
+    const {uuid,sockets}=useConnections()
+    
     useEffect(()=>{
         if (sockets==null){
            setConnections([]) 
@@ -28,6 +31,11 @@ export default function RecentConnections(){
         }
         
     },[sockets])
+
+    useEffect(()=>{
+        if(show)
+            toast.error("Error with the socket, try again",{duration:1000})
+    },[show])
 
     const handleClick=(element:Connection)=>{
         const fetchSetSocket=async ()=>{
@@ -95,7 +103,7 @@ export default function RecentConnections(){
                 ))}
 
             </div>
-            
+            <Toaster/>
         </div>
     )
 }

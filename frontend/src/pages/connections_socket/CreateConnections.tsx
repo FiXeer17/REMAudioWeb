@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input_email";
 import { Button } from "@/components/ui/button";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { addSocket } from "@/lib/services";
-import { useUUID } from "@/lib/socket/ComponentUuid";
+import { useConnections } from "@/lib/socket/ComponentUuid";
 
 type FormFields = {
     name:string;
@@ -16,7 +16,7 @@ type FormFields = {
 export default function CreateConnections(){
     const navigate=useNavigate()
     const { register,handleSubmit } =useForm<FormFields>();
-    const {uuid}=useUUID()
+    const {uuid}=useConnections()
 
     const onSubmit: SubmitHandler<FormFields> = async (data) => {
         try{
@@ -25,7 +25,7 @@ export default function CreateConnections(){
                 socket_name:data.name,
                 socket:`${data.ip}:${data.port}`
               }
-            const response= await addSocket(values)
+            await addSocket(values)
             navigate("/homeAudio")
         }catch(error){
             console.log("error creating socket")

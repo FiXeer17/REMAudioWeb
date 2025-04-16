@@ -13,9 +13,10 @@ import NewConnetions from "./pages/connections_socket/NewConnections"
 import CreateConnections from "./pages/connections_socket/CreateConnections"
 import RecentConnections from "./pages/connections_socket/RecentConnections"
 import CallAdministrator from "./pages/connections_socket/CallAdministrator"
+import UUIDLayout from "./pages/connections_socket/Redirect"
 
 
-const UUIDLayout=()=>{
+const UUIDLayou=()=>{
   return(
     <UUIDProvider>
       <Outlet/>
@@ -50,7 +51,7 @@ export const router = createBrowserRouter([
     element: <CallAdministrator/>
   },
   {
-    element: <UUIDLayout/>,
+    element: <UUIDLayou/>,
     children:[
       {
         path: "/uuidprovider",

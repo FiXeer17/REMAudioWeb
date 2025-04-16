@@ -41,6 +41,7 @@ export default function SignInPage({isLoading}:pageProps) {
       const isAdmin=response.data.admin
       const accessToken=response.data.access_token
       localStorage.setItem("accessToken",accessToken)
+      localStorage.setItem("isAdmin",isAdmin)
 
       return navigate("/uuidprovider",{state:{isAdmin}})
     }catch(error){

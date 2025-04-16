@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useEffect, useReducer, useState } from "react";
 import { defaultSocketContextState,SocketReducer,SocketContextProvider } from "./context";
-import { useUUID,useSockets } from "./ComponentUuid";
+import { useConnections } from "./ComponentUuid";
 import { useNavigate } from "react-router-dom";
 
 
@@ -13,10 +13,9 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const { children } = props
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
     const [loading, setLoading]= useState(true)
-    
-    const {uuid}=useUUID()
-    const {sockets}=useSockets()
+    const { triggerRedirect } = useConnections();
 
+    const {uuid,isAdmin}=useConnections()
 
     useEffect(()=>{
 
@@ -31,12 +30,21 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       socket.onmessage=(event)=>{
         const datajson=JSON.parse(event.data)
         if (datajson.hasOwnProperty('reason')){
-          socket.close()
-          navigate("/callAdministrator")
+          if (isAdmin){
+            const handleRedirect = async () => {
+            await triggerRedirect()
+            navigate("/uuidprovider",{state:{trigger:true}})
+            }
+            handleRedirect()
+          }
+          else
+            navigate("/callAdministrator")
 
-        }
-        socketDispatch({ type: 'new_message', payload: event.data })
+        }else{
+          socketDispatch({ type: 'new_message', payload: event.data })
         setLoading(false)
+        }
+        
       }
       
       StartListeners()
