@@ -3,15 +3,15 @@ use super::super::{
     schemas::MatrixStates,
 };
 
-use super::configs::*;
 use crate::{
     engine::lib::{read_all_states, MatrixCommand},
     services::{private::app::{
         messages::{ClosedByRemotePeer, GeneralError, SetCommand, SetHandlerState}, schemas::SetVisibility, tcp_manager::tcp_manager::TcpStreamsManager, ws_session::session::WsSession
-    }, public::{interfaces::update_channel_visibility, utils::SRC}},
+    }, public::{interfaces::{retrieve_socketid_from_db, update_channel_visibility}, utils::SRC}},
     utils::configs::tcp_comunication_settings, AppState,
 };
 use actix::{Actor, Addr, AsyncContext, Context, SpawnHandle};
+use actix_web::web::Data;
 use futures_util::lock::Mutex;
 use std::{collections::VecDeque, net::SocketAddrV4, sync::Arc};
 use tokio::{
@@ -27,10 +27,11 @@ pub struct TcpStreamActor {
     pub machine_states: Option<MatrixStates>,
     pub cmd_poller: Option<SpawnHandle>,
     pub owner: Option<SpawnHandle>,
+    pub pgpool:Data<AppState>,
 }
 
 impl TcpStreamActor {
-    pub fn new(stream_socket: SocketAddrV4, tcp_manager: Addr<TcpStreamsManager>) -> Self {
+    pub fn new(stream_socket: SocketAddrV4, tcp_manager: Addr<TcpStreamsManager>,pgpool: actix_web::web::Data<AppState>) -> Self {
         Self {
             stream_socket,
             tcp_manager,
@@ -39,6 +40,7 @@ impl TcpStreamActor {
             machine_states: None,
             cmd_poller: None,
             owner: None,
+            pgpool
         }
     }
     pub async fn read_states(
@@ -170,7 +172,7 @@ impl TcpStreamActor {
             });
         }
     }
-    pub fn handle_set_visibility_command(&mut self, sv: SetVisibility, pgpool: actix_web::web::Data<AppState>, user_id: i32, addr: Addr<WsSession>, selfaddr: Addr<TcpStreamActor>) {
+    pub fn handle_set_visibility_command(&mut self, sv: SetVisibility, pgpool: actix_web::web::Data<AppState>, addr: Addr<WsSession>, selfaddr: Addr<TcpStreamActor>) {
         let relative_identifier = sv.channel.parse::<i32>().unwrap();
         let visibility = sv.value.parse::<bool>().unwrap();
         let stream_socket = self.stream_socket.clone();
@@ -181,7 +183,13 @@ impl TcpStreamActor {
         let addr_clone = addr.clone();
         
         tokio::spawn(async move {
-            let result = update_channel_visibility(&pgpool_clone, user_id, relative_identifier, visibility, io_clone).await;
+            let socket_id = retrieve_socketid_from_db(&pgpool, stream_socket).await;
+            if socket_id.is_err() {
+                addr_clone.do_send(GeneralError{error: "cannot retrieve socket id in database".to_string()});
+                println!("cannot retrieve socket_id from the database");
+                return;
+            }
+            let result = update_channel_visibility(&pgpool_clone, socket_id.unwrap(), relative_identifier, visibility, io_clone).await;
             if let Err(_) = result {
                 addr_clone.do_send(GeneralError{error: "cannot update channel visibility in database".to_string()});
                 return;
@@ -216,7 +224,7 @@ impl Actor for TcpStreamActor {
         let ctx_address = ctx.address().clone();
         tokio::spawn(async move {
             let mut retries: u8 = 0;
-            while retries <= MAX_RETRIES {
+            while retries <= tcp_comunication_settings::get_max_connection_retries(){
                 match tokio::time::timeout(
                     tcp_comunication_settings::get_connection_timeout(),
                     TcpStream::connect(socket.to_string()),
@@ -231,7 +239,7 @@ impl Actor for TcpStreamActor {
                             break;
                         }
                         Err(e) => {
-                            if retries == MAX_RETRIES {
+                            if retries == tcp_comunication_settings::get_max_connection_retries() {
                                 let message = StreamFailed {
                                     socket,
                                     error: e.to_string(),
@@ -246,7 +254,7 @@ impl Actor for TcpStreamActor {
                         }
                     },
                     Err(t) => {
-                        if retries == MAX_RETRIES {
+                        if retries == tcp_comunication_settings::get_max_connection_retries() {
                             let message = StreamFailed {
                                 socket,
                                 error: t.to_string(),
