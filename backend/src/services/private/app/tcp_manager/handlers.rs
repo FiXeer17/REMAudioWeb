@@ -8,7 +8,7 @@ use crate::{
     services::{
         private::app::tcp_handler::{tcp_handler::TcpStreamActor, utils::add_channels},
         public::{
-            interfaces::{insert_socket_in_db, remove_socket_in_db, update_latest_socket_in_db},
+            interfaces::{insert_socket_in_db, update_latest_socket_in_db},
             schemas::Socket,
         },
     },
@@ -139,16 +139,8 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
             let to_reset = self.uuids_sockets.get_mut(uuid).unwrap();
             *to_reset = None;
         });
-        let removed = self.sockets.remove(&msg.socket);
-        if removed.is_some() {
-            let pool = self.pgpool.clone();
-            tokio::spawn(async move {
-                let result = remove_socket_in_db(&pool, msg.socket).await;
-                if result.is_err() {
-                    println!("couldn't remove socket in database");
-                }
-            });
-        }
+        self.sockets.remove(&msg.socket);
+        
     }
 }
 

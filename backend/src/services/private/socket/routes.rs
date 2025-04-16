@@ -11,7 +11,7 @@ use crate::{
             schemas::{RemoveSocketBody, SetSocketBody},
             utils::{check_in_connections, try_connection},
         },
-    }, public::interfaces::retrieve_admin_from_id},
+    }, public::interfaces::{remove_socket_in_db, retrieve_admin_from_id}},
     utils::common::{check_socket, return_json_reason}, AppState,
 };
 use actix_web::{post, web, HttpResponse, Responder};
@@ -118,7 +118,13 @@ pub async fn remove_socket(
             if let Ok(connections) = sockets{
                 match check_in_connections(s.unwrap(), connections){
                     true => (),
-                    false => return HttpResponse::NotFound().finish()
+                    false => {            
+                        let result = remove_socket_in_db(&pgpool, s.unwrap()).await;
+                        if result.is_err() {
+                            return HttpResponse::InternalServerError().finish();
+                        }
+                        return HttpResponse::Ok().json(json!({"socket": s.unwrap().to_string()}));
+                    }
                 }
             }
             let message = RemoveSocket {
