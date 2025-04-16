@@ -16,9 +16,8 @@ impl Handler<StreamStarted> for TcpStreamActor {
         let stream = Arc::new(Mutex::new(msg.tcp_stream));
         let ctx_addr = ctx.address().clone();
         self.stream = Some(stream.clone());
-
         tokio::spawn(async move {
-            TcpStreamActor::read_states(ctx_addr, socket, stream).await;
+            TcpStreamActor::read_states(ctx_addr, socket.clone(), stream).await;
         });
     }
 }
@@ -90,7 +89,7 @@ impl Handler<SetMessage> for TcpStreamActor{
                     let message = MatrixReady{socket:self.stream_socket,states:machine_sates.clone()};
                     self.tcp_manager.do_send(message);
                 }else{
-                    self.handle_set_visibility_command(sv.set_visibility,sv.db,sv.user_id,msg.addr,ctx.address());
+                    self.handle_set_visibility_command(sv.set_visibility,sv.db,msg.addr,ctx.address());
                 }
             }},
             Commands::ReCache => self.handle_recache(ctx),
