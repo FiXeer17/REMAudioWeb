@@ -29,7 +29,13 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
         const datajson=JSON.parse(event.data)
-        if (datajson.hasOwnProperty('reason')){
+        if (!datajson.hasOwnProperty('reason')){
+          socketDispatch({ type: 'new_message', payload: event.data })
+          setLoading(false)
+        }
+        
+      }
+      socket.onclose=()=>{
           if (isAdmin){
             const handleRedirect = async () => {
             await triggerRedirect()
@@ -39,14 +45,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
           }
           else
             navigate("/callAdministrator")
-
-        }else{
-          socketDispatch({ type: 'new_message', payload: event.data })
-        setLoading(false)
-        }
-        
       }
-      
       StartListeners()
 
       SendHandshake()
