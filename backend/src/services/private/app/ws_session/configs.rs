@@ -1,4 +1,0 @@
-
-
-pub const HEARTBEAT_INTERVAL:u64 = 5000;
-pub const CLIENT_TIMEOUT: u64 = 10000;
