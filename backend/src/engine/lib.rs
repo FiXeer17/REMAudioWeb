@@ -12,7 +12,7 @@ use crate::{
         presets::read_current_preset,
         volume::read_volume_all,
     },
-    services::private::app::schemas::SetState,
+    services::private::app::schemas::SetState, utils::configs::channels_settings,
 };
 
 use core::fmt;
@@ -89,10 +89,10 @@ impl MatrixCommand {
             end: END_CODE.to_string(),
         })
     }
-    pub fn check_channel(ch: String) -> Result<u16, Error> {
-        match ch.parse::<u16>() {
+    pub fn check_channel(ch: String) -> Result<u8, Error> {
+        match ch.parse::<u8>() {
             Ok(v) => {
-                if v > 16 {
+                if v > channels_settings::get_i_channel_number() || v<1{
                     return Err(Error::InvalidChannel);
                 }
                 return Ok(v);
