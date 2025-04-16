@@ -19,10 +19,14 @@ impl ReturnSockets {
         latest_socket: Option<HashMap<SocketAddrV4, String>>,
     ) -> Self {
         let mut sockets_without_latest = sockets;
-        if sockets_without_latest.is_some() && sockets_without_latest.is_some() {
-            sockets_without_latest.as_mut()
+        if latest_socket.is_some() && sockets_without_latest.is_some() {
+            sockets_without_latest
+                .as_mut()
                 .unwrap()
                 .remove(latest_socket.clone().unwrap().iter().next().unwrap().0);
+            if sockets_without_latest.as_mut().unwrap().is_empty(){
+                sockets_without_latest = None;
+            }
         }
         let latest_socket = latest_socket.as_ref().and_then(|map| {
             map.iter().next().map(|(socket, name)| NameIpPort {
@@ -31,7 +35,6 @@ impl ReturnSockets {
                 port: socket.port().to_string(),
             })
         });
-
         let sockets = sockets_without_latest.map(|map| {
             map.into_iter()
                 .map(|(socket, name)| NameIpPort {
