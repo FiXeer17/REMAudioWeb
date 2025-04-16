@@ -14,13 +14,15 @@
         "read_timeout":500,             
         "connection_timeout":2000,      
         "inactivity_timeout":5000,      
-        "max_connection_retries":3      
+        "max_connection_retries":3
 
     },
     "ping_socket_settings":{
 
         "ping_socket_timeout":1000,     
-        "ping_socket_max_retries":3     
+        "ping_socket_max_retries":3,
+        "inactive_sockets_polling_interval":3000  
+
     },
     "websocket_settings":{
 
