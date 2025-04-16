@@ -21,7 +21,7 @@ pub mod utils;
 pub const SERVER_ADDR: &str = "0.0.0.0";
 pub const SERVER_PORT: u16 = 8000;
 
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub struct AppState {
     pub db: Pool<Postgres>,
 }
@@ -31,8 +31,9 @@ pub async fn crate_app() -> Result<(), std::io::Error> {
     let pool = establish_connection().await; // create a connection with the database
     let _ = sqlx::migrate!("./migrations").run(&pool).await.unwrap(); // migrate
     let app_state = AppState { db: pool.clone() };
+    let dbdata =Data::new(app_state.clone());
     insert_default_user(&app_state).await.unwrap();
-    let server = TcpStreamsManager::new().start(); // start tcp connections manager
+    let server = TcpStreamsManager::new(dbdata.clone()).await.expect("cannot start tcp manager...").start(); // start tcp connections manager
     HttpServer::new(move || {
         let cors = actix_cors::Cors::permissive();
 
@@ -40,7 +41,7 @@ pub async fn crate_app() -> Result<(), std::io::Error> {
             .wrap(cors)
             .wrap(Logger::default())
             .wrap(NormalizePath::trim())
-            .app_data(Data::new(app_state.clone()))
+            .app_data(dbdata.clone())
             .app_data(Data::new(server.clone()))
             .service(
                 web::scope("/api")

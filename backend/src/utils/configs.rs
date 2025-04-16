@@ -72,8 +72,11 @@ pub struct websocket_settings {
 #[derive(Serialize,Deserialize,Clone)]
 pub struct ping_socket_settings {
     #[serde(deserialize_with="u64_to_millis")]
-    ping_socket_timeout:Duration,     
-    ping_socket_max_retries:u8 
+    ping_socket_timeout:Duration,   
+    #[serde(deserialize_with="u64_to_millis")]
+    inactive_sockets_polling_interval:Duration,
+    ping_socket_max_retries:u8,
+    
 }
 
 #[allow(non_camel_case_types,dead_code)]
@@ -203,6 +206,9 @@ impl ping_socket_settings{
     pub fn get_ping_socket_timeout()->Duration{
         GeneralSettings::get_vars().ping_socket_settings.ping_socket_timeout
     }
+    pub fn get_inactive_sockets_polling_interval()->Duration{
+        GeneralSettings::get_vars().ping_socket_settings.inactive_sockets_polling_interval
+    }
 }
 impl websocket_settings{
     pub fn get_heartbeat_interval()-> Duration{
@@ -211,6 +217,7 @@ impl websocket_settings{
     pub fn get_client_timeout()-> Duration{
         GeneralSettings::get_vars().websocket_settings.client_timeout
     }
+
 }
 impl tcp_comunication_settings{
     pub fn get_read_timeout() -> Duration{
@@ -227,6 +234,9 @@ impl tcp_comunication_settings{
     }
     pub fn get_reconnect_delay() -> Duration{
         GeneralSettings::get_vars().tcp_comunication_settings.reconnect_delay
+    }
+    pub fn get_max_connection_retries()-> u8{
+        GeneralSettings::get_vars().tcp_comunication_settings.max_connection_retries
     }
 }
 

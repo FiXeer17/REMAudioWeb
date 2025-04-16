@@ -16,9 +16,8 @@ impl Handler<StreamStarted> for TcpStreamActor {
         let stream = Arc::new(Mutex::new(msg.tcp_stream));
         let ctx_addr = ctx.address().clone();
         self.stream = Some(stream.clone());
-
         tokio::spawn(async move {
-            TcpStreamActor::read_states(ctx_addr, socket, stream).await;
+            TcpStreamActor::read_states(ctx_addr, socket.clone(), stream).await;
         });
     }
 }
@@ -81,10 +80,18 @@ impl Handler<Connect> for TcpStreamActor {
 impl Handler<SetMessage> for TcpStreamActor{
     type Result = ();
     fn handle(&mut self, msg: SetMessage, ctx: &mut Self::Context) -> Self::Result {
-        self.watch_inactive(ctx, msg.addr);
+        self.watch_inactive(ctx, msg.addr.clone());
         match msg.command{
             Commands::SetCommand(sc) => self.handle_set_command(sc),
-            Commands::SetVisibility(sv) => self.handle_set_visibility(sv),
+            Commands::SetVisibility(sv) => {if self.machine_states.is_some(){
+                let machine_sates = self.machine_states.as_ref().unwrap();
+                if machine_sates.i_visibility.is_none() || machine_sates.o_visibility.is_none(){
+                    let message = MatrixReady{socket:self.stream_socket,states:machine_sates.clone()};
+                    self.tcp_manager.do_send(message);
+                }else{
+                    self.handle_set_visibility_command(sv.set_visibility,sv.db,msg.addr,ctx.address());
+                }
+            }},
             Commands::ReCache => self.handle_recache(ctx),
         }
     }

@@ -1,8 +1,0 @@
-
-
-pub const COMMAND_DELAY: u64=20;
-pub const RECONNECT_DELAY: u64 =1000;
-pub const READ_TIMEOUT: u64 =10000;
-pub const CONNECTION_TIMEOUT:u64 = 10000;
-pub const INACTIVITY_TIMEOUT:u64=3000;
-pub const MAX_RETRIES: u8 = 3;

@@ -1,13 +1,16 @@
 use crate::engine::lib::MatrixCommand;
+use crate::services::public::schemas::Socket;
+use crate::AppState;
 
 use super::schemas::MatrixStates;
-use super::schemas::SetVisibility;
 use super::ws_session::session::WsSession;
+use super::ws_session::utils::UpdateVisibility;
 use actix::prelude::*;
 use actix::Message;
 use serde::Serialize;
 use tokio::net::TcpStream;
 use uuid::Uuid;
+use std::collections::VecDeque;
 use std::{net::SocketAddrV4,collections::HashMap};
 
 #[derive(Message, Clone)]
@@ -105,6 +108,11 @@ pub struct GeneralConnectionError{
     pub socket: Option<SocketAddrV4>,
     pub error: String, 
 }
+#[derive(Message,Clone,Serialize)]
+#[rtype(result="()")]
+pub struct GeneralError{
+    pub error: String, 
+}
 
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -124,7 +132,7 @@ pub struct RemoveSocket{
     pub socket:SocketAddrV4,
     pub uuid: String
 }
-#[derive(Message,Clone,Debug)]
+#[derive(Message,Clone)]
 #[rtype(result="()")]
 pub struct SetMessage{
     pub addr: Addr<WsSession>,
@@ -135,17 +143,16 @@ pub struct SetMessage{
 #[rtype(result="()")]
 pub struct ClosedByAdmin{}
 
-#[derive(Debug,Clone)]
+#[derive(Clone)]
 pub enum Commands{
     SetCommand(SetCommand),
-    SetVisibility(SetVisibility),
+    SetVisibility(UpdateVisibility),
     ReCache
 }
 
 #[derive(Debug,Clone)]
 pub struct SetCommand{
     pub command: MatrixCommand,
-    
 }
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -161,9 +168,6 @@ pub struct GetConnections{}
 #[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
 pub struct GetLatestConnection{}
 
-#[derive(Message,Clone)]
-#[rtype(result="bool")]
-pub struct PendingConnections{}
 
 #[derive(Message,Clone)]
 #[rtype(result="Option<i32>")]
@@ -176,6 +180,26 @@ pub struct RetrieveUserFromUuid{
 pub struct MatrixPostMiddleware{
     pub addr: Option<Addr<WsSession>>,
     pub states: MatrixStates,
+    pub pgpool : actix_web::web::Data<AppState>,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct UnavailableSockets{
+    pub sockets: Vec<Socket>,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct SocketRestarted{
+    pub socket: Option<Socket>,
+    pub latest_socket:Option<Socket>
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct InactiveQueue{
+    pub queue: VecDeque<Socket>
 }
 
 

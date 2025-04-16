@@ -1,30 +1,36 @@
-use crate::{engine::{defs::{datas, errors::Error}, lib::MatrixCommand}, services::private::app::schemas::{SetState, SetVisibility}};
+use actix_web::web::Data;
 
-#[derive(Debug,Clone)]
-pub enum HandleText{
+use crate::{
+    engine::{defs::errors::Error, lib::MatrixCommand},
+    services::{private::app::schemas::SetVisibility, public::utils::SRC},
+    utils::configs::channels_settings,
+    AppState,
+};
+
+#[derive(Debug, Clone)]
+pub enum HandleText {
     Command(Result<MatrixCommand, Error>),
-    Visibility(SetVisibility),
+    SetVisibility(SetVisibility),
     Recache,
-    Error(String)
+    Error(String),
 }
 
-pub fn deserialize_text(text:String)-> HandleText{
-    if text == String::from("recache"){
-        return HandleText::Recache;
-    }
+#[derive(Clone)]
+pub struct UpdateVisibility {
+    pub db: Data<AppState>,
+    pub user_id: i32,
+    pub set_visibility: SetVisibility,
+}
 
-    if let Ok(set_state) = serde_json::from_str::<SetState>(&text){
-        let rw = datas::rw::WRITE.to_string();
-        return HandleText::Command(MatrixCommand::new_from_client(rw, set_state));
-    }
-    if let Ok(set_visibility) = serde_json::from_str::<SetVisibility>(&text){
-        if let Err(e) = set_visibility.channel.parse::<u32>(){
-            return HandleText::Error(e.to_string())
+pub fn check_channel(io:String,ch: u8) -> bool {
+    if io == SRC::INPUT.to_string() {
+        if ch <= channels_settings::get_i_channel_number() && ch > 0 {
+            return true;
         }
-        if let Err(e) = set_visibility.value.parse::<bool>(){
-            return HandleText::Error(e.to_string())
+    } else if io == SRC::OUTPUT.to_string() {
+        if ch <= channels_settings::get_o_channel_number() && ch > 0 {
+            return true;
         }
-        return HandleText::Visibility(set_visibility);
     }
-    return HandleText::Error("invalid command".to_string());
+    return false;
 }
