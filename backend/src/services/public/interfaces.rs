@@ -181,3 +181,15 @@ pub async fn retrieve_socketid_from_db(pgpool: &AppState,socket:SocketAddrV4)-> 
 
     Ok(row.get("id"))
 }
+
+pub async fn retrieve_socket_from_db(pgpool: &AppState,socket:SocketAddrV4)-> Result<bool,sqlx::Error>{
+    let query:&str = "SELECT id FROM sockets WHERE socket = $1;";
+    let row = sqlx::query(query)
+    .bind(socket.to_string())
+    .fetch_optional(&pgpool.db).await?;
+
+    match row {
+        Some(_) => return Ok(true),
+        None => return Ok(false)
+    }
+}

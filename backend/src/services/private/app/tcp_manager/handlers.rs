@@ -140,7 +140,13 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
             *to_reset = None;
         });
         self.sockets.remove(&msg.socket);
-        
+        let index = self
+            .inactive_sockets
+            .iter()
+            .position(|s| s.socket == msg.socket.to_string());
+        if let Some(index) = index {
+            self.inactive_sockets.remove(index);
+        }
     }
 }
 
@@ -258,8 +264,10 @@ impl Handler<ClosedByRemotePeer> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: ClosedByRemotePeer, _ctx: &mut Self::Context) -> Self::Result {
         self.streams_actors.remove(&msg.socket);
-        for session in self.streams.remove(&msg.socket).unwrap() {
-            session.do_send(msg.clone());
+        if let Some(removed) = self.streams.remove(&msg.socket){
+            for session in removed {
+                session.do_send(msg.clone());
+            }
         }
     }
 }
@@ -291,16 +299,40 @@ impl Handler<SetMessage> for TcpStreamsManager {
 
 impl Handler<UnavailableSockets> for TcpStreamsManager {
     type Result = ();
-    fn handle(&mut self, msg: UnavailableSockets, _ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: UnavailableSockets, ctx: &mut Self::Context) -> Self::Result {
         msg.sockets.into_iter().for_each(|s| {
+            let to_remove = SocketAddrV4::from_str(&s.socket).unwrap();
             if let Some(soc) = self.latest_socket {
                 if soc.to_string() == s.socket {
                     self.latest_socket = None;
                 }
             }
-            self.sockets
-                .remove(&SocketAddrV4::from_str(&s.socket).unwrap());
+                ctx.address().do_send(ClosedByRemotePeer {
+                    socket: to_remove,
+                    message: "unknown".to_string(),
+                });
+            
+            self.avail_map.remove(&to_remove);
+            self.sockets.remove(&to_remove);
 
+            let to_remove_uuids: Vec<Uuid> = self
+                .uuids_sockets
+                .iter()
+                .filter_map(|(uuid, socket)| {
+
+                    if let Some(socket) = socket {
+                        if &check_socket(socket.clone()).unwrap().unwrap() == &to_remove {
+                            return Some(*uuid);
+                        }
+                        return None;
+                    }
+                    None
+                })
+                .collect();
+            to_remove_uuids.iter().for_each(|uuid| {
+                let to_reset = self.uuids_sockets.get_mut(uuid).unwrap();
+                *to_reset = None;
+            });
             self.inactive_sockets.push_front(s);
         });
     }

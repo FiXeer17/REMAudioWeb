@@ -16,7 +16,7 @@ use crate::{
             },
             socket::utils::try_connection,
         },
-        public::{interfaces::retrieve_sockets, schemas::Socket},
+        public::{interfaces::{retrieve_socket_from_db, retrieve_sockets}, schemas::Socket},
     },
     AppState,
 };
@@ -133,6 +133,9 @@ impl TcpStreamsManager {
         tokio::spawn(async move {
             if !inactive_sockets.is_empty() {
                 let to_test = inactive_sockets.pop_back().unwrap();
+                if let Ok(res) = retrieve_socket_from_db(&pgpool, SocketAddrV4::from_str(&to_test.socket).unwrap()).await{
+                    if !res {return;}
+                }
                 let response =
                     try_connection(SocketAddrV4::from_str(&to_test.socket).unwrap()).await;
                 if response {
