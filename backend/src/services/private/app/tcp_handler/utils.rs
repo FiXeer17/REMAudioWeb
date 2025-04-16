@@ -1,16 +1,35 @@
+use actix_web::web::Data;
 use futures_util::lock::Mutex;
 use std::{net::SocketAddrV4, sync::Arc};
 
 use actix::{Addr, AsyncContext, Context};
-use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::TcpStream};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpStream,
+};
 
-use crate::{engine::{defs::{datas::io::SRC, fncodes::FNCODE}, lib::MatrixCommand}, services::private::app::schemas::SetVisibility, utils::configs::tcp_comunication_settings};
+use crate::{
+    engine::{
+        defs::{datas::io::SRC, fncodes::FNCODE},
+        lib::MatrixCommand,
+    },
+    services::{
+        private::app::schemas::SetVisibility,
+        public::{
+            interfaces::{add_io_channels, retrieve_socketid_from_db},
+            utils::retrieve_all_channels,
+        },
+    },
+    utils::configs::tcp_comunication_settings,
+    AppState,
+};
 
 use super::{
     super::{
         messages::{ClosedByRemotePeer, MatrixReady, StreamFailed},
         schemas::MatrixStates,
-    },  tcp_handler::TcpStreamActor
+    },
+    tcp_handler::TcpStreamActor,
 };
 
 pub async fn process_response(
@@ -39,7 +58,7 @@ pub async fn process_response(
                 if converted.get(0) == Some(&"00".to_string()) {
                     if cmd.fcode != FNCODE::SCENE.to_string() {
                         states.set_changes(cmd);
-                        let message = MatrixReady { socket, states, };
+                        let message = MatrixReady { socket, states };
                         ctx_addr.do_send(message);
                     } else {
                         TcpStreamActor::read_states(ctx_addr, socket, stream).await;
@@ -57,8 +76,7 @@ pub async fn process_response(
     }
 }
 
-
-pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActor>){
+pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActor>) {
     if !act.commands_queue.is_empty() {
         let cmd = act.commands_queue.pop_back().unwrap();
         let stream = act.stream.as_mut().unwrap().clone();
@@ -83,21 +101,17 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
 
             let read_bytes = {
                 let mut stream_guard = stream.lock().await;
-                tokio::time::timeout(tcp_comunication_settings::get_read_timeout(), stream_guard.read(&mut buffer)).await
+                tokio::time::timeout(
+                    tcp_comunication_settings::get_read_timeout(),
+                    stream_guard.read(&mut buffer),
+                )
+                .await
             };
 
             match read_bytes {
                 Ok(not_timedout) => {
-                    process_response(
-                        not_timedout,
-                        socket,
-                        ctx_addr,
-                        buffer,
-                        states,
-                        cmd,
-                        stream,
-                    )
-                    .await
+                    process_response(not_timedout, socket, ctx_addr, buffer, states, cmd, stream)
+                        .await
                 }
                 Err(t) => {
                     let reason = format!("read error:{}", t.to_string());
@@ -112,7 +126,7 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
     }
 }
 
-pub fn update_visibility(
+pub async fn update_visibility(
     mut states: MatrixStates,
     cmd: SetVisibility,
 ) -> Result<MatrixStates, errors::Error> {
@@ -121,15 +135,15 @@ pub fn update_visibility(
         io if io == SRC::OUTPUT.to_label() => states.o_visibility.as_mut(),
         _ => return Err(errors::Error::InvalidSrc),
     };
-    let channel = match cmd.channel.parse::<u32>(){
+    let channel = match cmd.channel.parse::<u32>() {
         Ok(channel) => channel,
-        Err(_) => return Err(errors::Error::InvalidChannel)
+        Err(_) => return Err(errors::Error::InvalidChannel),
     };
-    let value = match cmd.value.parse::<bool>(){
+    let value = match cmd.value.parse::<bool>() {
         Ok(channel) => channel,
-        Err(_) => return Err(errors::Error::InvalidValue)
+        Err(_) => return Err(errors::Error::InvalidValue),
     };
-    
+
     let Some(map) = channel_map else {
         return Err(errors::Error::InvalidChannel);
     };
@@ -139,13 +153,33 @@ pub fn update_visibility(
     };
 
     *channel = value;
+
     Ok(states)
 }
 
-
-pub mod errors{
-    #[derive(Clone,Debug)]
-    pub enum Error{
+pub async fn add_channels(pgpool: Data<AppState>, socket: SocketAddrV4) {
+    let socket_id = retrieve_socketid_from_db(&pgpool, socket).await;
+    if socket_id.is_err() {
+        println!("cannot retrieve socket_id from the database");
+        return;
+    }
+    let socket_id = socket_id.unwrap();
+    let channels = retrieve_all_channels(&pgpool, socket_id).await;
+    if channels.is_err() {
+        println!("cannot retrieve channels from database");
+        return;
+    }
+    if channels.unwrap().is_none() {
+        let result = add_io_channels(&pgpool, socket_id).await;
+        if result.is_err() {
+            println!("cannot add io channels");
+            return;
+        }
+    }
+}
+pub mod errors {
+    #[derive(Clone, Debug)]
+    pub enum Error {
         InvalidSrc,
         InvalidChannel,
         InvalidValue,
