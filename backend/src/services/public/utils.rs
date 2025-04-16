@@ -1,17 +1,7 @@
-use serde::{Deserialize, Serialize};
-use sqlx::prelude::FromRow;
-
 use crate::{utils::hasher::argon2_enc, AppState};
 
-use super::interfaces::{check_username, retrieve_channels};
+use super::{interfaces::{check_username, retrieve_channels}, schemas::Channel};
 
-#[derive(Deserialize, Serialize, Debug, FromRow)]
-pub struct Channel {
-    pub id: i32,
-    pub channel_name: String,
-    pub visible: bool,
-    pub user_id: i32,
-}
 
 pub async fn insert_user(
     username: String,
@@ -56,12 +46,12 @@ impl ToString for SRC {
 }
 
 pub async fn retrieve_all_channels(
-    user_id: i32,
     pgpool: &AppState,
+    socket_id:i32
 ) -> Result<Option<Vec<Channel>>, sqlx::Error> {
     let mut results: Vec<Channel> = Vec::new();
-    let i_channels = retrieve_channels(pgpool, user_id, SRC::INPUT).await?;
-    let o_channels = retrieve_channels(pgpool, user_id, SRC::OUTPUT).await?;
+    let i_channels = retrieve_channels(pgpool, socket_id, SRC::INPUT).await?;
+    let o_channels = retrieve_channels(pgpool, socket_id, SRC::OUTPUT).await?;
     if i_channels.is_none() || o_channels.is_none(){
         return Ok(None);
     }

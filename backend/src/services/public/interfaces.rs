@@ -1,4 +1,6 @@
-use super::utils::{insert_user, Channel, SRC};
+use std::net::SocketAddrV4;
+use super::schemas::*;
+use super::utils::{insert_user, SRC};
 use crate::utils::configs::{channels_settings,DatabaseEnv};
 use crate::AppState;
 use crate::services::public::signin::schemas::ReturnFullUser;
@@ -72,12 +74,12 @@ pub async fn retrieve_admin_from_id(pgpool: &Data<AppState>, id: i32) -> Result<
 
 pub async fn retrieve_channels(
     pgpool: &AppState,
-    user_id: i32,
+    socket_id : i32,
     src: SRC,
 ) -> Result<Option<Vec<Channel>>, sqlx::Error> {
-    let query_string: &str = "SELECT * FROM channels WHERE user_id = $1 AND src=$2 ORDER BY relative_identifier ASC;";
+    let query_string: &str = "SELECT * FROM channels WHERE socket_id=$1 AND src=$2 ORDER BY relative_identifier ASC;";
     let channels: Vec<Channel> = sqlx::query_as::<_, Channel>(query_string)
-        .bind(user_id)
+        .bind(socket_id)
         .bind(src.to_string())
         .fetch_all(&pgpool.db)
         .await?;
@@ -88,8 +90,8 @@ pub async fn retrieve_channels(
     return Ok(Some(channels));
 }
 
-pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx::Error>{
-    let query_string: &str ="INSERT INTO channels (channel_name,visible,src,user_id,relative_identifier) VALUES ($1,$2,$3,$4,$5);";
+pub async fn add_io_channels(pgpool: &AppState, socket_id: i32) -> Result<(),sqlx::Error>{
+    let query_string: &str ="INSERT INTO channels (channel_name,visible,src,socket_id,relative_identifier) VALUES ($1,$2,$3,$4,$5);";
 
     let (i_channels, o_channels, default_visibility, channel_prefix) = (
         channels_settings::get_i_channel_number(),
@@ -103,7 +105,7 @@ pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx:
         .bind(format!("{}{}",channel_prefix,i))
         .bind(default_visibility)
         .bind(SRC::INPUT.to_string())
-        .bind(user_id)
+        .bind(socket_id)
         .bind(i as i32)
         .fetch_optional(&pgpool.db).await?;
     }
@@ -112,7 +114,7 @@ pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx:
         .bind(format!("{}{}",channel_prefix,i))
         .bind(default_visibility)
         .bind(SRC::OUTPUT.to_string())
-        .bind(user_id)
+        .bind(socket_id)
         .bind(i as i32)
         .fetch_optional(&pgpool.db).await?;
     }
@@ -120,14 +122,62 @@ pub async fn add_io_channels(pgpool: &AppState, user_id: i32) -> Result<(),sqlx:
     Ok(())
 }
 
-pub async fn update_channel_visibility(pgpool: &AppState,user_id: i32,relative_identifier:i32,visibility:bool,src:String)->Result<(),sqlx::Error>{
-    let query_string: &str = "UPDATE channels SET visible=$1 WHERE user_id=$2 AND relative_identifier=$3 AND src=$4;";
+pub async fn update_channel_visibility(pgpool: &AppState,socket_id: i32,relative_identifier:i32,visibility:bool,src:String)->Result<(),sqlx::Error>{
+    let query_string: &str = "UPDATE channels SET visible=$1 WHERE socket_id=$2 AND relative_identifier=$3 AND src=$4;";
     sqlx::query(query_string)
     .bind(visibility)
-    .bind(user_id)
+    .bind(socket_id)
     .bind(relative_identifier)
     .bind(src)
     .fetch_optional(&pgpool.db).await?;
 
     Ok(())
+}
+
+pub async fn retrieve_sockets(pgpool: &AppState)->Result<Vec<Socket>,sqlx::Error>{
+    let query_string: &str = "SELECT * FROM sockets";
+    let sockets= sqlx::query_as::<_, Socket>(query_string).fetch_all(&pgpool.db).await?;
+    Ok(sockets)
+}
+
+pub async fn insert_socket_in_db(pgpool: &AppState,socket_name:String,socket:SocketAddrV4)->Result<(),sqlx::Error>{
+    let query_string: &str = "INSERT INTO sockets (socket_name,socket,latest) VALUES ($1,$2,$3);";
+    sqlx::query(query_string)
+    .bind(socket_name)
+    .bind(socket.to_string())
+    .bind(true)
+    .fetch_optional(&pgpool.db).await?;
+
+    Ok(())
+}
+pub async fn remove_socket_in_db(pgpool: &AppState,socket:SocketAddrV4)->Result<(),sqlx::Error>{
+    let query_string: &str = "DELETE FROM sockets WHERE socket = $1";
+    sqlx::query(query_string)
+    .bind(socket.to_string())
+    .fetch_optional(&pgpool.db).await?;
+    Ok(())
+
+}
+
+pub async fn update_latest_socket_in_db(pgpool: &AppState,socket:SocketAddrV4)->Result<(),sqlx::Error>{
+    let update_other_latest_query: &str = "UPDATE sockets SET latest=false;";
+    let update_latest_query:&str = "UPDATE sockets SET latest=true WHERE socket=$1;";
+    sqlx::query(update_other_latest_query)
+    .bind(socket.to_string())
+    .fetch_optional(&pgpool.db).await?;
+
+    sqlx::query(update_latest_query)
+    .bind(socket.to_string())
+    .fetch_optional(&pgpool.db).await?;
+
+    Ok(())
+}
+
+pub async fn retrieve_socketid_from_db(pgpool: &AppState,socket:SocketAddrV4)-> Result<i32,sqlx::Error>{
+    let query:&str = "SELECT id FROM sockets WHERE socket = $1;";
+    let row = sqlx::query(query)
+    .bind(socket.to_string())
+    .fetch_one(&pgpool.db).await?;
+
+    Ok(row.get("id"))
 }
