@@ -7,7 +7,10 @@ const UUIDLayout = () => {
   const navigate =useNavigate()
   const location=useLocation()
 
-  
+  useEffect(()=>{
+    console.log(location.state?.show)
+  },[sockets])
+
   useEffect(() => {
     const handleRedirect = async () => {
       
@@ -17,13 +20,13 @@ const UUIDLayout = () => {
           if (location.state?.show === true) {
             navigate("/newconnections", { state: { show: true } });
           } else {
-            navigate("/newconnections");
+            navigate("/newconnections",{ state: { show: false } });
           }
         } else {
           if (location.state?.show === true) {
             navigate("/recentConnections", { state: { show: true } });
           } else {
-            navigate("/recentConnections");
+            navigate("/recentConnections", { state: { show: false } });
           }
         }
       } else {

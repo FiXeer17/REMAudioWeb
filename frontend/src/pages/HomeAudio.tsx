@@ -203,7 +203,7 @@ export default function Volume() {
       
       <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3">
         <Mute onClick={()=>handleState("","all")}>MUTE ALL</Mute>
-        <Navbar />
+        <Navbar selectedColor="house"/>
       </div>
       </div>
     </div>

@@ -14,11 +14,9 @@ type FormFields = {
   password: string;
 }
 
-interface pageProps{
-  isLoading?:boolean
-}
 
-export default function SignInPage({isLoading}:pageProps) {
+
+export default function SignInPage() {
   const { register,handleSubmit } =useForm<FormFields>();
   const navigate= useNavigate()
 
@@ -42,6 +40,7 @@ export default function SignInPage({isLoading}:pageProps) {
       const accessToken=response.data.access_token
       localStorage.setItem("accessToken",accessToken)
       localStorage.setItem("isAdmin",isAdmin)
+      localStorage.setItem("user",data.username)
 
       return navigate("/uuidprovider",{state:{isAdmin}})
     }catch(error){
@@ -69,7 +68,7 @@ export default function SignInPage({isLoading}:pageProps) {
           <Input_pass className="visible" Eye_state={"visible"} Forgot={"visible"} placeholder="Password" {...register("password")} />
         </div>
         <div className="flex flex-col items-center justify-start mt-8 ">
-         <Button_sign isLoading={isLoading} variant={"login"} size={"login"} >
+         <Button_sign variant={"login"} size={"login"} >
             Sign In
           </Button_sign>
           

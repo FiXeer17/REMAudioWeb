@@ -14,9 +14,11 @@ import CreateConnections from "./pages/connections_socket/CreateConnections"
 import RecentConnections from "./pages/connections_socket/RecentConnections"
 import CallAdministrator from "./pages/connections_socket/CallAdministrator"
 import UUIDLayout from "./pages/connections_socket/Redirect"
+import Settings from "./pages/Settings"
+import Volume from "./pages/Volume"
 
 
-const UUIDLayou=()=>{
+const UUIDLay=()=>{
   return(
     <UUIDProvider>
       <Outlet/>
@@ -40,18 +42,18 @@ export const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <SignIn isLoading={false}/> 
+    element: <SignIn/> 
   },
   {
     path: "/test",
     element: <Test/>
   },
   {
-    path: "/callAdministrator",
-    element: <CallAdministrator/>
+    path: "/volume",
+    element: <Volume/>
   },
   {
-    element: <UUIDLayou/>,
+    element: <UUIDLay/>,
     children:[
       {
         path: "/uuidprovider",
@@ -71,6 +73,10 @@ export const router = createBrowserRouter([
         element: <CreateConnections/>
       },
       {
+        path: "/callAdministrator",
+        element: <CallAdministrator/>
+      },
+      {
         
         element: <SocketLayout/>,
         children:[
@@ -82,6 +88,10 @@ export const router = createBrowserRouter([
         {
           path: "/homeVideo",
           element: <HomeVideo/>
+        },
+        {
+          path: "/settings",
+          element: <Settings/>
         },
         {
           path: "/test2",
