@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { addSocket } from "@/lib/services";
 import { useConnections } from "@/lib/socket/ComponentUuid";
+import { toast, Toaster } from "sonner";
 
 type FormFields = {
     name:string;
@@ -28,7 +29,7 @@ export default function CreateConnections(){
             await addSocket(values)
             navigate("/homeAudio")
         }catch(error){
-            console.log("error creating socket")
+            toast.error("Error creating new connections",{duration:1000})
         }
     }
     return (
@@ -62,7 +63,7 @@ export default function CreateConnections(){
             </div>
             </form>
             <div/>
-
+        <Toaster/>
         </div>
     )
 }

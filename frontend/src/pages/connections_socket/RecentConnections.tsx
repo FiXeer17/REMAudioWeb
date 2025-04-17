@@ -14,6 +14,7 @@ type Connection = {
     name:string,
     ip: string;
     port: number;
+    isLatest?: boolean;
   };
 
 export default function RecentConnections(){
@@ -29,12 +30,11 @@ export default function RecentConnections(){
         }else{
             setConnections(sockets)
         }
-        
     },[sockets])
 
     useEffect(()=>{
         if(show)
-            toast.error("Error with the socket, try again",{duration:1000})
+            toast.error("Error with the socket, try again",{duration:2000})
     },[show])
 
     const handleClick=(element:Connection)=>{
@@ -83,8 +83,13 @@ export default function RecentConnections(){
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           >
+            
             {displayedConnections.map((element:Connection)=>(
-                <div className=" flex flex-col bg-home_colors-Navbar/Selection_Bg border-2 items-start justify-center text-white text-sm border-home_colors-Border_Connections rounded-2xl" key={element.ip}>
+                <div className={`flex flex-col items-start justify-center text-white text-sm border-2 rounded-2xl ${
+                    element.isLatest
+                      ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text"
+                      : "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
+                  }`} key={element.ip}>
                     <p className="flex ml-6 ">{element.name}</p>
                     <div className="flex ml-6 text-[12px] items-center">
                         <div className=" bg-home_colors-Navbar/Selection_Bg px-5 py-2 border-2 rounded-l-xl border-home_colors-Border_Connections ">{element.ip}</div>
@@ -95,14 +100,17 @@ export default function RecentConnections(){
             ))}
             </div>
             
-            <div className="flex items-center justify-center ">
-                {displayedAllConnections.map((_,index)=>(
-                    index===currentSet ?
-                    (<Circle key={index} size={12} color="#ffffff" weight="fill"/>) :
-                    (<Circle key={index} size={12} color="#ffffff"  />)
-                ))}
-
-            </div>
+            {displayedAllConnections.length > 1 && (
+                <div className="flex justify-center gap-2 mt-4">
+                    {displayedAllConnections.map((_, index) => (
+                    index === currentSet ? (
+                        <Circle key={index} size={12} color="#ffffff" weight="fill" />
+                    ) : (
+                        <Circle key={index} size={12} color="#ffffff" />
+                    )
+                    ))}
+                </div>
+                )}
             <Toaster/>
         </div>
     )

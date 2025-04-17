@@ -1,7 +1,16 @@
 import { ArrowLeft, LinkSimple } from "@phosphor-icons/react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { toast,Toaster } from "sonner";
 
 export default function NewConnetions() {
+  const location=useLocation()
+  const [show] = useState<boolean>(() => location.state?.show);
+  
+  useEffect(()=>{
+    if(show)
+        toast.error("Error with the socket, try again",{duration:1000})
+},[show])
 
   return (
     <div className="grid grid-rows-[auto,1fr] min-h-svh ">
@@ -49,6 +58,7 @@ export default function NewConnetions() {
           })}
         </div>
       </div>
+      <Toaster/>
     </div>
   );
 }

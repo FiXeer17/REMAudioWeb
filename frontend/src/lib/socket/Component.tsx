@@ -39,7 +39,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
           if (isAdmin){
             const handleRedirect = async () => {
             await triggerRedirect()
-            navigate("/uuidprovider",{state:{trigger:true}})
+            navigate("/uuidprovider",{state:{show:true}})
             }
             handleRedirect()
           }

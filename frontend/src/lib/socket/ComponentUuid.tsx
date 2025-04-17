@@ -47,7 +47,14 @@ export const ConnectionsProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const value = await getSocket();
       if (isAdmin) {
-        setSockets(value.data.sockets);
+        const allSockets = value.data.sockets ;
+        const latest = value.data.latest_socket;
+
+        const updatedSockets = allSockets || latest
+            ? [...(allSockets ?? []),...(latest ? [{ ...latest, isLatest: true }] : []),]
+            : null;
+            
+        setSockets(updatedSockets)
       } else {
         setSockets(value.data.latest_socket ? [value.data.latest_socket] : null);
       }
