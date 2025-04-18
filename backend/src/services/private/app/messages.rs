@@ -1,6 +1,5 @@
 use crate::engine::lib::MatrixCommand;
 use crate::services::public::schemas::Socket;
-use crate::AppState;
 
 use super::schemas::MatrixStates;
 use super::ws_session::session::WsSession;
@@ -111,6 +110,7 @@ pub struct GeneralConnectionError{
 #[derive(Message,Clone,Serialize)]
 #[rtype(result="()")]
 pub struct GeneralError{
+    pub socket: Option<SocketAddrV4>,
     pub error: String, 
 }
 
@@ -119,7 +119,7 @@ pub struct GeneralError{
 pub struct CommandError{
     pub command: MatrixCommand
 }
-#[derive(Message,Clone)]
+#[derive(Message,Clone,Debug)]
 #[rtype(result="bool")]
 pub struct SetSocket{
     pub socket_name: String,
@@ -173,14 +173,6 @@ pub struct GetLatestConnection{}
 #[rtype(result="Option<i32>")]
 pub struct RetrieveUserFromUuid{
     pub uuid:Uuid,
-}
-
-#[derive(Message,Clone)]
-#[rtype(result="()")]
-pub struct MatrixPostMiddleware{
-    pub addr: Option<Addr<WsSession>>,
-    pub states: MatrixStates,
-    pub pgpool : actix_web::web::Data<AppState>,
 }
 
 #[derive(Message,Clone)]

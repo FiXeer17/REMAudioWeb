@@ -40,7 +40,7 @@ pub async fn add_socket(
         Ok(None) => return HttpResponse::Unauthorized().finish(),
         Err(e) => return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
     };
-
+    let message: SetSocket;
     let (socket,socket_name):(String,String)  = match check_socket(socket.to_string()) {
         Ok(s) => {
             if let Some(sock) = s {
@@ -57,20 +57,22 @@ pub async fn add_socket(
                         }
                     }
                 }
+                message = SetSocket {
+                    socket_name:request_body.socket_name.clone(),
+                    socket: sock.to_string(),
+                    uuid: uuid.uuid.clone(),
+                };
+                let response = srv.send(message).await;
+                if let Err(_) = response {
+                    return HttpResponse::InternalServerError()
+                        .json(return_json_reason("couldn't set the socket"));
+                }
+                if let false = response.unwrap() {
+                    return HttpResponse::BadRequest().json(return_json_reason("invalid uuid"));
+                }
             }
-            let message = SetSocket {
-                socket_name:request_body.socket_name.clone(),
-                socket: socket.to_string(),
-                uuid: uuid.uuid.clone(),
-            };
-            let response = srv.send(message).await;
-            if let Err(_) = response {
-                return HttpResponse::InternalServerError()
-                    .json(return_json_reason("couldn't set the socket"));
-            }
-            if let false = response.unwrap() {
-                return HttpResponse::BadRequest().json(return_json_reason("invalid uuid"));
-            }
+         
+
             (s.unwrap().to_string(),request_body.socket_name.clone())
             
         }

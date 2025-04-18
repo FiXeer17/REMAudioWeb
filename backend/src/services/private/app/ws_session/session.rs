@@ -1,17 +1,20 @@
 use super::utils::HandleText;
 use crate::{
-    engine::{defs::datas, lib::MatrixCommand}, services::{
-        private::app::{
-            messages::{self, Disconnect},
-            schemas::{MatrixStates, SetState, SetVisibility},
-        },
-        public::{interfaces, utils::SRC},
-    }, utils::configs::websocket_settings, AppState
+    engine::{
+        defs::{datas, sections::Sections},
+        lib::MatrixCommand,
+    },
+    services::private::app::{
+        messages::{self, Disconnect},
+        schemas::{SetState, SetVisibility},
+    },
+    utils::configs::websocket_settings,
+    AppState,
 };
 use actix::prelude::*;
-use actix_web::web::{self, Data};
+use actix_web::web::Data;
 use actix_web_actors::ws;
-use std::{collections::HashMap, net::SocketAddrV4, time::Instant};
+use std::{net::SocketAddrV4, str::FromStr, time::Instant};
 
 use super::super::tcp_manager::tcp_manager::TcpStreamsManager;
 
@@ -37,27 +40,22 @@ impl WsSession {
             ctx.ping(b"");
         });
     }
-    pub fn deserialize_text(&self,text:String)-> HandleText{
-        if text == String::from("recache"){
+    pub fn deserialize_text(&self, text: String) -> HandleText {
+        if text == String::from("recache") {
             return HandleText::Recache;
         }
-    
-        if let Ok(set_state) = serde_json::from_str::<SetState>(&text){
-            let rw = datas::rw::WRITE.to_string();
-            return HandleText::Command(MatrixCommand::new_from_client(rw, set_state));
-        }
-        if let Ok(set_visibility) = serde_json::from_str::<SetVisibility>(&text){
-            let channel =set_visibility.channel.parse::<i32>();
-            let value = set_visibility.value.parse::<bool>();
-            if let Err(e) = channel {
-                return HandleText::Error(e.to_string())
+
+        if let Ok(set_state) = serde_json::from_str::<SetState>(&text) {
+            match Sections::from_str(&set_state.section) {
+                Ok(section) => match section {
+                    Sections::Visibility => return handle_visibility(set_state),
+                    Sections::Command(_) => return handle_command(set_state),
+                    _ => return HandleText::Error("invalid command".to_string()),
+                },
+                Err(e) => return HandleText::Error(e.to_string()),
             }
-            if let Err(e) = value{
-                return HandleText::Error(e.to_string())
-            }
-            return HandleText::SetVisibility(set_visibility);
         }
-        return HandleText::Error("invalid command".to_string());
+        return HandleText::Error("invalid command".to_string())
     }
     fn on_connect(&self, ctx: &mut ws::WebsocketContext<Self>) {
         let addr = ctx.address();
@@ -68,43 +66,37 @@ impl WsSession {
     }
 }
 
-impl WsSession {
+fn handle_visibility(set_state: SetState) -> HandleText {
+    if set_state.io.is_none() {
+        return HandleText::Error("io is none".to_string());
+    };
+    let Some(ch) = set_state.channel.clone() else {
+        return HandleText::Error("channel is none".to_string());
+    };
+    let Some(value) = set_state.value.clone() else {
+        return HandleText::Error("value is none".to_string());
+    };
+    let ch = ch.parse::<u32>();
+    if ch.is_err() {
+        return HandleText::Error("channel is invalid".to_string());
+    };
+    let value = value.parse::<bool>();
+    if value.is_err() {
+        return HandleText::Error("value is invalid".to_string());
+    };
 
-    pub async fn attach_channel_visibility(
-        states: &mut MatrixStates,
-        socket_id: i32,
-        pgpool: web::Data<AppState>,
-    ) -> Result<MatrixStates,()> {
-        let pgpool = pgpool;
-        let mut i_visibility_map: HashMap<u32, bool> = HashMap::new();
-        let mut o_visibility_map: HashMap<u32, bool> = HashMap::new();
-        let i_channels = interfaces::retrieve_channels(&pgpool, socket_id, SRC::INPUT)
-            .await
-            .unwrap();
-            
-        let o_channels = interfaces::retrieve_channels(&pgpool, socket_id, SRC::OUTPUT)
-            .await
-            .unwrap();
-        if i_channels.is_none() || o_channels.is_none(){
-            return Err(());
-        }
-        i_channels.unwrap().iter().enumerate().for_each(|(i, channel)| {
-            let index = i + 1;
-            i_visibility_map
-                .entry(index as u32)
-                .or_insert(channel.visible);
-        });
-        o_channels.unwrap().iter().enumerate().for_each(|(i, channel)| {
-            let index = i + 1;
-            o_visibility_map
-                .entry(index as u32)
-                .or_insert(channel.visible);
-        });
+    let set_visibility = SetVisibility {
+        io: set_state.io.unwrap(),
+        channel: set_state.channel.unwrap(),
+        value: set_state.value.unwrap(),
+    };
+    HandleText::SetVisibility(set_visibility)
+}
 
-        states.i_visibility = Some(i_visibility_map);
-        states.o_visibility = Some(o_visibility_map);
-        Ok(states.clone())
-    }
+//fn handle_label(set_state: SetState) -> HandleText{}
+fn handle_command(set_state: SetState) -> HandleText {
+    let rw = datas::rw::WRITE.to_string();
+    HandleText::Command(MatrixCommand::new_from_client(rw, set_state))
 }
 
 impl Actor for WsSession {
