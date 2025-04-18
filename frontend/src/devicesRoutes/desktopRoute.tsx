@@ -1,5 +1,5 @@
 import { createBrowserRouter,Navigate,Outlet } from "react-router-dom"
-import SignInPage from "../pages/mobilePages/SignIn"
+import SignInPage from "../pages/desktopPages/SignIn"
 
 import Test from "../pages/test/Test"
 
@@ -7,7 +7,7 @@ import Test from "../pages/test/Test"
 export const DesktopRouter = createBrowserRouter([
     {
         path:"/",
-        element: <Navigate to="/test" replace/>
+        element: <Navigate to="/login" replace/>
       },
       {
         path: "/login",
