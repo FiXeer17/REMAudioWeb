@@ -4,7 +4,7 @@ import { Button as Channel } from "@/components/ui/button_channels";
 import { Badge } from "@/components/ui/badge";
 import { Button as Audio_Video } from "@/components/ui/audio_video";
 import { useNavigate } from "react-router-dom";
-import { SwipeChannels } from "../lib/swipeChannels";
+import { SwipeChannels } from "../../lib/swipeChannels";
 import { useState, useContext, useEffect } from "react";
 import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";

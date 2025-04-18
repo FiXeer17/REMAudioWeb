@@ -1,21 +1,21 @@
 import { createBrowserRouter,Navigate,Outlet } from "react-router-dom"
 
-import { clientLoader } from './lib/clientLoader'
-import SocketContextComponent from './lib/socket/Component'
-import UUIDProvider from "./lib/socket/ComponentUuid"
+import { clientLoader } from '../lib/clientLoader'
+import SocketContextComponent from '../lib/socket/Component'
+import UUIDProvider from "../lib/socket/ComponentUuid"
 
-import SignIn from "./pages/SignIn"
-import HomeAudio from './pages/HomeAudio'
-import Test from './pages/test/Test'
-import Test2 from './pages/test/Test2'
-import HomeVideo from "./pages/HomeVideo"
-import NewConnetions from "./pages/connections_socket/NewConnections"
-import CreateConnections from "./pages/connections_socket/CreateConnections"
-import RecentConnections from "./pages/connections_socket/RecentConnections"
-import CallAdministrator from "./pages/connections_socket/CallAdministrator"
-import UUIDLayout from "./pages/connections_socket/Redirect"
-import Settings from "./pages/Settings"
-import Volume from "./pages/Volume"
+import SignInPage from "@/pages/mobilePages/SignIn"
+import HomeAudio from '../pages/mobilePages/HomeAudio'
+import Test from '../pages/test/Test'
+import Test2 from '../pages/test/Test2'
+import HomeVideo from "../pages/HomeVideo"
+import NewConnetions from "../pages/connections_socket/NewConnections"
+import CreateConnections from "../pages/connections_socket/CreateConnections"
+import RecentConnections from "../pages/connections_socket/RecentConnections"
+import CallAdministrator from "../pages/connections_socket/CallAdministrator"
+import UUIDLayout from "../pages/connections_socket/Redirect"
+import Settings from "../pages/mobilePages/Settings"
+import Volume from "../pages/mobilePages/Volume"
 
 
 const UUIDLay=()=>{
@@ -35,14 +35,14 @@ const SocketLayout=()=>{
 }
 
 
-export const router = createBrowserRouter([
+export const MobileRouter = createBrowserRouter([
   {
     path:"/",
     element: <Navigate to="/login" replace/>
   },
   {
     path: "/login",
-    element: <SignIn/> 
+    element: <SignInPage/> 
   },
   {
     path: "/test",
