@@ -121,7 +121,7 @@ To do so you have to send a json formatted WebSocket message with this body:
     "section": "[POSSIBLE SECTIONS]",
     "io": "[POSSIBLE IO]", -> OPTIONAL                   
     "channel": String,  -> OPTIONAL
-    "value" : String, 
+    "value" : "[POSSIBLE VALUES]", 
 }
 ```
 
