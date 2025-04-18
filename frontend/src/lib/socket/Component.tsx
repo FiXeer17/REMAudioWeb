@@ -37,7 +37,6 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       }
       socket.onclose=()=>{
           if (isAdmin){
-            console.log("babi")
             const handleRedirect = async () => {
             await triggerRedirect()
             navigate("/uuidprovider",{state:{show:true}})

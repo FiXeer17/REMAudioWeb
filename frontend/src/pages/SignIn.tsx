@@ -19,7 +19,7 @@ type FormFields = {
 export default function SignInPage() {
   const { register,handleSubmit } =useForm<FormFields>();
   const navigate= useNavigate()
-
+  
    const showErrorToast = (data : FormFields) => {
       if (data.username===""||data.password===""){
         toast.error("All fields must be filled", { duration: 1000 });

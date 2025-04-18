@@ -8,13 +8,16 @@ import { useConnections } from "@/lib/socket/ComponentUuid"
 
 export default function Settings(){
     const navigate=useNavigate()
-    const { triggerRedirect } = useConnections();
+    const { isAdmin,triggerRedirect } = useConnections();
 
     const handleRedirect = async () => {
         await triggerRedirect()
         navigate("/uuidprovider",{state:{show:false}})
         }
-
+    const signOut=()=>{
+        localStorage.removeItem("accessToken")
+        navigate("/login")
+    }
     return(
         <div className="grid grid-rows-[1fr,1fr,1/2fr] min-h-svh">
             <div className="flex flex-col items-center justify-center pt-5 gap-4">
@@ -36,14 +39,16 @@ export default function Settings(){
                         <p className="flex font-bold text-sm text-home_colors-Similar_White">Change language</p>
                     </div>
                 </div>
+                {isAdmin &&(
                 <div className="flex-1 border-b-[0.7px] border-home_colors-Border_Connections border-opacity-45 pl-10">
-                    <div className="flex gap-1 h-full items-center w-fit cursor-pointer" onClick={()=>navigate("/recentConnections",{state: { show: false }})}>
+                    <div className="flex gap-1 h-full items-center w-fit cursor-pointer" onClick={()=>handleRedirect()}>
                         <Network color="#FAFAFA" size={30} weight="light" />
                         <p className="flex font-bold text-sm text-home_colors-Similar_White">Change connections</p>
                     </div>
                 </div>
+                )}
                 <div className="flex-1 pl-10 pt-5">
-                    <div className="flex gap-1 h-full items-center w-fit cursor-pointer" onClick={()=>handleRedirect()}>
+                    <div className="flex gap-1 h-full items-center w-fit cursor-pointer" onClick={()=>signOut()}>
                         <SignOut color="#F37171" size={30} weight="light" />
                         <p className="flex font-bold text-sm text-[#F37171]">Sign out</p>
                     </div>

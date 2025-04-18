@@ -83,7 +83,6 @@ export const router = createBrowserRouter([
         {
           path: "/homeAudio",
           element: <HomeAudio/>,
-          //loader: clientLoader
         },
         {
           path: "/homeVideo",
@@ -99,6 +98,7 @@ export const router = createBrowserRouter([
         }]
       }
     ]
+    ,loader:clientLoader
     
   }
 ]);

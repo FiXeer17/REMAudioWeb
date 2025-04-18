@@ -28,7 +28,8 @@ const buttonVariants = cva(
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
         modified: "h-11 w-40 px-2 py-4",
-        preset:"h-11 w-32 px-2 py-4"
+        preset:"h-11 w-32 px-2 py-4",
+        mute_preset:"h-6 w-20 px-2 "
       },
     },
     defaultVariants: {
