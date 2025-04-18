@@ -125,37 +125,29 @@ To do so you have to send a json formatted WebSocket message with this body:
 }
 ```
 
-### set visibility command
-
-```
-{
-    "io": "[POSSIBLE IO]", -> OPTIONAL                   
-    "channel": String,  -> OPTIONAL
-    "value" : String, 
-}
-value is a boolean string.
-```
-
 #### POSSIBLE SECTIONS:
 sections are specific keywords, here is a list of sections that the engine actually support:
 ```
-    preset -> "preset";
-    mute -> "mute";
-    volume ->"volume";
+    visibility -> "visibility"
+    preset -> "preset"
+    mute -> "mute"
+    volume ->"volume"
 ```
 
 ### POSSIBLE IO:
 input/output sources are specific keywords, here is a list of ios that the engine actually support:
 ```
-   general audio -> "both";
-   input ->"input";
-   output -> "output";
+   general audio -> "both"
+   input ->"input"
+   output -> "output"
 ```
 ### POSSIBLE VALUES:
 | section | value type |
 |-------|----------|
+| visibility | boolean |
 | preset | n positive integer: 1<=n<=16 |
 | mute | boolean |
 | volume | integer |
+
 
 
