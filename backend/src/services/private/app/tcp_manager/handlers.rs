@@ -65,7 +65,6 @@ impl Handler<SetSocket> for TcpStreamsManager {
     fn handle(&mut self, msg: SetSocket, _: &mut Self::Context) -> Self::Result {
         if let Ok(uuid) = Uuid::from_str(&msg.uuid) {
             if let Some(socket) = self.uuids_sockets.get_mut(&uuid) {
-                dbg!(&msg);
                 *socket = Some(msg.socket.clone());
                 let sockv4 = check_socket(msg.socket).unwrap();
                 self.latest_socket = sockv4;

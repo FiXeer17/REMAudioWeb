@@ -10,16 +10,15 @@ use tokio::{
 
 use crate::{
     engine::{
-        defs::{datas::io::SRC, fncodes::FNCODE},
+        defs::fncodes::FNCODE,
         lib::MatrixCommand,
     },
-    services::{
-        private::app::schemas::SetVisibility,
+    services::
         public::{
             interfaces::{add_io_channels, retrieve_socketid_from_db},
             utils::retrieve_all_channels,
         },
-    },
+    
     utils::configs::tcp_comunication_settings,
     AppState,
 };
@@ -128,36 +127,6 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
     }
 }
 
-pub async fn update_visibility(
-    states:&MatrixStates,
-    cmd: SetVisibility,
-) -> Result<MatrixStates, errors::Error> {
-    let mut channel_map = match cmd.io.as_str() {
-        io if io == SRC::INPUT.to_label() => states.i_visibility.clone(),
-        io if io == SRC::OUTPUT.to_label() => states.o_visibility.clone(),
-        _ => return Err(errors::Error::InvalidSrc),
-    };
-    let channel = match cmd.channel.parse::<u32>() {
-        Ok(channel) => channel,
-        Err(_) => return Err(errors::Error::InvalidChannel),
-    };
-    let value = match cmd.value.parse::<bool>() {
-        Ok(channel) => channel,
-        Err(_) => return Err(errors::Error::InvalidValue),
-    };
-
-    if channel_map.is_empty() {
-        return Err(errors::Error::InvalidChannel);
-    };
-    
-    let Some(channel) = channel_map.get_mut(&channel) else {
-        return Err(errors::Error::InvalidChannel);
-    };
-
-    *channel = value;
-
-    Ok(states.clone())
-}
 
 pub async fn add_channels(pgpool: Data<AppState>, socket: SocketAddrV4) {
     let socket_id = retrieve_socketid_from_db(&pgpool, socket).await;
