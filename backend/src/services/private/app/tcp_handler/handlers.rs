@@ -92,11 +92,21 @@ impl Handler<SetMessage> for TcpStreamActor {
             Commands::SetVisibility(sv) => {
                 if self.machine_states.is_some() {
                     self.handle_set_visibility_command(
-                        sv.set_visibility,
-                        sv.db,
+                        sv,
+                        self.pgpool.clone(),
                         msg.addr,
                         ctx.address(),
                     );
+                }
+            }
+            Commands::SetLabel(sl) => {
+                if self.machine_states.is_some(){
+                    self.handle_set_label_command(
+                        sl,
+                        self.pgpool.clone(),
+                        msg.addr,
+                        ctx.address(),
+                    )
                 }
             }
             Commands::ReCache => self.handle_recache(ctx),

@@ -237,3 +237,15 @@ pub async fn retrieve_labels(pgpool: &AppState, socket_id:&i32) -> Result<(Vec<S
     });
     Ok((i_labels,o_labels))
 }
+
+pub async fn update_labels_in_db(pgpool: &AppState,socket_id: i32,relative_identifier:i32,label:String,src:String)-> Result<(), sqlx::Error>{
+    let query_string: &str = "UPDATE channels SET channel_name=$1 WHERE socket_id=$2 AND relative_identifier=$3 AND src=$4;";
+    sqlx::query(query_string)
+    .bind(label)
+    .bind(socket_id)
+    .bind(relative_identifier)
+    .bind(src)
+    .fetch_optional(&pgpool.db).await?;
+
+    Ok(())
+}

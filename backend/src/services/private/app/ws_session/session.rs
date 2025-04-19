@@ -6,7 +6,7 @@ use crate::{
     },
     services::private::app::{
         messages::{self, Disconnect},
-        schemas::{SetState, SetVisibility},
+        schemas::{SetAttributes, SetState},
     },
     utils::configs::websocket_settings,
     AppState,
@@ -50,7 +50,7 @@ impl WsSession {
                 Ok(section) => match section {
                     Sections::Visibility => return handle_visibility(set_state),
                     Sections::Command(_) => return handle_command(set_state),
-                    _ => return HandleText::Error("invalid command".to_string()),
+                    Sections::Labels => return handle_label(set_state),
                 },
                 Err(e) => return HandleText::Error(e.to_string()),
             }
@@ -85,7 +85,7 @@ fn handle_visibility(set_state: SetState) -> HandleText {
         return HandleText::Error("value is invalid".to_string());
     };
 
-    let set_visibility = SetVisibility {
+    let set_visibility = SetAttributes {
         io: set_state.io.unwrap(),
         channel: set_state.channel.unwrap(),
         value: set_state.value.unwrap(),
@@ -98,6 +98,22 @@ fn handle_command(set_state: SetState) -> HandleText {
     let rw = datas::rw::WRITE.to_string();
     HandleText::Command(MatrixCommand::new_from_client(rw, set_state))
 }
+
+fn handle_label(set_state: SetState) -> HandleText{
+    let Some(io) = set_state.io else{
+        return HandleText::Error("io is none".to_string());
+    };
+    let Some(ch) = set_state.channel.clone() else {
+        return HandleText::Error("channel is none".to_string());
+    };
+    let Some(value) = set_state.value.clone() else {
+        return HandleText::Error("value is none".to_string());
+    };
+    let Ok(_) = ch.parse::<u32>() else{
+        return HandleText::Error("cannot parse channel".to_string());
+    };
+    HandleText::SetLabels(SetAttributes{io,channel:ch,value})
+}   
 
 impl Actor for WsSession {
     type Context = ws::WebsocketContext<Self>;

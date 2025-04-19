@@ -7,7 +7,7 @@ use serde_json::json;
 
 use super::super::messages::*;
 use super::session::WsSession;
-use super::utils::{check_channel, HandleText, UpdateVisibility};
+use super::utils::{check_channel, HandleText};
 
 impl Handler<StreamFailed> for WsSession {
     type Result = ();
@@ -107,11 +107,18 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                         if check_channel(io, channel) {
                             self.srv.do_send(SetMessage {
                                 addr,
-                                command: Commands::SetVisibility(UpdateVisibility {
-                                    db: self.pgpool.clone(),
-                                    set_visibility: sv,
-                                    user_id: self.user_id,
-                                }),
+                                command: Commands::SetVisibility(sv),
+                            });
+                        }
+                    },
+                    HandleText::SetLabels(sl) => {
+                        let sl_clone = sl.clone();
+                        let channel = sl_clone.channel.parse::<u8>().unwrap();
+                        let io = sl_clone.io;
+                        if check_channel(io, channel) {
+                            self.srv.do_send(SetMessage {
+                                addr,
+                                command: Commands::SetLabel(sl),
                             });
                         }
                     }
