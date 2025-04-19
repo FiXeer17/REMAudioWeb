@@ -128,6 +128,7 @@ To do so you have to send a json formatted WebSocket message with this body:
 #### POSSIBLE SECTIONS:
 sections are specific keywords, here is a list of sections that the engine actually support:
 ```
+    labels -> "labels"
     visibility -> "visibility"
     preset -> "preset"
     mute -> "mute"
@@ -144,6 +145,7 @@ input/output sources are specific keywords, here is a list of ios that the engin
 ### POSSIBLE VALUES:
 | section | value type |
 |-------|----------|
+| labels | string |
 | visibility | boolean |
 | preset | n positive integer: 1<=n<=16 |
 | mute | boolean |
