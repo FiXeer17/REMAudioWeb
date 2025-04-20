@@ -777,6 +777,10 @@ body {
   height: 500px;
 }
 
+.h-\[550px\] {
+  height: 550px;
+}
+
 .h-full {
   height: 100%;
 }
@@ -785,12 +789,8 @@ body {
   height: 100vh;
 }
 
-.h-\[400px\] {
-  height: 400px;
-}
-
-.h-\[550px\] {
-  height: 550px;
+.h-\[600px\] {
+  height: 600px;
 }
 
 .min-h-svh {
@@ -833,6 +833,14 @@ body {
   width: 2.25rem;
 }
 
+.w-\[400px\] {
+  width: 400px;
+}
+
+.w-\[550px\] {
+  width: 550px;
+}
+
 .w-\[600px\] {
   width: 600px;
 }
@@ -850,24 +858,12 @@ body {
   width: 100%;
 }
 
-.w-\[400px\] {
-  width: 400px;
+.w-\[700px\] {
+  width: 700px;
 }
 
-.w-\[500px\] {
-  width: 500px;
-}
-
-.w-\[550px\] {
-  width: 550px;
-}
-
-.w-screen {
-  width: 100vw;
-}
-
-.w-\[300px\] {
-  width: 300px;
+.w-\[710px\] {
+  width: 710px;
 }
 
 .flex-1 {
@@ -1034,6 +1030,14 @@ body {
 
 .gap-\[10\%\] {
   gap: 10%;
+}
+
+.gap-10 {
+  gap: 2.5rem;
+}
+
+.gap-5 {
+  gap: 1.25rem;
 }
 
 .self-start {
@@ -1294,9 +1298,18 @@ body {
   padding-bottom: 1.5rem;
 }
 
-.py-16 {
-  padding-top: 4rem;
-  padding-bottom: 4rem;
+.py-5 {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.py-7 {
+  padding-top: 1.75rem;
+  padding-bottom: 1.75rem;
+}
+
+.pb-10 {
+  padding-bottom: 2.5rem;
 }
 
 .pb-2 {
@@ -1329,10 +1342,6 @@ body {
 
 .pt-5 {
   padding-top: 1.25rem;
-}
-
-.pb-10 {
-  padding-bottom: 2.5rem;
 }
 
 .text-center {

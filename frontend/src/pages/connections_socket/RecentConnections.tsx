@@ -65,7 +65,7 @@ export default function RecentConnections(){
     handleTouchStart:handleTouchStart,
     handleTouchMove:handleTouchMove,
     handleTouchEnd:handleTouchEnd
-    }=SwipeConnections(connections)
+    }=SwipeConnections(connections,"mobile")
     
 
     return(

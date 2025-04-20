@@ -17,7 +17,8 @@ type Connection = {
 };
 
 export const SwipeConnections = (
-  allconnections: Connection[]
+  allconnections: Connection[],
+  deviceType:string
 
 ): SwipeConnectionsReturn => {
 
@@ -26,7 +27,7 @@ export const SwipeConnections = (
   const touchStartX = useRef(0);
   const isDragging = useRef(false);
 
-  const [length, connections] =divideConnections(allconnections)
+  const [length, connections] =divideConnections(allconnections,deviceType)
   const displayedConnections:Connection []=  connections[currentSet] ? connections[currentSet] : []
  
 
@@ -69,7 +70,7 @@ export const SwipeConnections = (
 };
 
 
-const divideConnections = (all:Connection[]):[number,Connection[][]]=>{
+const divideConnections = (all:Connection[],deviceType:string):[number,Connection[][]]=>{
   if (all.length === 0) {
     return [0, []]; 
   }
@@ -79,7 +80,7 @@ const divideConnections = (all:Connection[]):[number,Connection[][]]=>{
   let displayed:number
   let cont=0
   for (let c of all){
-    if (cont==4){
+    if (cont==(deviceType==="mobile"?4:8)){
         divided.push(single)
         cont=0
         single=[]
