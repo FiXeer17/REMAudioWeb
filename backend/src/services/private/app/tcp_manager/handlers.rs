@@ -186,21 +186,6 @@ impl Handler<InactiveQueue> for TcpStreamsManager {
     }
 }
 
-impl Handler<MatrixPostMiddleware> for TcpStreamsManager {
-    type Result = ();
-    fn handle(&mut self, msg: MatrixPostMiddleware, _ctx: &mut Self::Context) -> Self::Result {
-        let addr = msg.clone().addr.unwrap();
-        let actor = self.streams.keys().find_map(|socket| {
-            if self.streams.get(socket).unwrap().contains(&addr) {
-                return self.streams_actors.get(socket);
-            }
-            None
-        });
-        if let Some(actor) = actor {
-            actor.do_send(msg);
-        }
-    }
-}
 impl Handler<SessionOpened> for TcpStreamsManager {
     type Result = String;
     fn handle(&mut self, msg: SessionOpened, _: &mut Self::Context) -> Self::Result {
@@ -211,6 +196,17 @@ impl Handler<SessionOpened> for TcpStreamsManager {
         self.uuids_sockets.insert(uuid, None);
         self.uuids_users.insert(uuid, msg.user_id);
         uuid.to_string()
+    }
+}
+
+impl Handler<GeneralError> for TcpStreamsManager{
+    type Result = ();
+    fn handle(&mut self, msg: GeneralError, _ctx: &mut Self::Context) -> Self::Result {
+        if let Some(sock) = msg.socket{
+            self.streams.get(&sock).unwrap().iter().for_each(|addr|{
+                addr.do_send(msg.clone());
+            });
+        }
     }
 }
 

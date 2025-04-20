@@ -10,16 +10,15 @@ use tokio::{
 
 use crate::{
     engine::{
-        defs::{datas::io::SRC, fncodes::FNCODE},
+        defs::fncodes::FNCODE,
         lib::MatrixCommand,
     },
-    services::{
-        private::app::schemas::SetVisibility,
+    services::
         public::{
             interfaces::{add_io_channels, retrieve_socketid_from_db},
             utils::retrieve_all_channels,
         },
-    },
+    
     utils::configs::tcp_comunication_settings,
     AppState,
 };
@@ -40,6 +39,7 @@ pub async fn process_response(
     mut states: MatrixStates,
     cmd: MatrixCommand,
     stream: Arc<Mutex<TcpStream>>,
+    pgpool: Data<AppState>,
 ) {
     match not_timedout {
         Ok(n) => {
@@ -61,7 +61,7 @@ pub async fn process_response(
                         let message = MatrixReady { socket, states };
                         ctx_addr.do_send(message);
                     } else {
-                        TcpStreamActor::read_states(ctx_addr, socket, stream).await;
+                        TcpStreamActor::read_states(ctx_addr, socket, stream,pgpool).await;
                     }
                 }
             }
@@ -83,6 +83,7 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
         let ctx_addr = ctx.address().clone();
         let socket = act.stream_socket;
         let states = act.machine_states.as_mut().unwrap().clone();
+        let pgpool = act.pgpool.clone();
         tokio::spawn(async move {
             let written_bytes = {
                 let mut steram_guard = stream.lock().await;
@@ -110,7 +111,7 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
 
             match read_bytes {
                 Ok(not_timedout) => {
-                    process_response(not_timedout, socket, ctx_addr, buffer, states, cmd, stream)
+                    process_response(not_timedout, socket, ctx_addr, buffer, states, cmd, stream,pgpool)
                         .await
                 }
                 Err(t) => {
@@ -126,36 +127,6 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
     }
 }
 
-pub async fn update_visibility(
-    mut states: MatrixStates,
-    cmd: SetVisibility,
-) -> Result<MatrixStates, errors::Error> {
-    let channel_map = match cmd.io.as_str() {
-        io if io == SRC::INPUT.to_label() => states.i_visibility.as_mut(),
-        io if io == SRC::OUTPUT.to_label() => states.o_visibility.as_mut(),
-        _ => return Err(errors::Error::InvalidSrc),
-    };
-    let channel = match cmd.channel.parse::<u32>() {
-        Ok(channel) => channel,
-        Err(_) => return Err(errors::Error::InvalidChannel),
-    };
-    let value = match cmd.value.parse::<bool>() {
-        Ok(channel) => channel,
-        Err(_) => return Err(errors::Error::InvalidValue),
-    };
-
-    let Some(map) = channel_map else {
-        return Err(errors::Error::InvalidChannel);
-    };
-
-    let Some(channel) = map.get_mut(&channel) else {
-        return Err(errors::Error::InvalidChannel);
-    };
-
-    *channel = value;
-
-    Ok(states)
-}
 
 pub async fn add_channels(pgpool: Data<AppState>, socket: SocketAddrV4) {
     let socket_id = retrieve_socketid_from_db(&pgpool, socket).await;

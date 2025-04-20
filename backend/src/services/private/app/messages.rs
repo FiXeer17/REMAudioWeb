@@ -1,10 +1,9 @@
 use crate::engine::lib::MatrixCommand;
 use crate::services::public::schemas::Socket;
-use crate::AppState;
 
 use super::schemas::MatrixStates;
+use super::schemas::SetAttributes;
 use super::ws_session::session::WsSession;
-use super::ws_session::utils::UpdateVisibility;
 use actix::prelude::*;
 use actix::Message;
 use serde::Serialize;
@@ -52,14 +51,6 @@ pub struct SetHandlerState {
     pub state: Option<Addr<WsSession>>,
 }
 
-
-#[derive(Message, Clone)]
-#[rtype(result = "()")]
-pub struct HandlerState {
-    pub available: bool
-}
-
-
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct StartStream {
@@ -79,12 +70,6 @@ pub struct StreamStarted{
 pub struct StreamFailed{
     pub socket : SocketAddrV4,
     pub error: String
-}
-
-#[derive(Message,Clone)]
-#[rtype(result="()")]
-pub struct CommandReturn{
-    pub response: String,
 }
 
 
@@ -111,6 +96,7 @@ pub struct GeneralConnectionError{
 #[derive(Message,Clone,Serialize)]
 #[rtype(result="()")]
 pub struct GeneralError{
+    pub socket: Option<SocketAddrV4>,
     pub error: String, 
 }
 
@@ -119,7 +105,7 @@ pub struct GeneralError{
 pub struct CommandError{
     pub command: MatrixCommand
 }
-#[derive(Message,Clone)]
+#[derive(Message,Clone,Debug)]
 #[rtype(result="bool")]
 pub struct SetSocket{
     pub socket_name: String,
@@ -146,7 +132,8 @@ pub struct ClosedByAdmin{}
 #[derive(Clone)]
 pub enum Commands{
     SetCommand(SetCommand),
-    SetVisibility(UpdateVisibility),
+    SetVisibility(SetAttributes),
+    SetLabel(SetAttributes),
     ReCache
 }
 
@@ -173,14 +160,6 @@ pub struct GetLatestConnection{}
 #[rtype(result="Option<i32>")]
 pub struct RetrieveUserFromUuid{
     pub uuid:Uuid,
-}
-
-#[derive(Message,Clone)]
-#[rtype(result="()")]
-pub struct MatrixPostMiddleware{
-    pub addr: Option<Addr<WsSession>>,
-    pub states: MatrixStates,
-    pub pgpool : actix_web::web::Data<AppState>,
 }
 
 #[derive(Message,Clone)]

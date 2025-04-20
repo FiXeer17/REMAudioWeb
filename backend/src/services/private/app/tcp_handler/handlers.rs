@@ -15,9 +15,11 @@ impl Handler<StreamStarted> for TcpStreamActor {
         let socket = self.stream_socket.clone();
         let stream = Arc::new(Mutex::new(msg.tcp_stream));
         let ctx_addr = ctx.address().clone();
+        let pgpool = self.pgpool.clone();
         self.stream = Some(stream.clone());
+        
         tokio::spawn(async move {
-            TcpStreamActor::read_states(ctx_addr, socket.clone(), stream).await;
+            TcpStreamActor::read_states(ctx_addr, socket.clone(), stream,pgpool).await;
         });
     }
 }
@@ -43,12 +45,6 @@ impl Handler<ClosedByAdmin> for TcpStreamActor {
         ctx.stop();
     }
 }
-impl Handler<MatrixPostMiddleware> for TcpStreamActor{
-    type Result = ();
-    fn handle(&mut self, msg: MatrixPostMiddleware, _ctx: &mut Self::Context) -> Self::Result {
-        self.machine_states = Some(msg.states);
-    }
-}
 
 impl Handler<MatrixReady> for TcpStreamActor {
     type Result = ();
@@ -56,9 +52,19 @@ impl Handler<MatrixReady> for TcpStreamActor {
         self.machine_states = Some(msg.states.clone());
         self.tcp_manager.do_send(msg);
         if self.cmd_poller.is_none() {
-            let cmd_poller = ctx.run_interval(tcp_comunication_settings::get_command_delay(), command_polling);
+            let cmd_poller = ctx.run_interval(
+                tcp_comunication_settings::get_command_delay(),
+                command_polling,
+            );
             self.cmd_poller = Some(cmd_poller);
         }
+    }
+}
+
+impl Handler<GeneralError> for TcpStreamActor {
+    type Result = ();
+    fn handle(&mut self, msg: GeneralError, _ctx: &mut Self::Context) -> Self::Result {
+        self.tcp_manager.do_send(msg);
     }
 }
 
@@ -77,21 +83,32 @@ impl Handler<Connect> for TcpStreamActor {
     }
 }
 
-impl Handler<SetMessage> for TcpStreamActor{
+impl Handler<SetMessage> for TcpStreamActor {
     type Result = ();
     fn handle(&mut self, msg: SetMessage, ctx: &mut Self::Context) -> Self::Result {
         self.watch_inactive(ctx, msg.addr.clone());
-        match msg.command{
+        match msg.command {
             Commands::SetCommand(sc) => self.handle_set_command(sc),
-            Commands::SetVisibility(sv) => {if self.machine_states.is_some(){
-                let machine_sates = self.machine_states.as_ref().unwrap();
-                if machine_sates.i_visibility.is_none() || machine_sates.o_visibility.is_none(){
-                    let message = MatrixReady{socket:self.stream_socket,states:machine_sates.clone()};
-                    self.tcp_manager.do_send(message);
-                }else{
-                    self.handle_set_visibility_command(sv.set_visibility,sv.db,msg.addr,ctx.address());
+            Commands::SetVisibility(sv) => {
+                if self.machine_states.is_some() {
+                    self.handle_set_visibility_command(
+                        sv,
+                        self.pgpool.clone(),
+                        msg.addr,
+                        ctx.address(),
+                    );
                 }
-            }},
+            }
+            Commands::SetLabel(sl) => {
+                if self.machine_states.is_some(){
+                    self.handle_set_label_command(
+                        sl,
+                        self.pgpool.clone(),
+                        msg.addr,
+                        ctx.address(),
+                    )
+                }
+            }
             Commands::ReCache => self.handle_recache(ctx),
         }
     }

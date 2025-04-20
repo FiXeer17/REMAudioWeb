@@ -193,3 +193,59 @@ pub async fn retrieve_socket_from_db(pgpool: &AppState,socket:SocketAddrV4)-> Re
         None => return Ok(false)
     }
 }
+
+pub async fn retrieve_visibility(pgpool: &AppState, socket_id:&i32) -> Result<(Vec<bool>,Vec<bool>),sqlx::Error>{
+    let socket_id = socket_id.clone();
+    let i_channels = retrieve_channels(pgpool, socket_id, SRC::INPUT).await?;
+    let o_channels = retrieve_channels(pgpool,socket_id,SRC::OUTPUT).await?;
+    if i_channels.is_none() || o_channels.is_none(){
+        return Err(sqlx::Error::RowNotFound);
+    }
+    let (mut i_visibility, mut o_visibility) :(Vec<bool>,Vec<bool>) = (Vec::new(),Vec::new());
+
+    i_channels.iter().for_each(|chs|{
+        chs.iter().for_each(|ch|{
+            i_visibility.push(ch.visible);
+        });
+    });
+    o_channels.iter().for_each(|chs|{
+        chs.iter().for_each(|ch|{
+            o_visibility.push(ch.visible);
+        });
+    });
+    Ok((i_visibility,o_visibility))
+}
+
+pub async fn retrieve_labels(pgpool: &AppState, socket_id:&i32) -> Result<(Vec<String>,Vec<String>),sqlx::Error>{
+    let socket_id = socket_id.clone();
+    let i_channels = retrieve_channels(pgpool, socket_id, SRC::INPUT).await?;
+    let o_channels = retrieve_channels(pgpool,socket_id,SRC::OUTPUT).await?;
+    if i_channels.is_none() || o_channels.is_none(){
+        return Err(sqlx::Error::RowNotFound);
+    }
+    let (mut i_labels, mut o_labels) :(Vec<String>,Vec<String>) = (Vec::new(),Vec::new());
+
+    i_channels.iter().for_each(|chs|{
+        chs.iter().for_each(|ch|{
+            i_labels.push(ch.channel_name.clone());
+        });
+    });
+    o_channels.iter().for_each(|chs|{
+        chs.iter().for_each(|ch|{
+            o_labels.push(ch.channel_name.clone());
+        });
+    });
+    Ok((i_labels,o_labels))
+}
+
+pub async fn update_labels_in_db(pgpool: &AppState,socket_id: i32,relative_identifier:i32,label:String,src:String)-> Result<(), sqlx::Error>{
+    let query_string: &str = "UPDATE channels SET channel_name=$1 WHERE socket_id=$2 AND relative_identifier=$3 AND src=$4;";
+    sqlx::query(query_string)
+    .bind(label)
+    .bind(socket_id)
+    .bind(relative_identifier)
+    .bind(src)
+    .fetch_optional(&pgpool.db).await?;
+
+    Ok(())
+}
