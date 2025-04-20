@@ -18,9 +18,8 @@ export default function CreateConnections(){
 
     const navigate=useNavigate()
         const { register,handleSubmit } =useForm<FormFields>();
-        //const {uuid}=useConnections()
+        const {uuid}=useConnections()
         const onSubmit: SubmitHandler<FormFields> = async (data) => {
-            /*
             try{
                 const values={
                     uuid:uuid,
@@ -32,7 +31,6 @@ export default function CreateConnections(){
             }catch(error){
                 toast.error("Error creating new connections",{duration:1000})
             }
-                */
         }
 
     return(
@@ -54,7 +52,7 @@ export default function CreateConnections(){
                             <p className="text-white font-sans">MATRIX IP</p>
                             <Input {...register("ip")} placeholder="ip" className="w-full"/>
                         </div>
-                        <div className="flex flex-col mt-5 ">
+                        <div className="flex flex-col mt-5 gap-1">
                             <p className="text-white font-sans">MATRIX PORT</p>
                             <Input {...register("port")} placeholder="port" className="w-1/3"/>
                         </div>
@@ -67,6 +65,7 @@ export default function CreateConnections(){
                     </div>
                 </form>
             </div>
+            <Toaster/>
         </div>
     )
 }

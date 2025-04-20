@@ -9,7 +9,7 @@ import HomeAudio from '../pages/mobilePages/HomeAudio'
 import Test from '../pages/test/Test'
 import Test2 from '../pages/test/Test2'
 import HomeVideo from "../pages/HomeVideo"
-import NewConnetions from "../pages/connections_socket/NewConnections"
+import NewConnections from "../pages/connections_socket/NewConnections"
 import CreateConnections from "../pages/connections_socket/CreateConnections"
 import RecentConnections from "../pages/connections_socket/RecentConnections"
 import CallAdministrator from "../pages/connections_socket/CallAdministrator"
@@ -66,7 +66,7 @@ export const MobileRouter = createBrowserRouter([
       },
       {
         path: "/newconnections",
-        element: <NewConnetions/>
+        element: <NewConnections/>
       },
       {
         path: "/createconnections",

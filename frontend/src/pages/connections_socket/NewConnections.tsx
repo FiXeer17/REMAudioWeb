@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { toast,Toaster } from "sonner";
 
-export default function NewConnetions() {
+export default function NewConnections() {
   const location=useLocation()
   const [show] = useState<boolean>(() => location.state?.show);
   

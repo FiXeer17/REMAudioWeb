@@ -50,7 +50,7 @@ export default function CreateConnections(){
                     <p className="text-white font-sans">MATRIX IP</p>
                     <Input {...register("ip")} placeholder="ip" className="w-full"/>
                 </div>
-                <div className="flex flex-col mt-5 ">
+                <div className="flex flex-col mt-5 gap-1">
                     <p className="text-white font-sans">MATRIX PORT</p>
                     <Input {...register("port")} placeholder="port" className="w-1/3"/>
                 </div>

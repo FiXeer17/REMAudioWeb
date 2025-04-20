@@ -21,8 +21,16 @@ export default function RecentConnections(){
         const location=useLocation()
         const [show] = useState<boolean>(() => location.state?.show);
         const [connections, setConnections] = useState<Connection[]>([]);
-        //const {uuid,sockets}=useConnections()
+        const {uuid,sockets}=useConnections()
         
+        useEffect(()=>{
+            if (sockets==null){
+               setConnections([]) 
+            }else{
+                setConnections(sockets)
+            }
+        },[sockets])
+
         const l: Connection[] = [
             { name: "Router", ip: "192.168.0.1", port: 8000},
             { name: "Switch", ip: "192.168.0.2", port: 2200},
@@ -37,7 +45,6 @@ export default function RecentConnections(){
           
 
         const handleClick=(element:Connection)=>{
-            /*
                 const fetchSetSocket=async ()=>{
                     try {
                         const headers={
@@ -55,7 +62,6 @@ export default function RecentConnections(){
                     }
                 }
                 fetchSetSocket()
-                */
             }
             
             const {
@@ -66,7 +72,7 @@ export default function RecentConnections(){
             handleTouchStart:handleTouchStart,
             handleTouchMove:handleTouchMove,
             handleTouchEnd:handleTouchEnd
-            }=SwipeConnections(l,"desktop")
+            }=SwipeConnections(connections,"desktop")
 
     return(
         <div className="grid grid-rows-[auto,1fr] h-screen justify-center items-center">
