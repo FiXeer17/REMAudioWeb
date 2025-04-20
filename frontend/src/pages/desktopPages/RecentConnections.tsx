@@ -31,17 +31,6 @@ export default function RecentConnections(){
             }
         },[sockets])
 
-        const l: Connection[] = [
-            { name: "Router", ip: "192.168.0.1", port: 8000},
-            { name: "Switch", ip: "192.168.0.2", port: 2200},
-            { name: "Access Point", ip: "192.168.0.3", port: 4430, isLatest: true },
-            { name: "Printer", ip: "192.168.0.10", port: 9100 },
-            { name: "NAS", ip: "192.168.0.20", port: 5000 },
-            { name: "Server Dev", ip: "192.168.1.10", port: 3000 },
-            { name: "Server Prod", ip: "192.168.1.11", port: 8000 },
-            { name: "Smart TV", ip: "192.168.0.50", port: 8000 },
-            { name: "Laptop Federico", ip: "192.168.0.100", port: 5500}
-          ];
           
 
         const handleClick=(element:Connection)=>{
@@ -75,13 +64,14 @@ export default function RecentConnections(){
             }=SwipeConnections(connections,"desktop")
 
     return(
-        <div className="grid grid-rows-[auto,1fr] h-screen justify-center items-center">
-            <div className="flex mt-9 ml-7">
-                <Link to={"/Login"}>
+        <div className="flex flex-col gap-14 pt-8">
+            <div className="relative w-full h-14 flex items-center justify-center ">
+                <Link to={"/Login"} className="absolute left-7">
                     <ArrowLeft size={32} color="#FFFFFF" />
                 </Link>
-                <p className="flex text-white font-sans font-semibold flex-grow items-end justify-center">RECENT CONNECTIONS</p>
+                <p className="text-white font-sans font-semibold text-center">RECENT CONNECTIONS</p>
             </div>
+        <div className="flex h-full justify-center items-start">
             <div className="grid grid-rows-4 grid-cols-2 gap-5 border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[550px] w-[710px] px-10 py-7"
              style={{
                 transform: `translateX(${Offset}px)`,
@@ -93,7 +83,7 @@ export default function RecentConnections(){
               >
                 
                 {displayedConnections.map((element:Connection)=>(
-                    <div className={`flex flex-col items-start justify-center text-white text-sm border-2 rounded-2xl ${
+                    <div className={`flex flex-col items-start justify-center text-white text-sm border-[1.5px] rounded-2xl ${
                         element.isLatest
                             ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text"
                             : "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
@@ -106,8 +96,8 @@ export default function RecentConnections(){
                         </div>
                     </div>
                 ))}                            
-
             </div>
+        </div>
         </div>
     )
 }

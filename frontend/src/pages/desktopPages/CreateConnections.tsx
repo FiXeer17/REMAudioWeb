@@ -34,13 +34,14 @@ export default function CreateConnections(){
         }
 
     return(
-        <div className="grid grid-rows-[auto,1fr] h-screen justify-center items-center">
-            <div className="flex mt-9 mx-7 "  >
-                <Link to={"/Login"}>
+        <div className="flex flex-col pt-8 gap-14">
+            <div className="relative w-full h-14 flex items-center justify-center ">
+                <Link to={"/Login"} className="absolute left-7">
                     <ArrowLeft size={32} color="#FFFFFF" />
                 </Link>
-                <p className="flex text-white font-sans font-semibold flex-grow items-end justify-center">CREATE CONNECTIONS</p>
+                <p className="text-white font-sans font-semibold text-center">RECENT CONNECTIONS</p>
             </div>
+        <div className="flex h-full justify-center items-start ">
             <div className="flex border-[1.5px] items-center justify-center border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[500px] w-[400px]">
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="flex flex-col mx-12 gap-4 justify-start">
@@ -66,6 +67,7 @@ export default function CreateConnections(){
                 </form>
             </div>
             <Toaster/>
+        </div>
         </div>
     )
 }
