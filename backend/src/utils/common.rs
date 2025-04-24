@@ -10,7 +10,7 @@ pub fn validate_session_type(session_type: &str) -> Result<(), ValidationError> 
     }
 }
 
-pub fn return_json_reason(reason: &str) -> Value {
+pub fn toast(reason: &str) -> Value {
     json!({"reason":reason})
 }
 

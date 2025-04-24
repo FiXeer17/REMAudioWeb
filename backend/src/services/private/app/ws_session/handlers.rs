@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use crate::utils::common::return_json_reason;
+use crate::utils::common::toast;
 use actix::{ActorContext, AsyncContext, Handler, StreamHandler};
 use actix_web_actors::ws;
 use serde_json::json;
@@ -12,14 +12,14 @@ use super::utils::{check_channel, HandleText};
 impl Handler<StreamFailed> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: StreamFailed, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(return_json_reason(&msg.error.to_string()).to_string());
+        ctx.text(toast(&msg.error.to_string()).to_string());
         ctx.stop();
     }
 }
 impl Handler<ClosedByRemotePeer> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: ClosedByRemotePeer, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(return_json_reason(&msg.message.to_string()).to_string());
+        ctx.text(toast(&msg.message.to_string()).to_string());
 
         ctx.stop();
     }
@@ -45,14 +45,14 @@ impl Handler<MatrixReady> for WsSession {
 impl Handler<GeneralError> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: GeneralError, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(return_json_reason(&msg.error).to_string());
+        ctx.text(toast(&msg.error).to_string());
     }
 }
 
 impl Handler<GeneralConnectionError> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: GeneralConnectionError, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(return_json_reason(&msg.error).to_string());
+        ctx.text(toast(&msg.error).to_string());
         ctx.stop();
     }
 }
@@ -98,7 +98,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                         });
                     }
                     HandleText::Error(reason) => {
-                        ctx.text(return_json_reason(&reason).to_string());
+                        ctx.text(toast(&reason).to_string());
                     }
                     HandleText::SetVisibility(sv) => {
                         let sv_clone = sv.clone();

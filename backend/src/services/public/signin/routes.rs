@@ -1,7 +1,7 @@
 use crate::services::public::signin::schemas::SignInReturn;
 use crate::services::public::{interfaces::from_username, signin::schemas};
 use crate::{
-    utils::{common::return_json_reason, hasher::argon2_verify, jwt_utils::id_to_jwt},
+    utils::{common::toast, hasher_utils::argon2_verify, jwt_utils::id_to_jwt},
     AppState,
 };
 use actix_web::{
@@ -17,7 +17,7 @@ pub async fn signin(
     pgpool: Data<AppState>,
 ) -> impl Responder {
     if let Err(_) = request_body.validate() {
-        return HttpResponse::BadRequest().json(return_json_reason("user format not valid."));
+        return HttpResponse::BadRequest().json(toast("user format not valid."));
     }
     let username = &request_body.username;
     match from_username(&pgpool, &username.clone()).await {
@@ -34,14 +34,14 @@ pub async fn signin(
                 return HttpResponse::Ok().json(to_return);
             }
             Ok(false) => {
-                return HttpResponse::Unauthorized().json(return_json_reason("Wrong credentials."));
+                return HttpResponse::Unauthorized().json(toast("Wrong credentials."));
             }
             Err(_) => {
                 return HttpResponse::InternalServerError().finish();
             }
         },
         Err(_) => {
-            return HttpResponse::NotFound().json(return_json_reason("Wrong credentials."));
+            return HttpResponse::NotFound().json(toast("Wrong credentials."));
         }
     }
 }
