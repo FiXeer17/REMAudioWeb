@@ -9,7 +9,7 @@ RUN cargo install sqlx-cli --version 0.8.2 --no-default-features --features post
     cargo install cargo-watch
 
 # Copy dependency files and build dependencies only
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml Cargo.lock settings.json ./
 
 # Create a dummy main.rs to cache dependencies
 RUN mkdir src && \

@@ -20,13 +20,15 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         channels_activated: "border-[1px] border-home_colors-Enabled_Channels text-home_colors-Enabled_Channels",
-        channels_disabled: "border-[1px] border-home_colors-Disabled_Channels text-home_colors-Disabled_Channels"
+        channels_disabled: "border-[1px] border-home_colors-Disabled_Channels text-home_colors-Disabled_Channels",
+        channels_notVisible: "border-[1px] border-home_colors-Similar_White text-home_colors-Similar_White"
       },
       size: {
         default: "h-9 px-3 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        icon: "h-9 w-10",
+        desktop:"h-9 px-3 py-2 w-14 rounded-sm"
       },
     },
     defaultVariants: {

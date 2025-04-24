@@ -36,7 +36,12 @@ services:
       - ./backend/.env
     environment:
       - RUST_LOG=info
-  
+  matrix-simulator-1:
+    image: i3elle/matrix-engine
+    environment:
+      - MATRIX_HOST=0.0.0.0
+      - MATRIX_PORT=2000
+    
   frontend:
     build: 
       context: ./frontend
@@ -48,6 +53,31 @@ services:
     depends_on:
       - backend
       
+  matrix-simulator:
+    image: i3elle/matrix-engine
+    environment:
+      - MATRIX_HOST=0.0.0.0
+      - MATRIX_PORT=2000
+    ports:
+      - "2000:2000"
+    command: ./matrix-engine
+  matrix-simulator-2:
+    image: i3elle/matrix-engine
+    environment:
+      - MATRIX_HOST=0.0.0.0
+      - MATRIX_PORT=2001
+    ports:
+      - "2001:2001"
+    command: ./matrix-engine
+  matrix-simulator-3:
+    image: i3elle/matrix-engine
+    environment:
+      - MATRIX_HOST=0.0.0.0
+      - MATRIX_PORT=2002
+    ports:
+      - "2002:2002"
+    command: ./matrix-engine
+           
 volumes:
   postgres_data:
   cargo_target:

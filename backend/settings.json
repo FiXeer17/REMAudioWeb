@@ -1,0 +1,33 @@
+{
+    "channels_settings":{
+
+        "channel_label_prefix": "ch",   
+        "i_channels_number":16,
+        "o_channels_number":16,         
+        "default_visibility":true       
+    },
+
+    "tcp_comunication_settings":{
+
+        "command_delay":20,             
+        "reconnect_delay":1500,         
+        "read_timeout":500,             
+        "connection_timeout":2000,      
+        "inactivity_timeout":5000,      
+        "max_connection_retries":3
+
+    },
+    "ping_socket_settings":{
+
+        "ping_socket_timeout":1000,     
+        "ping_socket_max_retries":3,
+        "inactive_sockets_polling_interval":3000  
+
+    },
+    "websocket_settings":{
+
+        "heartbeat_interval":5000,      
+        "client_timeout":10000          
+
+    }
+}
