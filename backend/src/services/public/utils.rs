@@ -1,4 +1,4 @@
-use crate::{utils::hasher::argon2_enc, AppState};
+use crate::{utils::hasher_utils::argon2_enc, AppState};
 
 use super::{interfaces::{check_username, retrieve_channels}, schemas::Channel};
 

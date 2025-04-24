@@ -1,4 +1,4 @@
-use crate::utils::configs::DatabaseEnv;
+use crate::configs::DatabaseEnv;
 use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};

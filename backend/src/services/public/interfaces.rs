@@ -1,7 +1,7 @@
 use std::net::SocketAddrV4;
 use super::schemas::*;
 use super::utils::{insert_user, SRC};
-use crate::utils::configs::{channels_settings,DatabaseEnv};
+use crate::configs::{channels_settings,DatabaseEnv};
 use crate::AppState;
 use crate::services::public::signin::schemas::ReturnFullUser;
 use actix_web::web::Data;

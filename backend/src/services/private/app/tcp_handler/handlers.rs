@@ -3,7 +3,7 @@ use std::sync::Arc;
 use actix::{ActorContext, AsyncContext, Handler};
 use futures_util::lock::Mutex;
 
-use crate::utils::configs::tcp_comunication_settings;
+use crate::configs::tcp_comunication_settings;
 
 use super::super::messages::*;
 use super::tcp_handler::TcpStreamActor;

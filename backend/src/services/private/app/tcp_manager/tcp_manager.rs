@@ -6,7 +6,7 @@ use crate::{
         },
         public::{interfaces::retrieve_sockets, schemas::Socket},
     },
-    utils::configs::ping_socket_settings,
+    configs::ping_socket_settings,
     AppState,
 };
 

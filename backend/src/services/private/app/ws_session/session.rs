@@ -8,7 +8,7 @@ use crate::{
         messages::{self, Disconnect},
         schemas::{SetAttributes, SetState},
     },
-    utils::configs::websocket_settings,
+    configs::websocket_settings,
     AppState,
 };
 use actix::prelude::*;
