@@ -82,6 +82,43 @@ pub mod fncodes {
     }
 }
 
+pub mod sections{
+    use std::str::FromStr;
+
+    use super::{errors, fncodes::*};
+
+    pub const VISIBILITY_LABEL :&str = "visibility";
+    pub const LABELS_LABEL : &str = "labels";
+    pub enum Sections{
+        Visibility,
+        Labels,
+        Command(FNCODE),
+    }
+
+    impl ToString for Sections{
+        fn to_string(&self) -> String {
+            match self{
+                Sections::Labels => String::from(LABELS_LABEL),
+                Sections::Visibility => String::from(VISIBILITY_LABEL),
+                Sections::Command(cmd) => cmd.to_label(),
+            }
+        }
+    }
+    impl FromStr for Sections {
+        type Err = errors::Error;
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            match s {
+                VISIBILITY_LABEL => Ok(Sections::Visibility),
+                LABELS_LABEL => Ok(Sections::Labels),
+                VOLUME_LABEL => Ok(Sections::Command(FNCODE::VOLUME)),
+                MUTE_LABEL => Ok(Sections::Command(FNCODE::MUTE)),
+                SCENE_LABEL => Ok(Sections::Command(FNCODE::SCENE)),
+                _ => Err(errors::Error::InvalidSection)
+            }
+        }
+    }
+}
+
 // DATA FOUNDAMENTALS:
 pub mod datas {
     // INPUT/OUTPUT IDs
@@ -251,6 +288,7 @@ pub mod errors{
         InvalidData(String),
         InvalidPreset,
         InvalidFunctionCode,
+        InvalidSection,
     }
 
     impl ToString for Error{
@@ -263,6 +301,8 @@ pub mod errors{
                 Error::InvalidData(value) => String::from(value),
                 Error::InvalidPreset => String::from("invalid preset"),
                 Error::InvalidFunctionCode => String::from("invalid function code"),
+                Error::InvalidSection => String::from("invalid section")
+
             }
         }
     }

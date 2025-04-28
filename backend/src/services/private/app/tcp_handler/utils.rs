@@ -1,16 +1,34 @@
+use actix_web::web::Data;
 use futures_util::lock::Mutex;
 use std::{net::SocketAddrV4, sync::Arc};
 
 use actix::{Addr, AsyncContext, Context};
-use tokio::{io::{AsyncReadExt, AsyncWriteExt}, net::TcpStream};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpStream,
+};
 
-use crate::engine::{defs::fncodes::FNCODE, lib::MatrixCommand};
+use crate::{
+    engine::{
+        defs::fncodes::FNCODE,
+        lib::MatrixCommand,
+    },
+    services::
+        public::{
+            interfaces::{add_io_channels, retrieve_socketid_from_db},
+            utils::retrieve_all_channels,
+        },
+    
+    configs::tcp_comunication_settings,
+    AppState,
+};
 
 use super::{
     super::{
         messages::{ClosedByRemotePeer, MatrixReady, StreamFailed},
         schemas::MatrixStates,
-    }, configs::READ_TIMEOUT, tcp_handler::TcpStreamActor
+    },
+    tcp_handler::TcpStreamActor,
 };
 
 pub async fn process_response(
@@ -21,6 +39,7 @@ pub async fn process_response(
     mut states: MatrixStates,
     cmd: MatrixCommand,
     stream: Arc<Mutex<TcpStream>>,
+    pgpool: Data<AppState>,
 ) {
     match not_timedout {
         Ok(n) => {
@@ -42,7 +61,7 @@ pub async fn process_response(
                         let message = MatrixReady { socket, states };
                         ctx_addr.do_send(message);
                     } else {
-                        TcpStreamActor::read_states(ctx_addr, socket, stream).await;
+                        TcpStreamActor::read_states(ctx_addr, socket, stream,pgpool).await;
                     }
                 }
             }
@@ -57,14 +76,14 @@ pub async fn process_response(
     }
 }
 
-
-pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActor>){
+pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActor>) {
     if !act.commands_queue.is_empty() {
         let cmd = act.commands_queue.pop_back().unwrap();
         let stream = act.stream.as_mut().unwrap().clone();
         let ctx_addr = ctx.address().clone();
         let socket = act.stream_socket;
         let states = act.machine_states.as_mut().unwrap().clone();
+        let pgpool = act.pgpool.clone();
         tokio::spawn(async move {
             let written_bytes = {
                 let mut steram_guard = stream.lock().await;
@@ -83,21 +102,17 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
 
             let read_bytes = {
                 let mut stream_guard = stream.lock().await;
-                tokio::time::timeout(READ_TIMEOUT, stream_guard.read(&mut buffer)).await
+                tokio::time::timeout(
+                    tcp_comunication_settings::get_read_timeout(),
+                    stream_guard.read(&mut buffer),
+                )
+                .await
             };
 
             match read_bytes {
                 Ok(not_timedout) => {
-                    process_response(
-                        not_timedout,
-                        socket,
-                        ctx_addr,
-                        buffer,
-                        states,
-                        cmd,
-                        stream,
-                    )
-                    .await
+                    process_response(not_timedout, socket, ctx_addr, buffer, states, cmd, stream,pgpool)
+                        .await
                 }
                 Err(t) => {
                     let reason = format!("read error:{}", t.to_string());
@@ -109,5 +124,35 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
                 }
             }
         });
+    }
+}
+
+
+pub async fn add_channels(pgpool: Data<AppState>, socket: SocketAddrV4) {
+    let socket_id = retrieve_socketid_from_db(&pgpool, socket).await;
+    if socket_id.is_err() {
+        println!("cannot retrieve socket_id from the database");
+        return;
+    }
+    let socket_id = socket_id.unwrap();
+    let channels = retrieve_all_channels(&pgpool, socket_id).await;
+    if channels.is_err() {
+        println!("cannot retrieve channels from database");
+        return;
+    }
+    if channels.unwrap().is_none() {
+        let result = add_io_channels(&pgpool, socket_id).await;
+        if result.is_err() {
+            println!("cannot add io channels");
+            return;
+        }
+    }
+}
+pub mod errors {
+    #[derive(Clone, Debug)]
+    pub enum Error {
+        InvalidSrc,
+        InvalidChannel,
+        InvalidValue,
     }
 }

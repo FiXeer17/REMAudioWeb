@@ -1,0 +1,10 @@
+
+ALTER TABLE channels;
+DROP COLUMN socket_id 
+
+DROP TABLE sockets;
+
+ALTER TABLE channels
+ADD COLUMN user_id INTEGER,
+ADD CONSTRAINT fk_user
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE;

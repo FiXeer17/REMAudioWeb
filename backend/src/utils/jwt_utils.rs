@@ -1,4 +1,4 @@
-use crate::utils::configs::Env;
+use crate::configs::DatabaseEnv;
 use chrono::Utc;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -22,7 +22,7 @@ pub enum Claims {
 }
 
 pub fn id_to_jwt(id: i32, session_type: String) -> Result<String, Box<dyn std::error::Error>> {
-    let jwt_secret = Env::get_jwt_secret();
+    let jwt_secret = DatabaseEnv::get_jwt_secret();
     let claims: Claims;
 
     if session_type == "web" {
@@ -52,7 +52,7 @@ pub fn id_to_jwt(id: i32, session_type: String) -> Result<String, Box<dyn std::e
 }
 
 pub fn jwt_to_id(jwt_token: String) -> Result<i32, jsonwebtoken::errors::Error> {
-    let jwt_secret = Env::get_jwt_secret();
+    let jwt_secret = DatabaseEnv::get_jwt_secret();
     let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
     validation.required_spec_claims.remove("exp");
     let claim = decode::<Claims>(
@@ -72,4 +72,11 @@ pub fn jwt_to_id(jwt_token: String) -> Result<i32, jsonwebtoken::errors::Error> 
             return Ok(c.sub);
         }
     }
+}
+
+
+pub fn bearertkn_to_id(bearer_token:&str) -> i32{
+    let prefix = "Bearer ";
+    let jwt_token = bearer_token.strip_prefix(prefix).unwrap();
+    jwt_to_id(jwt_token.to_string()).unwrap()
 }

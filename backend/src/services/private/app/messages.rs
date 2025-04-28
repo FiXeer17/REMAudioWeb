@@ -1,12 +1,16 @@
 use crate::engine::lib::MatrixCommand;
+use crate::services::public::schemas::Socket;
 
 use super::schemas::MatrixStates;
+use super::schemas::SetAttributes;
 use super::ws_session::session::WsSession;
 use actix::prelude::*;
 use actix::Message;
+use serde::Serialize;
 use tokio::net::TcpStream;
 use uuid::Uuid;
-use std::net::SocketAddrV4;
+use std::collections::VecDeque;
+use std::{net::SocketAddrV4,collections::HashMap};
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
@@ -24,7 +28,8 @@ pub struct Connect {
 #[derive(Message,Clone)]
 #[rtype(result="String")]
 pub struct SessionOpened{
-    pub socket : Option<String>
+    pub socket : Option<String>,
+    pub user_id: i32,
 }
 
 #[derive(Message,Clone)]
@@ -41,10 +46,10 @@ pub struct CheckSessionUUID{
 
 #[derive(Message, Debug, Clone)]
 #[rtype(result = "()")]
-pub struct BroadcastMessage {
-    pub message: String,
+pub struct SetHandlerState {
+    pub socket: SocketAddrV4,
+    pub state: Option<Addr<WsSession>>,
 }
-
 
 #[derive(Message)]
 #[rtype(result = "()")]
@@ -67,12 +72,6 @@ pub struct StreamFailed{
     pub error: String
 }
 
-#[derive(Message,Clone)]
-#[rtype(result="()")]
-pub struct CommandReturn{
-    pub response: String,
-}
-
 
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -88,26 +87,60 @@ pub struct MatrixReady{
     pub socket: SocketAddrV4,
     pub states: MatrixStates
 }
+#[derive(Message,Clone,Serialize)]
+#[rtype(result="()")]
+pub struct GeneralConnectionError{
+    pub socket: Option<SocketAddrV4>,
+    pub error: String, 
+}
+#[derive(Message,Clone,Serialize)]
+#[rtype(result="()")]
+pub struct GeneralError{
+    pub socket: Option<SocketAddrV4>,
+    pub error: String, 
+}
 
 #[derive(Message,Clone)]
 #[rtype(result="()")]
 pub struct CommandError{
     pub command: MatrixCommand
 }
-#[derive(Message,Clone)]
+#[derive(Message,Clone,Debug)]
 #[rtype(result="bool")]
 pub struct SetSocket{
+    pub socket_name: String,
     pub socket: String,
     pub uuid: String
 }
-
 #[derive(Message,Clone)]
 #[rtype(result="()")]
-pub struct SetCommand{
-    pub command: MatrixCommand,
-    pub addr: Addr<WsSession>
+pub struct RemoveSocket{
+    pub socket:SocketAddrV4,
+    pub uuid: String
+}
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct SetMessage{
+    pub addr: Addr<WsSession>,
+    pub command: Commands
 }
 
+#[derive(Message,Clone,Debug)]
+#[rtype(result="()")]
+pub struct ClosedByAdmin{}
+
+#[derive(Clone)]
+pub enum Commands{
+    SetCommand(SetCommand),
+    SetVisibility(SetAttributes),
+    SetLabel(SetAttributes),
+    ReCache
+}
+
+#[derive(Debug,Clone)]
+pub struct SetCommand{
+    pub command: MatrixCommand,
+}
 #[derive(Message,Clone)]
 #[rtype(result="()")]
 pub struct SetCommandOk{
@@ -115,11 +148,37 @@ pub struct SetCommandOk{
 }
 
 #[derive(Message,Clone)]
-#[rtype(result="Option<Vec<SocketAddrV4>>")]
+#[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
 pub struct GetConnections{}
 
 #[derive(Message,Clone)]
-#[rtype(result="()")]
-pub struct ReCache{
-    pub addr: Addr<WsSession>
+#[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
+pub struct GetLatestConnection{}
+
+
+#[derive(Message,Clone)]
+#[rtype(result="Option<i32>")]
+pub struct RetrieveUserFromUuid{
+    pub uuid:Uuid,
 }
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct UnavailableSockets{
+    pub sockets: Vec<Socket>,
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct SocketRestarted{
+    pub socket: Option<Socket>,
+    pub latest_socket:Option<Socket>
+}
+
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct InactiveQueue{
+    pub queue: VecDeque<Socket>
+}
+
+

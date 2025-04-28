@@ -1,9 +1,6 @@
 use backend::crate_app;
 use sqlx::{Pool, Postgres};
 
-pub mod engine;
-pub mod services;
-pub mod utils;
 
 pub struct AppState {
     pub db: Pool<Postgres>,

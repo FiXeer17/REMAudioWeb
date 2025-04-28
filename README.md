@@ -18,23 +18,28 @@ JWT_SECRET=[STRONG KEY!!!]
 POSTGRES_USER=[DATABASE USER]
 POSTGRES_PASSWORD=[DATABASE USER PASSWORD] 
 POSTGRES_DB=[DATABASE NAME]
-DEFAULT_SOCKET=[TO THE MATRIX] for dev simulation use -> matrix-simulator:2000
 DEFAULT_ADMIN=[APPLICATION ADMIN USERNAME]
 DEFAULT_ADMIN_PASSWORD=[APPLICATION ADMIN PASSWORD]
+DEFAULT_USER=[APPLICATION USER USERNAME]
+DEFAULT_USER_PASSWORD=[APPLICATION USER USERNAME]
+SETTINGS_PATH=[PATH OF THE SETTINGS FILE, DEFAULT ./settings.json]
+```
 
+### .env example:
 
 ```
 
-configuration example: 
+### DATABASE SETTINGS ###
 
-```
-JWT_SECRET=30247432903281965233239807424244205335774652113094630819941797969296964439814
-POSTGRES_USER=user
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=users
-DEFAULT_SOCKET=matrix-simulator:2000
+JWT_SECRET=92368843446958883401368835169004584754983166754091679294489897723038422606962
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres 
+POSTGRES_DB=user
 DEFAULT_ADMIN=admin
-DEFAULT_ADMIN_PASSWORD=admin1234
+DEFAULT_ADMIN_PASSWORD=admin
+DEFAULT_USER=user
+DEFAULT_USER_PASSWORD=user
+SETTINGS_PATH=./settings.json
 ```
 
 ## Run:
@@ -56,3 +61,28 @@ docker compose up db
         or
 docker compose up backend
 ```
+
+
+## Extra customizations:
+
+You can start the application if you previously set the .env file with all the variables, but if you want
+to change some application behavior you can do it in the `settings.json` file in the `backend/` folder, here is a description of what those variables do in the application:
+
+
+
+| variable |value type| Description |
+| --- | --- |---|
+| channel_label_prefix | String | set the default channel prefix e.g. ch -> (ch1,ch2, .., chN) |
+| i_channels_number | positive integer | default ammount of matrix input channels |
+| o_channels_number | positive integer | default ammount of matrix output channels |
+| default_visibility | boolean | default visibility of matrix channels |
+| command_delay | milliseconds (positive integer) | default delay for matrix commands |
+| reconnect_delay | milliseconds (positive integer) | retry time to wait after a failed connection attempt |
+| read_timeout | milliseconds (positive integer) | max time to wait for a response to a command |
+| connection_timeout | milliseconds (positive integer) | max time to wait for a matrix connection |
+| inactivity_timeout | milliseconds (positive integer) | max user inactivity time before freeing the matrix |
+| max_connection_retries | positive integer | max connection retries ammount after a failed attempt |
+| ping_socket_timeout | milliseconds (positive integer) | time to wait for a matrix response to the ping while adding a matrix socket |
+| ping_socket_max_retries | positive integer | max ping retries after a failed ping attempt. |
+| heartbeat_interval | milliseconds (positive integer) | time to wait before sending a ping to the WebSocket client |
+| client_timeout | milliseconds (positive integer) | time to wait for a response to the sent WebSocket ping |
