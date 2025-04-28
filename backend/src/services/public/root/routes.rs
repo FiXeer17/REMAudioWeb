@@ -71,7 +71,6 @@ pub async fn get_all(_request: HttpRequest, pgpool: web::Data<AppState>) -> impl
         true => {return_latest_socket = None },
         false => {return_latest_socket = Some(latest_socket)}
     }
-    dbg!(&return_sockets,&return_latest_socket);
     let return_mess = ReturnSockets::new(return_sockets, return_latest_socket);
     HttpResponse::Ok().json(return_mess)
 }

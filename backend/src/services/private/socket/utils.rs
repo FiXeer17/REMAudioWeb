@@ -20,7 +20,6 @@ pub async fn try_connection(socket: SocketAddrV4) -> bool {
             }
             Err(_) => {
                 i+=1;
-                
             }
         }
     }
