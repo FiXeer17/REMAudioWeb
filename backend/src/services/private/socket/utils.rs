@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::net::SocketAddrV4;
 use tokio::net::TcpStream;
 use tokio::time::timeout;
-use crate::utils::configs::ping_socket_settings;
+use crate::configs::ping_socket_settings;
 
 pub async fn try_connection(socket: SocketAddrV4) -> bool {
     let max_retries = ping_socket_settings::get_ping_socket_max_retries();
@@ -20,7 +20,6 @@ pub async fn try_connection(socket: SocketAddrV4) -> bool {
             }
             Err(_) => {
                 i+=1;
-                
             }
         }
     }

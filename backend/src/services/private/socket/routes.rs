@@ -12,7 +12,7 @@ use crate::{
             utils::{check_in_connections, try_connection},
         },
     }, public::interfaces::{remove_socket_in_db, retrieve_admin_from_id}},
-    utils::common::{check_socket, return_json_reason}, AppState,
+    utils::common::{check_socket, toast}, AppState,
 };
 use actix_web::{post, web, HttpResponse, Responder};
 use serde_json::json;
@@ -28,17 +28,17 @@ pub async fn add_socket(
     let socket = &request_body.socket;
     let uuid_check = match Uuid::from_str(&uuid.uuid) {
         Ok(uuid) => uuid,
-        Err(e) => return HttpResponse::UnprocessableEntity().json(return_json_reason(&e.to_string())) 
+        Err(e) => return HttpResponse::UnprocessableEntity().json(toast(&e.to_string())) 
     };
     match srv.send(RetrieveUserFromUuid{uuid:uuid_check}).await{
         Ok(Some(id)) => match retrieve_admin_from_id(&pgpool, id).await {
             Ok(true) => (),
             Ok(false) => return HttpResponse::Unauthorized().finish(),
-            Err(e)=> return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
+            Err(e)=> return HttpResponse::InternalServerError().json(toast(&e.to_string()))
             
         },
         Ok(None) => return HttpResponse::Unauthorized().finish(),
-        Err(e) => return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
+        Err(e) => return HttpResponse::InternalServerError().json(toast(&e.to_string()))
     };
     let message: SetSocket;
     let (socket,socket_name):(String,String)  = match check_socket(socket.to_string()) {
@@ -50,7 +50,7 @@ pub async fn add_socket(
                         true => (),
                         false => {
                             if !try_connection(sock).await {
-                                return HttpResponse::BadRequest().json(return_json_reason(
+                                return HttpResponse::BadRequest().json(toast(
                                     &format!("{} doesn't respond.", sock),
                                 ));
                             }
@@ -65,10 +65,10 @@ pub async fn add_socket(
                 let response = srv.send(message).await;
                 if let Err(_) = response {
                     return HttpResponse::InternalServerError()
-                        .json(return_json_reason("couldn't set the socket"));
+                        .json(toast("couldn't set the socket"));
                 }
                 if let false = response.unwrap() {
-                    return HttpResponse::BadRequest().json(return_json_reason("invalid uuid"));
+                    return HttpResponse::BadRequest().json(toast("invalid uuid"));
                 }
             }
          
@@ -77,7 +77,7 @@ pub async fn add_socket(
             
         }
         Err(e) => {
-            return HttpResponse::BadRequest().json(return_json_reason(&format!(
+            return HttpResponse::BadRequest().json(toast(&format!(
                 "bad socket, {}",
                 e.to_string()
             )));
@@ -100,17 +100,17 @@ pub async fn remove_socket(
     let socket = &request_body.socket;
     let uuid_check = match Uuid::from_str(&uuid.uuid) {
         Ok(uuid) => uuid,
-        Err(e) => return HttpResponse::UnprocessableEntity().json(return_json_reason(&e.to_string())) 
+        Err(e) => return HttpResponse::UnprocessableEntity().json(toast(&e.to_string())) 
     };
     match srv.send(RetrieveUserFromUuid{uuid:uuid_check}).await{
         Ok(Some(id)) => match retrieve_admin_from_id(&pgpool, id).await {
             Ok(true) => (),
             Ok(false) => return HttpResponse::Unauthorized().finish(),
-            Err(e)=> return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
+            Err(e)=> return HttpResponse::InternalServerError().json(toast(&e.to_string()))
             
         },
         Ok(None) => return HttpResponse::Unauthorized().finish(),
-        Err(e) => return HttpResponse::InternalServerError().json(return_json_reason(&e.to_string()))
+        Err(e) => return HttpResponse::InternalServerError().json(toast(&e.to_string()))
     };
 
     
@@ -137,7 +137,7 @@ pub async fn remove_socket(
             s.unwrap()
         }
         Err(e) => {
-            return HttpResponse::BadRequest().json(return_json_reason(&format!(
+            return HttpResponse::BadRequest().json(toast(&format!(
                 "bad socket, {}",
                 e.to_string()
             )));

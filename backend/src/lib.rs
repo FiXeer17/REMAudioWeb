@@ -1,4 +1,4 @@
-use crate::utils::db::establish_connection;
+use crate::utils::db_utils::establish_connection;
 use actix::Actor;
 use actix_cors;
 use actix_web::{
@@ -16,6 +16,7 @@ use utils::auth_middleware::auth_middleware;
 pub mod engine;
 pub mod services;
 pub mod utils;
+pub mod configs;
 
 
 pub const SERVER_ADDR: &str = "0.0.0.0";

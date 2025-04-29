@@ -19,7 +19,7 @@ use crate::{
             utils::retrieve_all_channels,
         },
     
-    utils::configs::tcp_comunication_settings,
+    configs::tcp_comunication_settings,
     AppState,
 };
 

@@ -9,7 +9,7 @@ use crate::{
 };
 use actix_web::{get, web, HttpRequest, HttpResponse};
 
-use crate::utils::common::return_json_reason;
+use crate::utils::common::toast;
 use actix_web_actors::ws;
 use std::{str::FromStr, time::Instant};
 use uuid::Uuid;
@@ -23,12 +23,12 @@ pub async fn app(
     uuid: web::Query<SessionUUID>,
 ) -> Result<HttpResponse, actix_web::Error> {
     if let Err(_) = Uuid::from_str(&uuid.uuid) {
-        return Ok(HttpResponse::Unauthorized().json(return_json_reason("Invalid uuid found")));
+        return Ok(HttpResponse::Unauthorized().json(toast("Invalid uuid found")));
     }
     let uuid = Uuid::from_str(&uuid.uuid).unwrap();
     let checked = srv.send(CheckSessionUUID { uuid }).await;
     if let Err(e) = checked {
-        return Ok(HttpResponse::InternalServerError().json(return_json_reason(&format!("{}", e))));
+        return Ok(HttpResponse::InternalServerError().json(toast(&format!("{}", e))));
     }
     if let Ok(false) = checked {
         return Ok(HttpResponse::Unauthorized().finish());
@@ -36,12 +36,12 @@ pub async fn app(
 
     let socket = srv.send(RetrieveSocket { uuid }).await;
     if let Err(e) = socket {
-        return Ok(HttpResponse::InternalServerError().json(return_json_reason(&format!("{}", e))));
+        return Ok(HttpResponse::InternalServerError().json(toast(&format!("{}", e))));
     }
 
     let user_id = srv.send(RetrieveUserFromUuid { uuid }).await;
     if let Err(e) = user_id {
-        return Ok(HttpResponse::InternalServerError().json(return_json_reason(&e.to_string())));
+        return Ok(HttpResponse::InternalServerError().json(toast(&e.to_string())));
     }
     let user_id = user_id.unwrap();
     if user_id.is_none() {

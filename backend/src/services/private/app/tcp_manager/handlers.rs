@@ -199,11 +199,11 @@ impl Handler<SessionOpened> for TcpStreamsManager {
     }
 }
 
-impl Handler<GeneralError> for TcpStreamsManager{
+impl Handler<GeneralError> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: GeneralError, _ctx: &mut Self::Context) -> Self::Result {
-        if let Some(sock) = msg.socket{
-            self.streams.get(&sock).unwrap().iter().for_each(|addr|{
+        if let Some(sock) = msg.socket {
+            self.streams.get(&sock).unwrap().iter().for_each(|addr| {
                 addr.do_send(msg.clone());
             });
         }
@@ -260,7 +260,7 @@ impl Handler<ClosedByRemotePeer> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: ClosedByRemotePeer, _ctx: &mut Self::Context) -> Self::Result {
         self.streams_actors.remove(&msg.socket);
-        if let Some(removed) = self.streams.remove(&msg.socket){
+        if let Some(removed) = self.streams.remove(&msg.socket) {
             for session in removed {
                 session.do_send(msg.clone());
             }
@@ -272,9 +272,11 @@ impl Handler<ClosedByRemotePeer> for TcpStreamsManager {
 impl Handler<MatrixReady> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: MatrixReady, _: &mut Self::Context) -> Self::Result {
-        for session in self.streams.get(&msg.socket).unwrap().clone() {
-            let message = self.post_middleware(msg.clone(), session.clone());
-            session.do_send(message);
+        if let Some(sessions) = self.streams.get(&msg.socket).cloned() {
+            for session in sessions {
+                let message = self.post_middleware(msg.clone(), session.clone());
+                session.do_send(message);
+            }
         }
     }
 }
@@ -303,11 +305,11 @@ impl Handler<UnavailableSockets> for TcpStreamsManager {
                     self.latest_socket = None;
                 }
             }
-                ctx.address().do_send(ClosedByRemotePeer {
-                    socket: to_remove,
-                    message: "unknown".to_string(),
-                });
-            
+            ctx.address().do_send(ClosedByRemotePeer {
+                socket: to_remove,
+                message: "unknown".to_string(),
+            });
+
             self.avail_map.remove(&to_remove);
             self.sockets.remove(&to_remove);
 
@@ -315,7 +317,6 @@ impl Handler<UnavailableSockets> for TcpStreamsManager {
                 .uuids_sockets
                 .iter()
                 .filter_map(|(uuid, socket)| {
-
                     if let Some(socket) = socket {
                         if &check_socket(socket.clone()).unwrap().unwrap() == &to_remove {
                             return Some(*uuid);
