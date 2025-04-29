@@ -36,6 +36,15 @@ services:
       - ./backend/.env
     environment:
       - RUST_LOG=info
+  proxy:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/reverse_proxy.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
   matrix-simulator-1:
     image: i3elle/matrix-engine
     environment:
