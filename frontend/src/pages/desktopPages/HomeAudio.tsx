@@ -41,7 +41,7 @@ export default function HomeAudio() {
 
         } else if (type === "all") {
 
-        for (let channel = 1; channel <= 16; channel++) {
+          for (let channel = 1; channel <= 16; channel++) {
             const dataoutput = {section: "mute",io: "output",channel: channel.toString(),value: "false",};
             socket?.send(JSON.stringify(dataoutput));
             const datainput = {section: "mute",io: "input",channel: channel.toString(),value: "false",};

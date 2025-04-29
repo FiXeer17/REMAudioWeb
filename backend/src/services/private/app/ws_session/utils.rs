@@ -2,7 +2,7 @@
 use crate::{
     engine::{defs::errors::Error, lib::MatrixCommand},
     services::{private::app::schemas::SetAttributes, public::utils::SRC},
-    utils::configs::channels_settings,
+    configs::channels_settings,
 };
 
 #[derive(Debug, Clone)]

@@ -12,7 +12,7 @@ use crate::{
         presets::read_current_preset,
         volume::read_volume_all,
     },
-    services::private::app::schemas::SetState, utils::configs::channels_settings,
+    services::private::app::schemas::SetState, configs::channels_settings,
 };
 
 use core::fmt;

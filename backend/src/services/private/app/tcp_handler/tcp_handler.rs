@@ -8,7 +8,7 @@ use crate::{
     services::{private::app::{
         messages::{ClosedByRemotePeer, GeneralError, SetCommand, SetHandlerState}, schemas::SetAttributes, tcp_manager::tcp_manager::TcpStreamsManager, ws_session::session::WsSession
     }, public::{interfaces::{retrieve_labels, retrieve_socketid_from_db, retrieve_visibility, update_channel_visibility, update_labels_in_db}, utils::SRC}},
-    utils::configs::tcp_comunication_settings, AppState,
+    configs::tcp_comunication_settings, AppState,
 };
 use actix::{Actor, Addr, AsyncContext, Context, SpawnHandle};
 use actix_web::web::Data;
