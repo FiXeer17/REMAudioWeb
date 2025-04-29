@@ -16,7 +16,7 @@ type FormFields = {
 
 
 
-export default function SignInPage() {
+export const SignInPage=() => {
   const { register,handleSubmit } =useForm<FormFields>();
   const navigate= useNavigate()
   

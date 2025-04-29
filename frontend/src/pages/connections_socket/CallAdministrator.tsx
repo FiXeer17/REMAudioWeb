@@ -1,7 +1,7 @@
 import { ArrowLeft } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 
-export default function CallAdministrator() {
+export const CallAdministrator=() => {
   return (
     <div className="grid grid-rows-[auto,1fr] min-h-svh">
       <div className=" mt-9 ml-7">

@@ -1,15 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect} from "react";
-import { useConnections } from "@/lib/socket/ComponentUuid"; // Assicurati di usare il contesto giusto
+import { useConnections } from "@/lib/socket/ComponentUuid"; 
 
 const UUIDLayout = () => {
-  const {uuid,sockets, isAdmin } = useConnections(); // Usa il contesto per ottenere i dati
+  const {uuid,sockets, isAdmin } = useConnections(); 
   const navigate =useNavigate()
   const location=useLocation()
 
-  useEffect(()=>{
-    console.log(location.state?.show)
-  },[sockets])
 
   useEffect(() => {
     const handleRedirect = async () => {

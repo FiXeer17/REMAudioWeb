@@ -1,8 +1,18 @@
 import { ArrowLeft } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast, Toaster } from "sonner";
+import { useLocation } from "react-router-dom";
 
+export const CallAdministrator=()=>{
+  const location=useLocation()
+  const [show] = useState<boolean>(() => location.state?.show);
 
-export default function CallAdministrator(){
+  useEffect(()=>{
+    if(show)
+        toast.error("Error with the socket, try again",{duration:2000})
+    },[show])
+
     return(
         <div className="grid grid-rows-[auto,1fr] h-screen">
             <div className=" mt-9 ml-7">
@@ -57,6 +67,7 @@ export default function CallAdministrator(){
           );
         })}
       </div>
+      <Toaster/>
         </div>
     )
 }

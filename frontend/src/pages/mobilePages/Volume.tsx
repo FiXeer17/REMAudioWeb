@@ -6,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Circle } from "@phosphor-icons/react";
 import { SwipeVolumes } from "@/lib/swipeSliders";
 
-export default function Volume(){
+export const Volume=()=>{
     
 	const i_volumes= {
 		"1": -2,
@@ -15,7 +15,7 @@ export default function Volume(){
 		"4": -2,
         "5": -2,
 		"6": -130,
-		"7": -130,
+		"7": -120,
 		"8": -2,
 	}
     

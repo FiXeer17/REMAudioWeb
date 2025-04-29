@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
-import { RouterSelector } from './detect_displayDevice/RouterSelector'
+import { RouterProvider } from 'react-router-dom'
+import { AppRouter } from './detect_displayDevice/Routes'
 
 createRoot(document.getElementById('root')!).render(
-      <RouterSelector />
+      <RouterProvider router={AppRouter}/>
 )

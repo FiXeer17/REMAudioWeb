@@ -28,14 +28,12 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       socket.onopen=()=>{};
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
+        console.log(event.data)
         const datajson=JSON.parse(event.data)
         if (!datajson.hasOwnProperty('reason')){
           socketDispatch({ type: 'new_message', payload: event.data })
           setLoading(false)
-        }
-        
-      }
-      socket.onclose=()=>{
+        }else{
           if (isAdmin){
             const handleRedirect = async () => {
             await triggerRedirect()
@@ -45,22 +43,15 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
           }
           else
             navigate("/callAdministrator")
+        }
       }
-      StartListeners()
-
-      SendHandshake()
+      socket.onclose=()=>{}
       return () => {
         socket.close();
       };
     },[uuid])
 
-
-    const StartListeners= ()=>{
-
-      };
     
-    const SendHandshake = ()=>{}
-
     if(loading) return <div>Caricamento socket in corso...</div>
 
     return <SocketContextProvider value={{ socketState,socketDispatch }}>

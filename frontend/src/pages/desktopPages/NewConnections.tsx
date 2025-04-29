@@ -1,11 +1,22 @@
 import { ArrowLeft, LinkSimple } from "@phosphor-icons/react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { toast, Toaster } from "sonner";
 
-export default function NewConnections() {
+export const NewConnections=()=> {
+
+    const location=useLocation()
+    const [show] = useState<boolean>(() => location.state?.show);
+  
+    useEffect(()=>{
+      if(show)
+          toast.error("Error with the socket, try again",{duration:2000})
+      },[show])
+
   return (
     <div className="grid grid-rows-[auto,1fr] h-screen">
       <div className="mt-9 ml-7">
-        <Link to={"/Login"}>
+        <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
           <ArrowLeft size={32} color="#FFFFFF" />
         </Link>
       </div>
@@ -48,6 +59,7 @@ export default function NewConnections() {
           })}
         </div>
       </div>
+      <Toaster/>
     </div>
   );
 }

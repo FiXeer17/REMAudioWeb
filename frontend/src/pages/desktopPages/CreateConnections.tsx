@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { addSocket } from "@/lib/services";
 import { useConnections } from "@/lib/socket/ComponentUuid";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
+
 
 type FormFields = {
     name:string;
@@ -14,29 +15,31 @@ type FormFields = {
   }
 
 
-export default function CreateConnections(){
+export const CreateConnections=()=>{
 
     const navigate=useNavigate()
-        const { register,handleSubmit } =useForm<FormFields>();
-        const {uuid}=useConnections()
-        const onSubmit: SubmitHandler<FormFields> = async (data) => {
-            try{
-                const values={
-                    uuid:uuid,
-                    socket_name:data.name,
-                    socket:`${data.ip}:${data.port}`
-                  }
-                await addSocket(values)
-                navigate("/homeAudio")
-            }catch(error){
-                toast.error("Error creating new connections",{duration:1000})
-            }
+    const { register,handleSubmit } =useForm<FormFields>();
+    const {uuid}=useConnections()
+
+
+    const onSubmit: SubmitHandler<FormFields> = async (data) => {
+        try{
+            const values={
+                uuid:uuid,
+                socket_name:data.name,
+                socket:`${data.ip}:${data.port}`
+                }
+            await addSocket(values)
+            navigate("/homeAudio")
+        }catch(error){
+            toast.error("Error creating new connections",{duration:1000})
         }
+    }
 
     return(
         <div className="flex flex-col pt-8 gap-14">
             <div className="relative w-full h-14 flex items-center justify-center ">
-                <Link to={"/Login"} className="absolute left-7">
+                <Link to={"/Login"} className="absolute left-7" onClick={() => localStorage.removeItem("accessToken")}>
                     <ArrowLeft size={32} color="#FFFFFF" />
                 </Link>
                 <p className="text-white font-sans font-semibold text-center">RECENT CONNECTIONS</p>
@@ -66,7 +69,6 @@ export default function CreateConnections(){
                     </div>
                 </form>
             </div>
-            <Toaster/>
         </div>
         </div>
     )

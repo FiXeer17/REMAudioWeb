@@ -17,7 +17,7 @@ type Connection = {
     isLatest?: boolean;
   };
 
-export default function RecentConnections(){
+export const RecentConnections=()=>{
     const navigate=useNavigate()
     const location=useLocation()
     const [show] = useState<boolean>(() => location.state?.show);
@@ -71,8 +71,8 @@ export default function RecentConnections(){
     return(
         <div className="grid grid-rows-5 min-h-svh">
             <div className=" mt-9 ml-7">
-                <Link to={"/Login"}>
-                <ArrowLeft size={32} color="#FFFFFF" />
+                <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
+                    <ArrowLeft size={32} color="#FFFFFF" />
                 </Link>
             </div>
             <div className="grid row-span-3 grid-rows-4 mx-10 gap-4" style={{

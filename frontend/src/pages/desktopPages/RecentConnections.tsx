@@ -15,7 +15,7 @@ type Connection = {
     isLatest?: boolean;
   };
 
-export default function RecentConnections(){
+export const RecentConnections=()=>{
 
         const navigate=useNavigate()
         const location=useLocation()
@@ -31,7 +31,10 @@ export default function RecentConnections(){
             }
         },[sockets])
 
-          
+        useEffect(()=>{
+            if(show)
+                toast.error("Error with the socket, try again",{duration:2000})
+        },[show])
 
         const handleClick=(element:Connection)=>{
                 const fetchSetSocket=async ()=>{
@@ -66,7 +69,7 @@ export default function RecentConnections(){
     return(
         <div className="flex flex-col gap-14 pt-8">
             <div className="relative w-full h-14 flex items-center justify-center ">
-                <Link to={"/Login"} className="absolute left-7">
+                <Link to={"/Login"} className="absolute left-7" onClick={() => localStorage.removeItem("accessToken")}>
                     <ArrowLeft size={32} color="#FFFFFF" />
                 </Link>
                 <p className="text-white font-sans font-semibold text-center">RECENT CONNECTIONS</p>
@@ -98,6 +101,7 @@ export default function RecentConnections(){
                 ))}                            
             </div>
         </div>
+        <Toaster/>
         </div>
     )
 }

@@ -6,7 +6,7 @@ import { useConnections } from "@/lib/socket/ComponentUuid"
 
 
 
-export default function Settings(){
+export const Settings=()=>{
     const navigate=useNavigate()
     const { isAdmin,triggerRedirect } = useConnections();
 

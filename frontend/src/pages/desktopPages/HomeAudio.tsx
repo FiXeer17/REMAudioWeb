@@ -10,7 +10,7 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { Clock } from "@phosphor-icons/react";
 
-export default function HomeAudio() {
+export const HomeAudio=()=> {
     const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
     const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
     const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});

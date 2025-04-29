@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { toast,Toaster } from "sonner";
 
-export default function NewConnections() {
+export const NewConnections=()=> {
   const location=useLocation()
   const [show] = useState<boolean>(() => location.state?.show);
   
@@ -15,7 +15,7 @@ export default function NewConnections() {
   return (
     <div className="grid grid-rows-[auto,1fr] min-h-svh ">
       <div className="mt-9 ml-7">
-        <Link to={"/Login"}>
+        <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
           <ArrowLeft size={32} color="#FFFFFF" />
         </Link>
       </div>
