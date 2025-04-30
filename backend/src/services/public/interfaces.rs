@@ -144,9 +144,9 @@ pub async fn add_presets(
         np = presets_settings::get_video_presets_number();
         prfx = presets_settings::get_video_preset_label_prefix()
     }
-    for i in 1..np {
+    for i in 1..np + 1 {
         sqlx::query(query_string)
-            .bind(prfx.clone())
+            .bind(format!("{}{}",prfx,i))
             .bind(i as i32)
             .bind(socket_id)
             .fetch_optional(&pgpool.db)
@@ -250,10 +250,7 @@ pub async fn retrieve_socketid_from_db(
     Ok(row.get("id"))
 }
 
-pub async fn retrieve_socket_from_db(
-    pgpool: &AppState,
-    socket: SocketAddrV4,
-) -> Result<bool, sqlx::Error> {
+pub async fn is_socket_in_db(pgpool: &AppState, socket: SocketAddrV4) -> Result<bool, sqlx::Error> {
     let query: &str = "SELECT id FROM sockets WHERE socket = $1;";
     let row = sqlx::query(query)
         .bind(socket.to_string())
@@ -264,6 +261,17 @@ pub async fn retrieve_socket_from_db(
         Some(_) => return Ok(true),
         None => return Ok(false),
     }
+}
+pub async fn retrieve_socket_from_db(
+    pgpool: &AppState,
+    socket: SocketAddrV4,
+) -> Result<Socket, sqlx::Error> {
+    let query_string = "SELECT * FROM sockets WHERE socket = $1;";
+
+    sqlx::query_as::<_, Socket>(query_string)
+        .bind(socket.to_string())
+        .fetch_one(&pgpool.db)
+        .await
 }
 
 pub async fn retrieve_visibility(

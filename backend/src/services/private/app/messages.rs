@@ -1,4 +1,5 @@
 use crate::audio_engine::lib::MatrixCommand;
+use crate::services::private::socket::utils::Device;
 use crate::services::public::schemas::Socket;
 
 use super::schemas::MatrixStates;
@@ -56,6 +57,7 @@ pub struct SetHandlerState {
 pub struct StartStream {
     pub socket: Option<SocketAddrV4>,
     pub client: Addr<WsSession>,
+    pub device_type: Device,
 }
 
 
