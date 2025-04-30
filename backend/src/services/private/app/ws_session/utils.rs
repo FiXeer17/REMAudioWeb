@@ -1,6 +1,6 @@
 
 use crate::{
-    engine::{defs::errors::Error, lib::MatrixCommand},
+    audio_engine::{defs::errors::Error, lib::MatrixCommand},
     services::{private::app::schemas::SetAttributes, public::utils::SRC},
     configs::channels_settings,
 };
