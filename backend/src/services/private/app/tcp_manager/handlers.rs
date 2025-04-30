@@ -69,26 +69,20 @@ impl Handler<SetSocket> for TcpStreamsManager {
                 let sockv4 = check_socket(msg.socket).unwrap();
                 self.latest_socket = sockv4;
                 if sockv4.is_some() {
-                    let res = self
-                        .sockets
+                    self.sockets
                         .insert(sockv4.clone().unwrap(), msg.socket_name.clone());
                     let pool = self.pgpool.clone();
-
-                    if res.is_none() {
-                        tokio::spawn(async move {
-                            let result = insert_socket_in_db(
-                                &pool,
-                                msg.socket_name,
-                                sockv4.clone().unwrap(),
-                            )
-                            .await;
-                            if result.is_err() {
-                                println!("couldn't save socket in database");
-                            }
-                        });
-                    }
-                    let pool = self.pgpool.clone();
                     tokio::spawn(async move {
+                        let result = insert_socket_in_db(
+                            &pool,
+                            msg.socket_name,
+                            sockv4.clone().unwrap(),
+                            msg.device,
+                        )
+                        .await;
+                        if result.is_err() {
+                            println!("couldn't save socket in database");
+                        }
                         let result = update_latest_socket_in_db(&pool, sockv4.unwrap()).await;
                         if result.is_err() {
                             println!("couldn't update latest socket in database");

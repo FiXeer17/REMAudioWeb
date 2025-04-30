@@ -1,4 +1,4 @@
-use crate::engine::lib::MatrixCommand;
+use crate::audio_engine::lib::MatrixCommand;
 use crate::services::public::schemas::Socket;
 
 use super::schemas::MatrixStates;
@@ -110,6 +110,7 @@ pub struct CommandError{
 pub struct SetSocket{
     pub socket_name: String,
     pub socket: String,
+    pub device: String,
     pub uuid: String
 }
 #[derive(Message,Clone)]
