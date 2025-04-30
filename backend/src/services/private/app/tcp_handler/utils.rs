@@ -7,7 +7,7 @@ use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
 };
-
+use log::{info, warn};
 use crate::{
     audio_engine::{
         defs::{datas::io::SRC, fncodes::FNCODE},
@@ -146,37 +146,37 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
 
 pub async fn add_channels(pgpool: Data<AppState>, socket: SocketAddrV4) {
     let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
-        println!("Cannot retrieve socket_id from the database");
+        warn!("Cannot retrieve socket_id from the database");
         return;
     };
     let Ok(channels) = retrieve_all_channels(&pgpool, socket_id).await else {
-        println!("Cannot retrieve channels from database");
+        warn!("Cannot retrieve channels from database");
         return;
     };
     if let None = channels {
         if let Err(_) = add_io_channels(&pgpool, socket_id).await {
-            println!("Cannot add io channels");
+            warn!("Cannot add io channels");
             return;
         };
     }
-    println!("channels added succesfully.")
+    info!("Channels added succesfully for socket:{}.",socket.to_string())
 }
 pub async fn add_presets(pgpool: Data<AppState>, socket: SocketAddrV4, device: String) {
     let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
-        println!("Cannot retrieve socket_id from the database");
+        warn!("Cannot retrieve socket_id from the database");
         return;
     };
     let Ok(presets) = retrieve_all_presets(&pgpool, socket_id).await else {
-        println!("Cannot retrieve presets from database");
+        warn!("Cannot retrieve presets from database");
         return;
     };
     if let None = presets {
         let Ok(_) = interfaces::add_presets(&pgpool, socket_id, device.clone()).await else {
-            println!("Cannot add io channels");
+            warn!("Cannot add io channels");
             return;
         };
     }
-    println!("Presets added succesfully for device type: {device}.")
+    info!("Presets added succesfully for device type: {}.",device)
 
 }
 
@@ -259,7 +259,7 @@ impl TcpStreamActor {
         }
         let socket_id = retrieve_socketid_from_db(&pgpool, socket).await;
         if socket_id.is_err() {
-            println!("cannot retrieve socket id from database");
+            warn!("Cannot retrieve socket id from database");
             return;
         }
         let visibility = retrieve_visibility(&pgpool, socket_id.as_ref().unwrap()).await;
@@ -366,7 +366,7 @@ impl TcpStreamActor {
                     error: "cannot retrieve socket id in database".to_string(),
                     socket: Some(stream_socket),
                 });
-                println!("cannot retrieve socket_id from the database");
+                warn!("Cannot retrieve socket id from the database");
                 return;
             }
             let result = update_channel_visibility(
@@ -431,7 +431,7 @@ impl TcpStreamActor {
                     error: "cannot retrieve socket id in database".to_string(),
                     socket: Some(stream_socket),
                 });
-                println!("cannot retrieve socket_id from the database");
+                warn!("Cannot retrieve socket id from the database");
                 return;
             }
             let result = update_labels_in_db(

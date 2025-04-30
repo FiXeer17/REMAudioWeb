@@ -28,8 +28,7 @@ pub struct AppState {
     pub db: Pool<Postgres>,
 }
 
-pub async fn crate_app() -> Result<(), std::io::Error> {
-    env_logger::init();
+pub async fn create_app() -> Result<(), std::io::Error> {
     let pool = establish_connection().await; // create a connection with the database
     let _ = sqlx::migrate!("./migrations").run(&pool).await.unwrap(); // migrate
     let app_state = AppState { db: pool.clone() };

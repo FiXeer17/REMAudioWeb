@@ -14,6 +14,7 @@ use crate::{
 use actix::prelude::*;
 use actix_web::web::Data;
 use actix_web_actors::ws;
+use log::info;
 use std::{net::SocketAddrV4, str::FromStr, time::Instant};
 
 use super::super::tcp_manager::tcp_manager::TcpStreamsManager;
@@ -30,7 +31,7 @@ impl WsSession {
     fn hb(&self, ctx: &mut ws::WebsocketContext<Self>) {
         ctx.run_interval(websocket_settings::get_heartbeat_interval(), |act, ctx| {
             if Instant::now().duration_since(act.hb) > websocket_settings::get_client_timeout() {
-                println!("Websocket Client heartbeat failed, disconnecting!");
+                info!("Websocket Client heartbeat failed, disconnecting!");
                 let address = ctx.address();
                 act.srv.do_send(Disconnect { addr: address });
                 ctx.stop();

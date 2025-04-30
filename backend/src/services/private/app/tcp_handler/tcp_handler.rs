@@ -9,6 +9,7 @@ use crate::{
 use actix::{Actor, Addr, AsyncContext, Context, SpawnHandle};
 use actix_web::web::Data;
 use futures_util::lock::Mutex;
+use log::warn;
 use std::{collections::VecDeque, net::SocketAddrV4, sync::Arc};
 use tokio::net::TcpStream;
 
@@ -85,7 +86,7 @@ impl Actor for TcpStreamActor {
                                 error: t.to_string(),
                             };
                             ctx_address.do_send(message);
-                            println!("cannot create tcp stream (elapsed), closing...");
+                            warn!("Cannot create tcp stream (time elapsed), closing...");
                             return;
                         }
                         retries += 1;

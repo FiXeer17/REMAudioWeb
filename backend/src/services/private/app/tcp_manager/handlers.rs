@@ -15,6 +15,7 @@ use crate::{
     utils::common::check_socket,
 };
 use actix::{Actor, AsyncContext, Handler};
+use log::{info, warn};
 use uuid::Uuid;
 
 use super::{super::messages::*, tcp_manager::TcpStreamsManager};
@@ -35,10 +36,10 @@ impl Handler<Connect> for TcpStreamsManager {
                 }
             },
         };
-        println!("Connecting to {:?}", socket);
+        info!("Connecting to {:?}", socket);
         let pool_cloned = self.pgpool.clone();
         tokio::spawn(async move {
-            let Ok(dbsock) = retrieve_socket_from_db(&pool_cloned, socket).await else{ println!("Couldn't retrieve socket from database."); return ;};
+            let Ok(dbsock) = retrieve_socket_from_db(&pool_cloned, socket).await else{ warn!("Couldn't retrieve socket from database."); return ;};
             add_presets(pool_cloned.clone(), socket, dbsock.device).await;
             add_channels(pool_cloned, socket).await;
         });
@@ -56,7 +57,7 @@ impl Handler<Connect> for TcpStreamsManager {
             let ctx_addr = ctx.address().clone();
             let pool_cloned = self.pgpool.clone();
             tokio::spawn(async move {
-                println!("New connection detected at socket {}, processing...",socket.to_string());
+                info!("New connection detected at socket {}, processing...",socket.to_string());
                 if let Ok(dbsock) = retrieve_socket_from_db(&pool_cloned, socket).await{
                     let Ok(device_type) = Device::from_str(&dbsock.device) else{return;};
                     let message = StartStream {
@@ -85,7 +86,7 @@ impl Handler<SetSocket> for TcpStreamsManager {
                         .insert(sockv4.clone().unwrap(), msg.socket_name.clone());
                     let pool = self.pgpool.clone();
                     tokio::spawn(async move {
-                        println!("Setting the new socket...");
+                        info!("Setting the new socket...");
                         let result = insert_socket_in_db(
                             &pool,
                             msg.socket_name,
@@ -94,13 +95,13 @@ impl Handler<SetSocket> for TcpStreamsManager {
                         )
                         .await;
                         if result.is_err() {
-                            println!("Couldn't save socket in database");
+                            warn!("Couldn't save socket in database");
                         }
                         let result = update_latest_socket_in_db(&pool, sockv4.unwrap()).await;
                         if result.is_err() {
-                            println!("Couldn't update latest socket in database");
+                            warn!("Couldn't update latest socket in database");
                         }
-                        println!("Socket set succesfully.");
+                        info!("Socket set succesfully.");
                     });
                 }
                 return true;
@@ -235,7 +236,7 @@ impl Handler<StartStream> for TcpStreamsManager {
         self.streams_actors
             .entry(socket)
             .or_insert(stream_actor_addr);
-        println!("Connection established at socket {}",socket.to_string());
+        info!("Connection established at socket {}",socket.to_string());
     }
 }
 

@@ -5,6 +5,7 @@ use std::{
 };
 
 use actix::Addr;
+use log::info;
 
 use crate::{
     services::{
@@ -69,7 +70,7 @@ pub async fn remove_inactive_connection(
         }
     }
     for socket in inactive_sockets {
-        println!(
+        info!(
             "Inactive connection found, removing socket: {}...",
             socket.to_string()
         );
@@ -78,7 +79,7 @@ pub async fn remove_inactive_connection(
 
     if latest_socket.is_some() {
         if !try_connection(latest_socket.unwrap()).await {
-            println!(
+            info!(
                 "Inactive connection found, removing latest_socket: {}...",
                 latest_socket.unwrap().to_string()
             );
