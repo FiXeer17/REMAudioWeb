@@ -68,7 +68,8 @@ To start a comunication with WebSocket protocol you'll need a UUID that certify 
 ```
 {
     "socket_name":"socket name",
-	"socket":"matrix-simulator:2000"
+	"socket":"matrix-simulator:2000",
+    "device_type":[POSSIBLE DEVICE_TYPE]
 } 
 ```
 ### remove socket:
@@ -125,24 +126,36 @@ To do so you have to send a json formatted WebSocket message with this body:
 }
 ```
 
+### POSSIBLE DEVICE TYPES
+currently you can control audio and video devices setting sockets with these keywords:
+| device type | keyword |
+|-------------|---------|
+| audio | "matrix" |
+| video | "camera" |
+
+
 #### POSSIBLE SECTIONS:
-sections are specific keywords, here is a list of sections that the engine actually support:
-```
-    labels -> "labels"
-    visibility -> "visibility"
-    preset -> "preset"
-    mute -> "mute"
-    volume ->"volume"
-```
+sections are specific keywords, here is a list of sections that the engine currently support:
+| function | keyword |
+|---------|---------|
+| change channel labels | "labels" |
+| change channel visibility | "visibility" |
+| change the current preset | "preset" |
+| mute channel | "mute" |
+| change the volume of the channel | "volume" |
+
 
 ### POSSIBLE IO:
-input/output sources are specific keywords, here is a list of ios that the engine actually support:
-```
-   general audio -> "both"
-   input ->"input"
-   output -> "output"
-```
+input/output sources are specific keywords, here is a list of ios that the engine currently support:
+| source | value |
+|--------------|-------|
+| input | "input" |
+| output | "output" |
+
+
 ### POSSIBLE VALUES:
+values can be used in different context, because of that it can assume different type:
+
 | section | value type |
 |-------|----------|
 | labels | string |

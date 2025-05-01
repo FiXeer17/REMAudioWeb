@@ -116,17 +116,25 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
     fn handle(&mut self, msg: RemoveSocket, _ctx: &mut Self::Context) -> Self::Result {
         let sessions = self.streams.remove(&msg.socket);
         let message = ClosedByAdmin {};
+        if let Some(sessions) = sessions {
+            sessions.iter().for_each(|addr| {
+                addr.do_send(message.clone());
+            });
+        }
+        let index = self
+            .inactive_sockets
+            .iter()
+            .position(|s| s.socket == msg.socket.to_string());
+        if let Some(index) = index {
+            self.inactive_sockets.remove(index);
+        }
 
         if let Some(socket) = self.latest_socket {
             if &socket == &msg.socket {
                 self.latest_socket = None;
             }
         }
-        if sessions.is_some() {
-            sessions.unwrap().iter().for_each(|addr| {
-                addr.do_send(message.clone());
-            });
-        }
+        
         if let Some(stream_actor) = self.streams_actors.remove(&msg.socket) {
             stream_actor.do_send(message.clone());
         }
@@ -149,13 +157,7 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
             *to_reset = None;
         });
         self.sockets.remove(&msg.socket);
-        let index = self
-            .inactive_sockets
-            .iter()
-            .position(|s| s.socket == msg.socket.to_string());
-        if let Some(index) = index {
-            self.inactive_sockets.remove(index);
-        }
+        
     }
 }
 
