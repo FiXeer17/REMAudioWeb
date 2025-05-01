@@ -5,8 +5,8 @@ use tokio::net::TcpStream;
 use tokio::time::timeout;
 use crate::configs::ping_socket_settings;
 
-pub const AUDIO_LABEL:&str="audio";
-pub const VIDEO_LABEL:&str="video";
+pub const AUDIO_LABEL:&str="matrix";
+pub const VIDEO_LABEL:&str="camera";
 
 #[derive(Debug,Clone)]
 pub enum Device{

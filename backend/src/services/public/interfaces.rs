@@ -1,6 +1,7 @@
 use super::schemas::*;
 use super::utils::{insert_user, SRC};
 use crate::configs::{channels_settings, presets_settings, DatabaseEnv};
+use crate::services::private::socket::utils::Device;
 use crate::services::public::signin::schemas::ReturnFullUser;
 use crate::AppState;
 use actix_web::web::Data;
@@ -137,7 +138,7 @@ pub async fn add_presets(
         "INSERT INTO presets (label,relative_identifier,socket_id) VALUES ($1,$2,$3);";
     let np: u8;
     let prfx: String;
-    if device == "audio".to_string() {
+    if device == Device::Audio.to_string() {
         np = presets_settings::get_audio_presets_number();
         prfx = presets_settings::get_audio_preset_label_prefix()
     } else {
