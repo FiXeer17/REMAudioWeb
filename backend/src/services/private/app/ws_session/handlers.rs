@@ -58,6 +58,7 @@ impl Handler<GeneralConnectionError> for WsSession {
     }
 }
 
+
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
         let msg = match msg {
@@ -69,15 +70,15 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
         };
         match msg {
             ws::Message::Ping(msg) => {
-                self.hb = Instant::now();
-                ctx.pong(&msg);
+                self.hb = Instant::now(); // updating heartbeat if recieve a ping from client
+                ctx.pong(&msg); 
             }
             ws::Message::Pong(_) => {
-                self.hb = Instant::now();
+                self.hb = Instant::now(); //updating heartbeat if recieve a pong response to a ping from client
             }
             ws::Message::Text(text) => {
                 self.hb = Instant::now();
-                let addr = ctx.address();
+                let addr = ctx.address(); // deserialize_text detect the command type sent by the client.
                 match self.deserialize_text(text.to_string()) {
                     HandleText::Command(cmd) => match cmd {
                         Ok(cmd) => {

@@ -128,7 +128,7 @@ impl MatrixStates {
         }
     }
 
-    pub fn set_changes(&mut self, command: MatrixCommand) -> () {
+    pub fn set_changes(&mut self, command: MatrixCommand) {
         let cmd = MatrixCommandDatas::from(command);
         let io = cmd.io;
         let function = cmd.function;

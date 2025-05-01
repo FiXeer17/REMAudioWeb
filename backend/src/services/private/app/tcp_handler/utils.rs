@@ -38,7 +38,11 @@ use super::{
     },
     tcp_handler::TcpStreamActor,
 };
-
+/*
+    This function deserialize the hex byte string recieved into a readable 
+    command struct, if the command is a preset command then a full matrix read will be ran.
+    Else set_changes will take care of updating the cache. 
+ */
 pub async fn process_response(
     not_timedout: Result<usize, std::io::Error>,
     socket: SocketAddrV4,
@@ -65,11 +69,16 @@ pub async fn process_response(
                     .collect::<Vec<String>>();
                 if converted.get(0) == Some(&"00".to_string()) {
                     if cmd.fcode != FNCODE::SCENE.to_string() {
-                        states.set_changes(cmd);
+                        states.set_changes(cmd); // set changes detect changes from the recieved command and update the cache.
                         let message = MatrixReady { socket, states };
                         ctx_addr.do_send(message);
                     } else {
-                        TcpStreamActor::read_states(ctx_addr, socket, stream, pgpool).await;
+                        TcpStreamActor::read_states(ctx_addr.clone(), socket, stream, pgpool).await; //TODO DELETE .clone() 
+                        warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
+                        states.set_changes(cmd); //TODO DELETE THIS LINE  
+                        let message = MatrixReady { socket, states }; //TODO DELETE THIS LINE 
+                        ctx_addr.do_send(message); //TODO DELETE THIS LINE 
+
                     }
                 }
             }
@@ -84,6 +93,12 @@ pub async fn process_response(
     }
 }
 
+
+/*
+    This function extract and send a command from the command_queue,
+    process_response fn will take care of converting the bytes buffer and 
+    return a response to the WebSocket handler.
+ */
 pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActor>) {
     if !act.commands_queue.is_empty() {
         let cmd = act.commands_queue.pop_back().unwrap();
@@ -325,8 +340,12 @@ impl TcpStreamActor {
             },
         ));
     }
+    /*
+        If a matrix command type is recieved it will be pushed inside the commands queue,
+        command_polling fn will take care of it.
+     */
     pub fn handle_set_command(&mut self, sc: SetCommand) {
-        self.commands_queue.push_front(sc.command);
+        self.commands_queue.push_front(sc.command); 
     }
     pub fn handle_recache(&mut self, ctx: &mut Context<Self>) {
         if self.machine_states.is_some() {
