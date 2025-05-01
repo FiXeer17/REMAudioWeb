@@ -3,6 +3,7 @@ use std::time::Instant;
 use crate::utils::common::toast;
 use actix::{ActorContext, AsyncContext, Handler, StreamHandler};
 use actix_web_actors::ws;
+use log::debug;
 use serde_json::json;
 
 use super::super::messages::*;
@@ -124,7 +125,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                     }
                 }
             }
-            ws::Message::Binary(_) => println!("Unexpected binary"),
+            ws::Message::Binary(_) => debug!("Unexpected binary"),
             ws::Message::Close(reason) => {
                 ctx.close(reason);
                 ctx.stop();

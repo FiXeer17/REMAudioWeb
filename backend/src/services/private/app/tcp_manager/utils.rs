@@ -5,6 +5,7 @@ use std::{
 };
 
 use actix::Addr;
+use log::info;
 
 use crate::{
     services::{
@@ -16,7 +17,7 @@ use crate::{
             },
             socket::utils::try_connection,
         },
-        public::{interfaces::{retrieve_socket_from_db, retrieve_sockets}, schemas::Socket},
+        public::{interfaces::{is_socket_in_db, retrieve_sockets}, schemas::Socket},
     },
     AppState,
 };
@@ -69,7 +70,7 @@ pub async fn remove_inactive_connection(
         }
     }
     for socket in inactive_sockets {
-        println!(
+        info!(
             "Inactive connection found, removing socket: {}...",
             socket.to_string()
         );
@@ -78,7 +79,7 @@ pub async fn remove_inactive_connection(
 
     if latest_socket.is_some() {
         if !try_connection(latest_socket.unwrap()).await {
-            println!(
+            info!(
                 "Inactive connection found, removing latest_socket: {}...",
                 latest_socket.unwrap().to_string()
             );
@@ -98,32 +99,6 @@ pub async fn detect_dead_sockets(socks: Vec<Socket>) -> Result<Vec<Socket>, sqlx
 
     Ok(inactive_sockets)
 }
-pub fn socket_vec_builder(
-    sockets: HashMap<SocketAddrV4, String>,
-    latest_socket: Option<SocketAddrV4>,
-) -> Vec<Socket> {
-    let mut socks: Vec<Socket> = Vec::new();
-    for sock in sockets {
-        if let Some(latest) = latest_socket {
-            if latest == sock.0 {
-                socks.push(Socket {
-                    id: None,
-                    socket_name: sock.1,
-                    socket: latest.to_string(),
-                    latest: true,
-                });
-                continue;
-            }
-        }
-        socks.push(Socket {
-            id: None,
-            socket_name: sock.1,
-            socket: sock.0.to_string(),
-            latest: false,
-        });
-    }
-    socks
-}
 impl TcpStreamsManager {
     pub fn poll_sockets(
         mut inactive_sockets: VecDeque<Socket>,
@@ -133,7 +108,7 @@ impl TcpStreamsManager {
         tokio::spawn(async move {
             if !inactive_sockets.is_empty() {
                 let to_test = inactive_sockets.pop_back().unwrap();
-                if let Ok(res) = retrieve_socket_from_db(&pgpool, SocketAddrV4::from_str(&to_test.socket).unwrap()).await{
+                if let Ok(res) = is_socket_in_db(&pgpool, SocketAddrV4::from_str(&to_test.socket).unwrap()).await{
                     if !res {return;}
                 }
                 let response =

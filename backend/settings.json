@@ -6,6 +6,12 @@
         "o_channels_number":16,         
         "default_visibility":true       
     },
+    "presets_settings": {
+        "audio_preset_label_prefix" : "preset",
+        "video_preset_label_prefix" : "preset",
+        "audio_presets_number" : 16,
+        "video_presets_number":10
+    },
 
     "tcp_comunication_settings":{
 

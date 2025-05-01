@@ -9,7 +9,7 @@ use crate::{
         },
         socket::{
             schemas::{RemoveSocketBody, SetSocketBody},
-            utils::{check_in_connections, try_connection},
+            utils::{check_in_connections, try_connection, Device},
         },
     }, public::interfaces::{remove_socket_in_db, retrieve_admin_from_id}},
     utils::common::{check_socket, toast}, AppState,
@@ -57,17 +57,21 @@ pub async fn add_socket(
                         }
                     }
                 }
+                if let Err(()) = Device::from_str(&request_body.device_type){
+                    return HttpResponse::BadRequest().json(toast("invalid device type"));
+                }
+
                 message = SetSocket {
                     socket_name:request_body.socket_name.clone(),
                     socket: sock.to_string(),
                     uuid: uuid.uuid.clone(),
+                    device:request_body.device_type.clone()
                 };
-                let response = srv.send(message).await;
-                if let Err(_) = response {
+                let Ok(response) = srv.send(message).await else {
                     return HttpResponse::InternalServerError()
                         .json(toast("couldn't set the socket"));
-                }
-                if let false = response.unwrap() {
+                };
+                if let false = response {
                     return HttpResponse::BadRequest().json(toast("invalid uuid"));
                 }
             }

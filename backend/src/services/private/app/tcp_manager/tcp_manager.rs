@@ -39,8 +39,8 @@ impl TcpStreamsManager {
     pub async fn new(pgpool: actix_web::web::Data<AppState>) -> Result<Self, sqlx::Error> {
         let (sockets, latest_socket) = remove_inactive_connection(pgpool.clone()).await?;
         Ok(Self {
-            streams: HashMap::with_capacity(1),
-            streams_actors: HashMap::with_capacity(1),
+            streams: HashMap::new(),
+            streams_actors: HashMap::new(),
             uuids_sockets: HashMap::new(),
             uuids_users: HashMap::new(),
             avail_map: HashMap::new(),

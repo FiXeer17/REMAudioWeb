@@ -1,27 +1,26 @@
 [package]
+edition = "2021"
 name = "backend"
 version = "0.1.0"
-edition = "2021"
-
 
 [dependencies]
-tokio = { version="1.43", features=["full"]}
-sqlx = { version="0.8.3", features=["runtime-tokio-rustls", "postgres", "macros"]}
-dotenv = { version="0.15.0"}
-actix-web = { version="4"}
-actix-ws = {version="0.3.0"}
-futures-util = {version="0.3.31"}
+actix = {version = "0.13.5"}
+actix-cors = {version = "0.7.0"}
+actix-web = {version = "4"}
 actix-web-actors = "4"
-serde = { version = "1.0", features = ["derive"] }
-validator = { version = "0.16", features = ["derive"] }
-argon2 ={version= "0.5.0"}
-rand = {version="0.8.5"}
-serde_json = {version="1.0"}
-derive_more = {version="2.0.1", features=["display","error","from"]}
-actix-cors = {version="0.7.0"}
-jsonwebtoken = {version="9.3.1"}
-chrono = {version="0.4.39"}
-env_logger = {version="0.11.6"}
-actix= {version="0.13.5"}
-uuid = { version = "1.16.0", features = ["v4"] }
-
+actix-ws = {version = "0.3.0"}
+argon2 = {version = "0.5.0"}
+chrono = {version = "0.4.39"}
+derive_more = {version = "2.0.1", features = ["display", "error", "from"]}
+dotenv = {version = "0.15.0"}
+env_logger = {version = "0.11.6"}
+futures-util = {version = "0.3.31"}
+jsonwebtoken = {version = "9.3.1"}
+log = {version = "0.4.27"}
+rand = {version = "0.8.5"}
+serde = {version = "1.0", features = ["derive"]}
+serde_json = {version = "1.0"}
+sqlx = {version = "0.8.3", features = ["runtime-tokio-rustls", "postgres", "macros"]}
+tokio = {version = "1.43", features = ["full"]}
+uuid = {version = "1.16.0", features = ["v4"]}
+validator = {version = "0.16", features = ["derive"]}
