@@ -15,6 +15,7 @@ use crate::{
     utils::common::{check_socket, toast}, AppState,
 };
 use actix_web::{post, web, HttpResponse, Responder};
+use log::{info,error};
 use serde_json::json;
 use uuid::Uuid;
 
@@ -88,7 +89,7 @@ pub async fn add_socket(
         }
     };
 
-    let response = json!({"name":socket_name,"socket": socket});
+    let response = json!({"name":socket_name,"socket": socket,"device":request_body.device_type});
     HttpResponse::Ok().json(response)
 }
 
@@ -120,15 +121,16 @@ pub async fn remove_socket(
     
     let socket = match check_socket(socket.to_string()) {
         Ok(s) => {
+            if let Err(e) = remove_socket_in_db(&pgpool, s.unwrap()).await{
+                error!("Cannot remove socket from database, error:\n{}",e.to_string());
+                return HttpResponse::InternalServerError().finish();
+            }
+            info!("Socket: {} removed from database.",s.unwrap());
             let sockets = srv.send(GetConnections {}).await;
             if let Ok(connections) = sockets{
                 match check_in_connections(s.unwrap(), connections){
                     true => (),
                     false => {            
-                        let result = remove_socket_in_db(&pgpool, s.unwrap()).await;
-                        if result.is_err() {
-                            return HttpResponse::InternalServerError().finish();
-                        }
                         return HttpResponse::Ok().json(json!({"socket": s.unwrap().to_string()}));
                     }
                 }
@@ -138,7 +140,8 @@ pub async fn remove_socket(
                 uuid: uuid.uuid.clone(),
             };
             srv.do_send(message);
-            s.unwrap()
+            s.unwrap();
+            
         }
         Err(e) => {
             return HttpResponse::BadRequest().json(toast(&format!(
