@@ -2,7 +2,7 @@ import { Navbar } from "@/components/ui/navbar";
 import { Button as Mute } from "@/components/ui/button_mute";
 import { Button as Channel } from "@/components/ui/button_channels";
 import { Badge } from "@/components/ui/badge";
-import { Button as Audio_Video } from "@/components/ui/audio_video";
+import { Button as PresetsButton } from "@/components/ui/audio_video";
 import { useNavigate } from "react-router-dom";
 import { SwipeChannels } from "../../lib/swipeChannels";
 import { useState, useContext, useEffect } from "react";
@@ -17,15 +17,17 @@ export const HomeAudio=() => {
   const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
   const {socket,message} = useContext(SocketContext).socketState
   const [isAvailable, setIsAvailable] = useState(true)
+  const [currentPresets,setCurrentPresets]=useState(0)
 
   useEffect(()=>{
 
-    const { inputChannelStates, outputChannelStates,isAvailable,outputVisibility, inputVisibility } = GetData(message);
+    const { inputChannelStates, outputChannelStates,isAvailable,outputVisibility, inputVisibility,currentPresets } = GetData(message);
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
       setInputVisibility(inputVisibility)
       setOutputVisibility(outputVisibility)
       setIsAvailable(isAvailable)
+      setCurrentPresets(currentPresets)
   },[message])
   const navigate = useNavigate();
 
@@ -89,13 +91,10 @@ export const HomeAudio=() => {
     
     <div className="grid grid-rows-[auto,1fr,1fr,auto] min-h-svh" >
       
-      <div className="flex justify-start px-2 pb-5 pt-3 ">
-        <div className=" grid grid-cols-2 px-5 py-3 w-full items-center justify-items-center  bg-home_colors-Navbar/Selection_Bg rounded-full">
-          <Audio_Video variant={"blue"}>AUDIO</Audio_Video>
-          <Audio_Video variant={"white"} onClick={() => navigate("/homeVideo")}>
-            VIDEO
-          </Audio_Video>
-        </div>
+      <div className="flex justify-center  pb-5 pt-4 ">
+
+        <PresetsButton variant={"blue"} onClick={()=>{navigate("/presets",{state:"house"})}}>PRESETS {currentPresets}</PresetsButton>
+          
       </div>
       <div className="flex flex-col px-7 py-6">
         <div

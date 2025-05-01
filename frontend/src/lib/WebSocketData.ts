@@ -5,5 +5,7 @@ export function GetData(data:string){
     const outputVisibility=dataJson.o_visibility
     const inputVisibility=dataJson.i_visibility
     const isAvailable=dataJson.available
-    return { inputChannelStates,outputChannelStates,isAvailable,outputVisibility,inputVisibility }   
+    const currentPresets=dataJson.current_preset
+
+    return { inputChannelStates,outputChannelStates,isAvailable,outputVisibility,inputVisibility,currentPresets }   
 }

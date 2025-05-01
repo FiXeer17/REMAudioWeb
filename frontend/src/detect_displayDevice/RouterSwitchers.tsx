@@ -1,10 +1,3 @@
-
-import { createBrowserRouter,Navigate,Outlet } from "react-router-dom"
-import { clientLoader } from '../lib/clientLoader'
-import SocketContextComponent from '../lib/socket/Component'
-import UUIDProvider from "../lib/socket/ComponentUuid"
-import UUIDLayout from "../pages/connections_socket/Redirect"
-
 import {SignInPage as SignInDesktop } from "../pages/desktopPages/SignIn"
 import {SignInPage as SignInMobile} from "@/pages/mobilePages/SignIn"
 
@@ -28,6 +21,9 @@ import { Settings as SettingsMobile } from "@/pages/mobilePages/Settings"
 
 import { Volume as VolumeDesktop } from "@/pages/desktopPages/Volume"
 import { Volume as VolumeMobile } from "@/pages/mobilePages/Volume"
+
+import { Presets as PresetsDesktop } from "@/pages/desktopPages/Presets"
+import { Presets as PresetsMobile  } from "@/pages/mobilePages/Presets"
 
 import { useIsDesktop } from "./useDeviceType"
 
@@ -70,6 +66,11 @@ export const Settings = () => {
 export const Volume = () => {
     const isDesktop = useIsDesktop();
     return isDesktop ? <VolumeDesktop /> : <VolumeMobile />;
+};
+
+export const Presets = () => {
+    const isDesktop = useIsDesktop();
+    return isDesktop ? <PresetsDesktop /> : <PresetsMobile />;
 };
 
 

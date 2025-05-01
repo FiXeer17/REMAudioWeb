@@ -18,7 +18,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const {uuid,isAdmin}=useConnections()
 
     useEffect(()=>{
-
+      
       if (!uuid) return
 
       const socketServerUrl = `ws://localhost:8000/ws/app?uuid=${uuid}`;  
@@ -28,7 +28,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       socket.onopen=()=>{};
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
-        console.log(event.data)
+
         const datajson=JSON.parse(event.data)
         if (!datajson.hasOwnProperty('reason')){
           socketDispatch({ type: 'new_message', payload: event.data })
