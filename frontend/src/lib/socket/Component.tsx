@@ -2,6 +2,7 @@ import React, { PropsWithChildren, useEffect, useReducer, useState } from "react
 import { defaultSocketContextState,SocketReducer,SocketContextProvider } from "./context";
 import { useConnections } from "./ComponentUuid";
 import { useNavigate } from "react-router-dom";
+import { RecentConnections } from "@/pages/connections_socket/RecentConnections";
 
 
 
@@ -52,7 +53,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     },[uuid])
 
     
-    if(loading) return <div>Caricamento socket in corso...</div>
+    if(loading) return <RecentConnections isLoading={true}/>
 
     return <SocketContextProvider value={{ socketState,socketDispatch }}>
         {children}

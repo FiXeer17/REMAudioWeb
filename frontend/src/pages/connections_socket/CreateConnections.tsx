@@ -3,7 +3,7 @@ import { Link,useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input_email";
 import { Button } from "@/components/ui/button";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { addSocket } from "@/lib/services";
+import { setSocket } from "@/lib/services";
 import { useConnections } from "@/lib/socket/ComponentUuid";
 import { toast, Toaster } from "sonner";
 
@@ -24,9 +24,10 @@ export const CreateConnections=()=>{
             const values={
                 uuid:uuid,
                 socket_name:data.name,
-                socket:`${data.ip}:${data.port}`
+                socket:`${data.ip}:${data.port}`,
+                device_type:"audio"
               }
-            await addSocket(values)
+            await setSocket(values)
             navigate("/homeAudio")
         }catch(error){
             toast.error("Error creating new connections",{duration:1000})

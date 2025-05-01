@@ -17,13 +17,8 @@ export default function Test2() {
 
     return(
 
-        <div>
-            <p className="text-white"> 
-                <strong>
-                    {message}
-                </strong>
-            </p>
-            
-        </div>
+        <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
+                   <div className="w-10 h-10 border-4  border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
     )
 }

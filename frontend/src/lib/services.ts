@@ -12,6 +12,7 @@ interface UserSocket{
   uuid:string|undefined;
   socket:string;
   socket_name:string;
+  device_type:string;
 
 }
   
@@ -33,12 +34,12 @@ export function getSocket():Promise<AxiosResponse<{ sockets: { name: string; ip:
   return client.get("api")
 }
 
-export function setSocket({uuid,socket_name,socket}: UserSocket): Promise<AxiosResponse> {
-  return client.post(`ws/socket/add?uuid=${uuid}`, {socket_name,socket});
+export function setSocket({uuid,socket_name,socket,device_type}: UserSocket): Promise<AxiosResponse> {
+  return client.post(`ws/socket/add?uuid=${uuid}`, {socket_name,socket,device_type});
 }
 
-export function addSocket({uuid,socket_name,socket}: UserSocket): Promise<AxiosResponse> {
-  return client.post(`ws/socket/add?uuid=${uuid}`, {socket_name,socket});
+export function addSocket({uuid,socket_name,socket,device_type}: UserSocket): Promise<AxiosResponse> {
+  return client.post(`ws/socket/add?uuid=${uuid}`, {socket_name,socket,device_type});
 }
 
 export function removeSocket({uuid,socket_name,socket}: UserSocket): Promise<AxiosResponse> {
