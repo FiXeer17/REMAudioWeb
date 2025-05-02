@@ -20,7 +20,7 @@ pub fn into_data(data: SetState) ->Result<Vec<String>,Error>{
                         if v > 16 || v == 0 {
                             return Err(Error::InvalidPreset);
                         }
-                        Ok(vec![format!("{:02}", v)])
+                        Ok(vec![format!("{:02X}", v)])
                     }
                     Err(e) => return Err(Error::ConversionError(e.to_string())),
                 }
