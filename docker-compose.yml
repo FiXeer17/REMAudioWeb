@@ -37,7 +37,7 @@ services:
     environment:
       - RUST_LOG=info
   matrix-simulator-1:
-    image: i3elle/matrix-engine
+    image: i3elle/matrix-engine:latest
     environment:
       - MATRIX_HOST=0.0.0.0
       - MATRIX_PORT=2000
@@ -45,7 +45,7 @@ services:
       - "2000:2000"
     command: ./matrix-engine
   matrix-simulator-2:
-    image: i3elle/matrix-engine
+    image: i3elle/matrix-engine:latest
     environment:
       - MATRIX_HOST=0.0.0.0
       - MATRIX_PORT=2001
@@ -53,7 +53,7 @@ services:
       - "2001:2001"
     command: ./matrix-engine
   matrix-simulator-3:
-    image: i3elle/matrix-engine
+    image: i3elle/matrix-engine:latest
     environment:
       - MATRIX_HOST=0.0.0.0
       - MATRIX_PORT=2002
