@@ -76,7 +76,7 @@ impl MatrixCommand {
             if !vec.iter().all(|val| val.is_valid_format()) {
                 return Err(Error::InvalidFormat("Invalid data format".to_string()));
             }
-            data_length = Some(format!("{:02}", vec.len()));
+            data_length = Some(format!("{:02X}", vec.len()));
         }
 
         Ok(MatrixCommand {
@@ -90,7 +90,7 @@ impl MatrixCommand {
         })
     }
     pub fn check_channel(ch: String) -> Result<u8, Error> {
-        match ch.parse::<u8>() {
+        match u8::from_str_radix(&ch, 16) {
             Ok(v) => {
                 if v > channels_settings::get_i_channel_number() || v<1{
                     return Err(Error::InvalidChannel);
@@ -111,7 +111,7 @@ impl MatrixCommand {
             Err(_) => return Err(Error::InvalidFunctionCode),
         };
         if datas.is_some() {
-            data_length = Some(format!("{:02}", datas.clone().unwrap().len()));
+            data_length = Some(format!("{:02X}", datas.clone().unwrap().len()));
         }
 
         Ok(Self {
@@ -145,7 +145,7 @@ impl From<MatrixCommand> for MatrixCommandDatas {
             .expect("Cannot retrieve fcode")
             .to_label();
         let data_length =
-            u32::from_str_radix(&value.data_length.unwrap_or("00".to_string()), 10).unwrap();
+            u32::from_str_radix(&value.data_length.unwrap_or("00".to_string()), 16).unwrap();
         let (mut io, mut ch, mut v, mut muted, mut preset) = (None, None, None, None, None);
 
         if let Some(mut data) = value.data {
@@ -157,12 +157,14 @@ impl From<MatrixCommand> for MatrixCommandDatas {
                 );
             } else {
                 let value = data.remove(0);
-                preset = Some(u8::from_str_radix(&value, 10).unwrap())
+                preset = Some(u8::from_str_radix(&value, 16).unwrap())
             }
             if data.len() > 0 {
                 ch = Some(
-                    u32::from_str_radix(&data.remove(0), 10).expect("Cannot find channel code"),
+                    u32::from_str_radix(&data.remove(0), 16).expect("Cannot find channel code"),
+                    
                 );
+
                 if !data.is_empty() && function == FNCODE::VOLUME.to_label() {
                     data.reverse();
                     let decimal = u16::from_str_radix(&data.concat(), 16)
@@ -194,9 +196,10 @@ impl TryFrom<&[u8]> for MatrixCommand {
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         let raw_cmd = value
             .iter()
-            .map(|byte| format!("{:02X}", byte))
+            .map(|byte|  format!("{:02X}", byte))
             .collect::<Vec<String>>()
             .join(" ");
+       
         MatrixCommand::from_str(&raw_cmd)
     }
 }
@@ -267,7 +270,7 @@ impl FromStr for MatrixCommand {
                         Error::ConversionError(String::from("Missing data length"))
                     })?;
 
-                    if let Ok(usable_data_length) = u8::from_str_radix(data_length, 10) {
+                    if let Ok(usable_data_length) = u8::from_str_radix(data_length, 16) {
                         let data: Option<Vec<String>>;
                         let mut data_length = Some(data_length.to_string());
 

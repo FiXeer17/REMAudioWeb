@@ -208,7 +208,6 @@ impl TcpStreamActor {
 
         for command in commands {
             let cmd = command.to_byte_hex().unwrap();
-
             let written_bytes = {
                 let mut stream = stream.lock().await;
                 stream.write(&cmd[..]).await
