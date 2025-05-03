@@ -16,13 +16,20 @@ export const Presets = () => {
     const [colorNav] = useState<string>(() => location.state);
     const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
 
+
     useEffect(()=>{
 
       const { isAvailable,currentPresets }=GetData(message)      
       setIsAvailable(isAvailable)
       setCurrentPresets(currentPresets)
-
+ 
     },[message])
+
+    const handleSetPreset=(Preset:number)=>{
+      const dataoutput={"section":"preset","value":Preset.toString()}
+      socket?.send(JSON.stringify(dataoutput))
+      colorNav==="house" ? navigate("/homeAudio") : navigate("/volume")
+    }
 
   return (
     <>
@@ -52,7 +59,7 @@ export const Presets = () => {
                 </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
                   {Presets.map((Presets)=>(
-                    <PresetsButton size={"presets"} variant={currentPresets === Presets ? "blue" : "white"} key={Presets}>Presets {Presets}</PresetsButton>
+                    <PresetsButton size={"presets"} variant={currentPresets === Presets ? "blue" : "white"} key={Presets} onClick={()=>handleSetPreset(Presets)}>Presets {Presets}</PresetsButton>
                   ))}
               </div>
           </div>

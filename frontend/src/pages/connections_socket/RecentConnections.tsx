@@ -47,7 +47,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                     uuid:uuid,
                     socket_name:element.name,
                     socket:`${element.ip}:${element.port}`,
-                    device_type:"audio"
+                    device_type:"matrix"
                 }
                 const value = await setSocket(headers);
                 if (value.status===200){

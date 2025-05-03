@@ -1,12 +1,23 @@
 import { useState } from "react";
 
-export default function InOutButton() {
+interface InOutButtonProps {
+  onChange: (value: "IN" | "OUT") => void;
+}
+
+
+export default function InOutButton({ onChange }: InOutButtonProps) {
   const [selected, setSelected] = useState<"IN" | "OUT">("IN");
+
+
+  const handleSelected = (value: "IN" | "OUT") => {
+    setSelected(value);
+    onChange(value); 
+  };
 
   return (
     <div className="flex w-fit">
       <div
-        onClick={() => setSelected("IN")}
+        onClick={() => handleSelected("IN")}
         className={`flex border-[0.9px] text-sm font-bold justify-center w-10 cursor-pointer
           ${selected === "IN" 
             ? "text-home_colors-Selected_Borders/text border-home_colors-Selected_Borders/text"
@@ -15,7 +26,7 @@ export default function InOutButton() {
         IN
       </div>
       <div
-        onClick={() => setSelected("OUT")}
+        onClick={() => handleSelected("OUT")}
         className={`flex border-[0.9px] text-sm font-bold justify-center w-10 cursor-pointer
           ${selected === "OUT" 
             ? "text-home_colors-Selected_Borders/text border-home_colors-Selected_Borders/text"

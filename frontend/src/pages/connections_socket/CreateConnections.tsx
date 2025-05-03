@@ -25,7 +25,7 @@ export const CreateConnections=()=>{
                 uuid:uuid,
                 socket_name:data.name,
                 socket:`${data.ip}:${data.port}`,
-                device_type:"audio"
+                device_type:"matrix"
               }
             await setSocket(values)
             navigate("/homeAudio")

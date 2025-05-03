@@ -19,7 +19,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        modified: "border-[1px] border-home_colors-Disabled_Channels text-home_colors-Disabled_Channels font-sans font-bold",
+        muted: "border-[1px] border-home_colors-Disabled_Channels text-home_colors-Disabled_Channels font-sans font-bold",
+        unmuted: "border-[1px] border-home_colors-Enabled_Channels text-home_colors-Enabled_Channels font-sans font-bold",
         preset: "border-[1px] border-home_colors-Selected_Borders/text text-home_colors-Selected_Borders/text font-sans font-bold"
       },
       size: {
@@ -33,7 +34,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "modified",
+      variant: "muted",
       size: "modified",
     },
   }
