@@ -1,11 +1,11 @@
-import { ArrowLeft } from "@phosphor-icons/react";
+import { ArrowLeft,Plus,Trash } from "@phosphor-icons/react";
 import { Link,useNavigate,useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Circle } from "@phosphor-icons/react";
 import { SwipeConnections } from "@/lib/swipeConnections";
 import { useConnections } from "@/lib/socket/ComponentUuid";
-import { setSocket } from "@/lib/services";
+import { removeSocket, setSocket } from "@/lib/services";
 import { toast, Toaster } from "sonner";
 
 
@@ -25,7 +25,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
     const location=useLocation()
     const [show] = useState<boolean>(() => location.state?.show);
     const [connections, setConnections] = useState<Connection[]>([]);
-    const {uuid,sockets}=useConnections()
+    const {uuid,sockets,triggerRedirect}=useConnections()
     
     useEffect(()=>{
         if (sockets==null){
@@ -60,6 +60,28 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
         fetchSetSocket()
     }
 
+    const handleRevome=(element:Connection)=>{
+        const fetchSetSocket=async ()=>{
+            try {
+                const headers={
+                    uuid:uuid,
+                    socket:`${element.ip}:${element.port}`,
+                }
+                const value = await removeSocket(headers);
+                if (value.status===200 ){
+                    const handleRedirect = async () => {
+                        await triggerRedirect()
+                        navigate("/uuidprovider")
+                    }
+                    handleRedirect()
+                }
+            } catch (error) {
+                console.error("Error setting Socket:", error);
+            }
+        }
+        fetchSetSocket()
+    }
+
     const {
     currentSet:currentSet,
     displayedConnections:displayedConnections,
@@ -79,28 +101,36 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                 </div>:<div className="absolute inset-0 z-10"></div>}
             <div className="absolute inset-0 bg-black z-20">
                 <div className="grid grid-rows-5 min-h-svh">
-                    <div className=" mt-9 ml-7">
+                    <div className="flex justify-between mt-9 ml-7 mr-7">
                         <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
                             <ArrowLeft size={32} color="#FFFFFF" />
                         </Link>
+                        <Link to={"/createConnections"}>
+                            <Plus color="#FFFFFF" size={32}/>
+                        </Link>
                     </div>
-                    <div className="grid row-span-3 grid-rows-4 mx-10 gap-4" style={{
+                    <div className="grid row-span-3 grid-rows-4 mx-10 gap-4 justify-center" style={{
                     transform: `translateX(${Offset}px)`,
                     transition: Offset === 0 ? "transform 0.3s ease" : "none",
-                }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                >
+                        }}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        >
                     
                     {displayedConnections.map((element:Connection)=>(
-                        <div className={`flex flex-col items-start justify-center text-white text-sm border-2 rounded-2xl ${
+                        <div className={`flex flex-col items-start justify-center text-white w-fit px-6 text-sm border-2 rounded-2xl ${
                             element.isLatest
                             ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text"
                             : "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
                         }`} key={element.ip}>
-                            <p className="flex ml-6 ">{element.name}</p>
-                            <div className="flex ml-6 text-[12px] items-center">
+                            <div className="flex justify-between w-full items-center ">
+                                <p className="flex ">{element.name}</p>
+                                <div className="bg-red-900 rounded-sm py-1 px-1 cursor-pointer" onClick={()=>handleRevome(element)}>
+                                    <Trash size={22}/>
+                                </div>
+                            </div>
+                            <div className="flex text-[12px] items-center">
                                 <div className=" bg-home_colors-Navbar/Selection_Bg px-5 py-2 border-2 rounded-l-xl border-home_colors-Border_Connections ">{element.ip}</div>
                                 <div className=" bg-home_colors-Navbar/Selection_Bg px-3 py-2 border-2 rounded-r-xl border-l-transparent border-home_colors-Border_Connections  ">{element.port}</div>
                                 <Button size={"recentConnections"} className=" ml-2  bg-white text-black " onClick={()=>handleClick(element)}>Connect</Button>

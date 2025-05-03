@@ -11,8 +11,11 @@ import { GetData } from "@/lib/WebSocketData";
 import SocketContext from "@/lib/socket/context";
 
 export const Volume=()=>{
+    const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
+    const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
     const [inputVolumesStates, setInputVolumesStates] = useState<{[key: string]: number;}>({});
     const [outputVolumesStates, setOutputVolumesStates] = useState<{[key: string]: number;}>({});
+
     const [channelSources, setChannelSources] = useState<{ [key: string]: "IN" | "OUT" }>(
         () => {
           const initial: { [key: string]: "IN" | "OUT" } = {};
@@ -30,7 +33,9 @@ export const Volume=()=>{
     const [currentPresets,setCurrentPresets]=useState(0)
     
     useEffect(()=>{
-    const { inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets } = GetData(message);
+    const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets } = GetData(message);
+        setInputChannelStates(inputChannelStates);
+        setOutputChannelStates(outputChannelStates);
         setInputVolumesStates(inputVolumesStates);
         setOutputVolumesStates(outputVolumesStates);
         setInputVisibility(inputVisibility)
@@ -50,6 +55,16 @@ export const Volume=()=>{
         handleTouchEnd: handleInputTouchEnd,
       } = SwipeVolumes(inputVolumesStates,outputVolumesStates);
       
+    const handleMute=(channel: string, type: string)=>{
+        console.log()
+        if (type === "IN") {;
+            const data={"section":"mute","io":"input","channel":channel,"value":(!inputChannelStates[channel]).toString()}
+            socket?.send(JSON.stringify(data))
+          }else if(type==="ON"){
+            const data={"section":"mute","io":"output","channel":channel,"value":(!outputChannelStates[channel]).toString()}
+            socket?.send(JSON.stringify(data))
+          }
+    }
 
     return(
         <div className="grid grid-rows-[0.5fr_2fr,auto] mx-5 min-h-svh">
@@ -72,6 +87,8 @@ export const Volume=()=>{
                     
                     Object.entries(displayedInputVolumes).map(([key, inputValue]) => {
                         const source = channelSources[key];
+                        const visibility= source ==="IN" ? inputVisibility: outputVisibility
+                        const channelState= source ==="IN" ? inputChannelStates: outputChannelStates
                         const value = source === "IN"
                           ? inputValue
                           : displayedOutputVolumes[key];
@@ -85,21 +102,13 @@ export const Volume=()=>{
                       
                         return (
                           <div className="flex flex-col items-center gap-3" key={key}>
-                            <p className="text-home_colors-Similar_White text-sm font-bold">
-                              {value ?? "-"} db
-                            </p>
-                            <Slider
-                              orientation="vertical"
-                              className="h-full"
-                              min={-60}
-                              max={15}
-                              value={[value ?? -60]}
-                            />
-                            <p className="text-home_colors-Similar_White text-sm font-bold">
-                              CH{key}
-                            </p>
+                            <p className="text-home_colors-Similar_White text-sm font-bold">{value} db </p>
+                            <Slider orientation="vertical" className="h-full" disabled={channelState[key] ? true : false } min={-60} max={15} value={channelState[key] ? [-60] : [value]} />
+                            <p className="text-home_colors-Similar_White text-sm font-bold"> CH{key} </p>
                             <InOutButton onChange={handleSourceChange} />
-                            <Mute size={"mute_preset"} variant={"unmuted"}>
+                            <Mute size={"mute_preset"} 
+                                variant={ visibility[key]? channelState[key]? "muted": "unmuted" : "notAvailable"} 
+                                onClick={()=>handleMute(key,source)}>
                               MUTE
                             </Mute>
                           </div>

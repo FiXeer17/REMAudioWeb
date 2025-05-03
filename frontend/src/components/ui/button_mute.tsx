@@ -21,6 +21,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         muted: "border-[1px] border-home_colors-Disabled_Channels text-home_colors-Disabled_Channels font-sans font-bold",
         unmuted: "border-[1px] border-home_colors-Enabled_Channels text-home_colors-Enabled_Channels font-sans font-bold",
+        notAvailable: "border-[1px] border-home_colors-Similar_White text-home_colors-Similar_White font-sans font-bold",
         preset: "border-[1px] border-home_colors-Selected_Borders/text text-home_colors-Selected_Borders/text font-sans font-bold"
       },
       size: {

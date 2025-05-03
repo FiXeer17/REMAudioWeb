@@ -15,6 +15,11 @@ interface UserSocket{
   device_type:string;
 
 }
+interface UserRemoveSocket{
+  uuid:string|undefined;
+  socket:string;
+
+}
   
 
 export function register({ username, email, password, session_type }: UserCredentials): Promise<AxiosResponse> {
@@ -42,6 +47,6 @@ export function addSocket({uuid,socket_name,socket,device_type}: UserSocket): Pr
   return client.post(`ws/socket/add?uuid=${uuid}`, {socket_name,socket,device_type});
 }
 
-export function removeSocket({uuid,socket_name,socket}: UserSocket): Promise<AxiosResponse> {
-  return client.post(`ws/socket/remove?uuid=${uuid}`, {socket_name,socket});
+export function removeSocket({uuid,socket}: UserRemoveSocket): Promise<AxiosResponse> {
+  return client.post(`ws/socket/remove?uuid=${uuid}`, {socket});
 }

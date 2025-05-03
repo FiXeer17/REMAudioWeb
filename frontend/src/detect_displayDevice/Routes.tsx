@@ -1,6 +1,6 @@
 import { createBrowserRouter,Navigate,Outlet } from "react-router-dom";
 import { 
-      SignIn,NewConnections,CreateConnections,RecentConnections,CallAdministrator,HomeAudio,Volume,Settings,Presets 
+      SignIn,NewConnections,CreateConnections,RecentConnections,CallAdministrator,HomeAudio,Volume,Settings,Presets,PreferenciesPresets 
        } from "./RouterSwitchers";
 import UUIDProvider from "../lib/socket/ComponentUuid";
 import SocketContextComponent from "../lib/socket/Component";
@@ -29,7 +29,10 @@ import Test2 from "@/pages/test/Test2";
       path: "/login",
       element: <SignIn/> 
     },
-    
+    {
+      path: "/preferenciesPresets",
+      element: <PreferenciesPresets/>
+    },
     
     {
       path: "/test",
@@ -78,7 +81,8 @@ import Test2 from "@/pages/test/Test2";
           {
             path: "/presets",
             element: <Presets/>
-          }
+          },
+          
         ]
         }
       ]
