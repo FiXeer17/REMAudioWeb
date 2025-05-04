@@ -1,12 +1,11 @@
 use crate::{
+    configs::ping_socket_settings,
     services::{
         private::app::{
-            messages::{MatrixReady, SetMessage, UnavailableSockets},
-            ws_session::session::WsSession,
+            messages::{MatrixReady, SetMessage, UnavailableSockets}, utils::CommandsExt, ws_session::session::WsSession
         },
         public::{interfaces::retrieve_sockets, schemas::Socket},
     },
-    configs::ping_socket_settings,
     AppState,
 };
 
@@ -28,16 +27,18 @@ pub struct TcpStreamsManager {
     pub streams_actors: HashMap<SocketAddrV4, Addr<TcpStreamActor>>,
     pub uuids_sockets: HashMap<Uuid, Option<String>>,
     pub uuids_users: HashMap<Uuid, i32>,
-    pub latest_socket: Option<SocketAddrV4>,
+    pub latest_audio_socket: Option<SocketAddrV4>,
+    pub latest_video_socket: Option<SocketAddrV4>,
     pub avail_map: HashMap<SocketAddrV4, Option<Addr<WsSession>>>,
-    pub sockets: HashMap<SocketAddrV4, String>,
+    pub sockets: HashSet<Socket>,
     pub inactive_sockets: VecDeque<Socket>,
     pub pgpool: actix_web::web::Data<AppState>,
 }
 
 impl TcpStreamsManager {
     pub async fn new(pgpool: actix_web::web::Data<AppState>) -> Result<Self, sqlx::Error> {
-        let (sockets, latest_socket) = remove_inactive_connection(pgpool.clone()).await?;
+        let (sockets, latest_audio_socket, latest_video_socket) =
+            remove_inactive_connection(pgpool.clone()).await?;
         Ok(Self {
             streams: HashMap::new(),
             streams_actors: HashMap::new(),
@@ -47,13 +48,15 @@ impl TcpStreamsManager {
             inactive_sockets: VecDeque::new(),
             pgpool: pgpool.clone(),
             sockets,
-            latest_socket,
+            latest_audio_socket,
+            latest_video_socket,
         })
     }
     pub fn handle_message(&self, msg: SetMessage) {
         let addr = &msg.addr;
         for stream in &self.streams {
-            if stream.1.contains(addr) {
+            let socket = self.sockets.iter().find_map(|s|if s.socket == stream.0.to_string() {Some(s)} else {None}).unwrap();
+            if stream.1.contains(addr) && socket.device == msg.command.compatibility().to_string() {
                 let socket = stream.0;
                 let tcp_actor = self.streams_actors.get(socket).unwrap();
                 let availability = self.avail_map.get(socket).unwrap();
@@ -86,33 +89,30 @@ impl Actor for TcpStreamsManager {
     fn started(&mut self, ctx: &mut Self::Context) {
         let pgpool = self.pgpool.clone();
         let available_connetion = self.sockets.clone();
-        let latest_socket = self.latest_socket.clone();
+        let latest_audio_socket = self.latest_audio_socket.clone();
+        let latest_video_socket = self.latest_video_socket.clone();
         let self_addr = ctx.address().clone();
         tokio::spawn(async move {
-            let sockets = retrieve_sockets(&pgpool).await;
-            if sockets.is_ok() {
-                let sockets = sockets.unwrap();
+            if let Ok(sockets) = retrieve_sockets(&pgpool).await {
                 let mut unavailable_sockets: HashMap<SocketAddrV4, Socket> = HashMap::new();
                 sockets.into_iter().for_each(|sock| {
                     unavailable_sockets.insert(SocketAddrV4::from_str(&sock.socket).unwrap(), sock);
                 });
                 available_connetion.iter().for_each(|s| {
-                    unavailable_sockets.remove(s.0);
+                    unavailable_sockets.remove(&SocketAddrV4::from_str(&s.socket).unwrap());
                 });
-                if latest_socket.is_some() {
-                    unavailable_sockets.remove(&latest_socket.unwrap());
-                }
+                if let Some(socket) = latest_audio_socket{unavailable_sockets.remove(&socket);}
+                if let Some(socket) = latest_video_socket{unavailable_sockets.remove(&socket);}
                 self_addr.do_send(UnavailableSockets {
                     sockets: unavailable_sockets.values().cloned().collect(),
                 });
-            }
+            };
         });
         let interval = ping_socket_settings::get_inactive_sockets_polling_interval();
         ctx.run_interval(interval, |act, ctx| {
             let inactive_sockets = act.inactive_sockets.clone();
             let pgpool = act.pgpool.clone();
-            TcpStreamsManager::poll_sockets(inactive_sockets, ctx.address(),pgpool);
-            
+            TcpStreamsManager::poll_sockets(inactive_sockets, ctx.address(), pgpool);
         });
     }
 }

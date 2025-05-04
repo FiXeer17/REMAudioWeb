@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::SocketAddrV4, str::FromStr};
+use std::collections::HashSet;
 
 use actix_web::{
     get,
@@ -8,13 +8,9 @@ use actix_web::{
 
 use crate::{
     services::{
-        private::app::{
-            messages::{GetConnections, GetLatestConnection},
-            tcp_manager::tcp_manager::TcpStreamsManager,
-        },
-        public::{interfaces::retrieve_sockets, root::schemas::ReturnSockets},
+        private::app::{messages::GetConnections, tcp_manager::tcp_manager::TcpStreamsManager},
+        public::{interfaces::retrieve_sockets, root::schemas::ReturnSockets, schemas::Socket},
     },
-    utils::common::toast,
     AppState,
 };
 
@@ -26,12 +22,7 @@ pub async fn root(
     let message = GetConnections {};
     match srv.send(message).await {
         Ok(sockets) => {
-            let latest_socket = srv.send(GetLatestConnection {}).await;
-            if let Err(_) = latest_socket {
-                return HttpResponse::InternalServerError()
-                    .json(toast("cannot read latest connection."));
-            }
-            let return_mess = ReturnSockets::new(sockets, latest_socket.unwrap());
+            let return_mess = ReturnSockets::new(sockets);
             HttpResponse::Ok().json(return_mess)
         }
         Err(_) => HttpResponse::InternalServerError().finish(),
@@ -43,34 +34,10 @@ pub async fn get_all(_request: HttpRequest, pgpool: web::Data<AppState>) -> impl
     let Ok(db_sockets) = retrieve_sockets(&pgpool).await else {
         return HttpResponse::InternalServerError().finish();
     };
-    let mut sockets: HashMap<SocketAddrV4, String> = HashMap::new();
-    let mut latest_socket: HashMap<SocketAddrV4, String> = HashMap::new();
-    for socket in db_sockets {
-        if socket.latest {
-            latest_socket.clear();
-            latest_socket.insert(
-                SocketAddrV4::from_str(&socket.socket).unwrap(),
-                socket.socket_name.clone(),
-            );
-        }
-        sockets.insert(
-            SocketAddrV4::from_str(&socket.socket).unwrap(),
-            socket.socket_name,
-        );
-    }
-    
-    let (return_sockets, return_latest_socket): (
-        Option<HashMap<SocketAddrV4, String>>,
-        Option<HashMap<SocketAddrV4, String>>,
-    );
-    match sockets.is_empty(){
-        true => {return_sockets = None},
-        false => {return_sockets = Some(sockets)}
-    }
-    match latest_socket.is_empty(){
-        true => {return_latest_socket = None },
-        false => {return_latest_socket = Some(latest_socket)}
-    }
-    let return_mess = ReturnSockets::new(return_sockets, return_latest_socket);
+    let db_sockets: Option<HashSet<Socket>> = match db_sockets.is_empty() {
+        true => None,
+        false => Some(db_sockets.into_iter().collect()),
+    };
+    let return_mess = ReturnSockets::new(db_sockets);
     HttpResponse::Ok().json(return_mess)
 }

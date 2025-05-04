@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::{HashMap, HashSet, VecDeque},
     net::SocketAddrV4,
     str::FromStr,
 };
@@ -15,7 +15,7 @@ use crate::{
                 schemas::MatrixStates,
                 ws_session::session::WsSession,
             },
-            socket::utils::try_connection,
+            socket::utils::{try_connection, Device},
         },
         public::{interfaces::{is_socket_in_db, retrieve_sockets}, schemas::Socket},
     },
@@ -43,50 +43,66 @@ pub fn attach_availability(
 
 pub async fn load_sockets_from_db(
     pgpool: actix_web::web::Data<AppState>,
-) -> Result<(HashMap<SocketAddrV4, String>, Option<SocketAddrV4>), sqlx::Error> {
+) -> Result<(HashMap<Socket, String>, Option<SocketAddrV4>,Option<SocketAddrV4>), sqlx::Error> {
     let sockets = retrieve_sockets(&pgpool).await?;
-    let mut map: HashMap<SocketAddrV4, String> = HashMap::new();
+    let mut map: HashMap<Socket, String> = HashMap::new();
     sockets.iter().for_each(|socket| {
-        let sockv4 = SocketAddrV4::from_str(&socket.socket).unwrap();
-        map.insert(sockv4, socket.socket_name.clone());
+        map.insert(socket.clone(), socket.socket_name.clone());
     });
-    let latest_socket = sockets.iter().find_map(|sock| {
-        if sock.latest {
+    let latest_audio_socket = sockets.iter().find_map(|sock| {
+        if sock.latest && sock.device == Device::Audio.to_string() {
             return Some(SocketAddrV4::from_str(&sock.socket).unwrap());
         }
         None
     });
-    return Ok((map, latest_socket));
+    let latest_video_socket = sockets.iter().find_map(|sock| {
+        if sock.latest && sock.device == Device::Video.to_string() {
+            return Some(SocketAddrV4::from_str(&sock.socket).unwrap());
+        }
+        None
+    });
+    return Ok((map, latest_audio_socket,latest_video_socket));
 }
 
 pub async fn remove_inactive_connection(
     pgpool: actix_web::web::Data<AppState>,
-) -> Result<(HashMap<SocketAddrV4, String>, Option<SocketAddrV4>), sqlx::Error> {
-    let (mut sockets, mut latest_socket) = load_sockets_from_db(pgpool.clone()).await?;
-    let mut inactive_sockets: Vec<SocketAddrV4> = Vec::new();
+) -> Result<(HashSet<Socket>, Option<SocketAddrV4>, Option<SocketAddrV4>), sqlx::Error> {
+    let (mut sockets, mut latest_audio_socket,mut latest_video_socket) = load_sockets_from_db(pgpool.clone()).await?;
+    let mut inactive_sockets: Vec<Socket> = Vec::new();
     for socket in sockets.keys() {
-        if !try_connection(*socket).await {
-            inactive_sockets.push(*socket);
+        let sockv4 = SocketAddrV4::from_str(&socket.socket).unwrap();
+        if !try_connection(sockv4).await {
+            inactive_sockets.push(socket.clone());
         }
     }
     for socket in inactive_sockets {
         info!(
             "Inactive connection found, removing socket: {}...",
-            socket.to_string()
+            socket.socket_name
         );
         sockets.remove(&socket).unwrap();
     }
 
-    if latest_socket.is_some() {
-        if !try_connection(latest_socket.unwrap()).await {
+    if let Some(latest) = latest_audio_socket {
+        if !try_connection(latest).await {
             info!(
                 "Inactive connection found, removing latest_socket: {}...",
-                latest_socket.unwrap().to_string()
+                latest.to_string()
             );
-            latest_socket = None;
+            latest_audio_socket = None;
         }
     }
-    Ok((sockets, latest_socket))
+    if let Some(latest) = latest_video_socket {
+        if !try_connection(latest).await {
+            info!(
+                "Inactive connection found, removing latest_socket: {}...",
+                latest.to_string()
+            );
+            latest_video_socket = None;
+        }
+    }
+    let sockets:HashSet<Socket> = sockets.keys().cloned().collect();
+    Ok((sockets, latest_audio_socket,latest_video_socket))
 }
 
 pub async fn detect_dead_sockets(socks: Vec<Socket>) -> Result<Vec<Socket>, sqlx::Error> {

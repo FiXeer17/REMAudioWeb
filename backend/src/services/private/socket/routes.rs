@@ -9,9 +9,9 @@ use crate::{
         },
         socket::{
             schemas::{RemoveSocketBody, SetSocketBody},
-            utils::{check_in_connections, try_connection, Device},
+            utils::{try_connection, Device},
         },
-    }, public::interfaces::{remove_socket_in_db, retrieve_admin_from_id}},
+    }, public::{interfaces::{remove_socket_in_db, retrieve_admin_from_id}, schemas::IsContainedExt}},
     utils::common::{check_socket, toast}, AppState,
 };
 use actix_web::{post, web, HttpResponse, Responder};
@@ -47,16 +47,19 @@ pub async fn add_socket(
             if let Some(sock) = s {
                 let sockets = srv.send(GetConnections {}).await;
                 if let Ok(connections) = sockets {
-                    match check_in_connections(sock, connections) {
-                        true => (),
-                        false => {
-                            if !try_connection(sock).await {
-                                return HttpResponse::BadRequest().json(toast(
-                                    &format!("{} doesn't respond.", sock),
-                                ));
+                    if let Some(connections) = connections{
+                        match connections.socket_is_contained(&s.unwrap().to_string()) {
+                            true => (),
+                            false => {
+                                if !try_connection(sock).await {
+                                    return HttpResponse::BadRequest().json(toast(
+                                        &format!("{} doesn't respond.", sock),
+                                    ));
+                                }
                             }
                         }
                     }
+                    
                 }
                 if let Err(()) = Device::from_str(&request_body.device_type){
                     return HttpResponse::BadRequest().json(toast("invalid device type"));
@@ -94,7 +97,6 @@ pub async fn add_socket(
 }
 
 
-
 #[post("/remove")]
 pub async fn remove_socket(
     request_body: web::Json<RemoveSocketBody>,
@@ -128,12 +130,16 @@ pub async fn remove_socket(
             info!("Socket: {} removed from database.",s.unwrap());
             let sockets = srv.send(GetConnections {}).await;
             if let Ok(connections) = sockets{
-                match check_in_connections(s.unwrap(), connections){
-                    true => (),
-                    false => {            
-                        return HttpResponse::Ok().json(json!({"socket": s.unwrap().to_string()}));
+                if let Some(connections) = connections{
+                    match connections.socket_is_contained(&s.unwrap().to_string()){
+                        true => (),
+                        false => { 
+                                     
+                            return HttpResponse::Ok().json(json!({"socket": s.unwrap().to_string()}));
+                        }
                     }
                 }
+                
             }
             let message = RemoveSocket {
                 socket:s.unwrap(),

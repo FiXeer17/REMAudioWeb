@@ -190,21 +190,28 @@ pub async fn insert_socket_in_db(
     socket: SocketAddrV4,
     device: String,
 ) -> Result<(), sqlx::Error> {
+    let mut tx = pgpool.db.begin().await?;
     let query_string: &str =
         "INSERT INTO sockets (socket_name,socket,latest,device) VALUES ($1,$2,$3,$4)
         ON CONFLICT (socket)
         DO UPDATE SET
             socket_name = EXCLUDED.socket_name,
-            device = EXCLUDED.device
-        ;";
+            device = EXCLUDED.device,
+            latest = EXCLUDED.latest;";
     sqlx::query(query_string)
         .bind(socket_name)
         .bind(socket.to_string())
         .bind(true)
-        .bind(device)
-        .fetch_optional(&pgpool.db)
+        .bind(device.clone())
+        .execute(&mut *tx)
         .await?;
 
+    let query_string :&str = "UPDATE sockets SET latest=false WHERE socket != $1 AND device = $2;";
+    sqlx::query(query_string)
+        .bind(socket.to_string())
+        .bind(device)
+        .execute(&mut *tx).await?;
+    tx.commit().await?;
     Ok(())
 }
 pub async fn remove_socket_in_db(
@@ -219,24 +226,6 @@ pub async fn remove_socket_in_db(
     Ok(())
 }
 
-pub async fn update_latest_socket_in_db(
-    pgpool: &AppState,
-    socket: SocketAddrV4,
-) -> Result<(), sqlx::Error> {
-    let update_other_latest_query: &str = "UPDATE sockets SET latest=false;";
-    let update_latest_query: &str = "UPDATE sockets SET latest=true WHERE socket=$1;";
-    sqlx::query(update_other_latest_query)
-        .bind(socket.to_string())
-        .fetch_optional(&pgpool.db)
-        .await?;
-
-    sqlx::query(update_latest_query)
-        .bind(socket.to_string())
-        .fetch_optional(&pgpool.db)
-        .await?;
-
-    Ok(())
-}
 
 pub async fn retrieve_socketid_from_db(
     pgpool: &AppState,
