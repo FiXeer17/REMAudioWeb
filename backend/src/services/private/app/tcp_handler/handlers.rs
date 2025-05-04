@@ -107,9 +107,14 @@ impl Handler<SetMessage> for TcpStreamActor {
                     );
                 }
             }
-            Commands::SetLabel(sl) => {
+            Commands::SetChannelLabel(sl) => {
                 if self.machine_states.is_some() {
-                    self.handle_set_label_command(sl, self.pgpool.clone(), msg.addr, ctx.address())
+                    self.handle_set_channel_labels_command(sl, self.pgpool.clone(), msg.addr, ctx.address())
+                }
+            },
+            Commands::SetPresetLabel(sl) => {
+                if self.machine_states.is_some() {
+                    self.handle_set_preset_labels_command(sl, self.pgpool.clone(), msg.addr, ctx.address())
                 }
             }
             Commands::ReCache => self.handle_recache(ctx),

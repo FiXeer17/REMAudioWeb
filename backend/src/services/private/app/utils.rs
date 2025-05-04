@@ -14,9 +14,11 @@ impl CommandsExt for Commands{
     fn compatibility(&self)->Device {
         match self {
             Commands::ReCache => Device::Audio,
-            Commands::SetLabel(_) => Device::Audio,
+            Commands::SetChannelLabel(_) => Device::Audio,
+            Commands::SetPresetLabel(_) => Device::Audio,
             Commands::SetMatrixCommand(_)=> Device::Audio,
             Commands::SetVisibility(_)=> Device::Audio,
+            
         }
     }
 }

@@ -10,12 +10,14 @@ pub struct SetState {
     pub io: Option<String>,
     pub channel: Option<String>,
     pub value: Option<String>,
+    pub index: Option<String>
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SetAttributes {
-    pub io: String,
-    pub channel: String,
+    pub io: Option<String>,
+    pub channel: Option<String>,
+    pub index: Option<String>,
     pub value: String,
 }
 
@@ -56,6 +58,7 @@ pub struct MatrixStates {
     pub o_visibility: HashMap<u32, bool>,
     pub i_labels: HashMap<u32, String>,
     pub o_labels: HashMap<u32, String>,
+    pub preset_labels:HashMap<u32, String>,
     pub current_preset: u8,
     pub available: Option<bool>,
     pub matrix_socket: String,
@@ -64,8 +67,9 @@ impl MatrixStates {
     pub fn new(
         cmds: Vec<MatrixCommand>,
         matrix_socket: String,
-        input_labels: Vec<String>,
-        output_labels: Vec<String>,
+        input_channel_labels: Vec<String>,
+        output_channel_labels: Vec<String>,
+        preset_labels: Vec<String>,
         input_visibility: Vec<bool>,
         output_visibility: Vec<bool>,
     ) -> Self {
@@ -84,10 +88,12 @@ impl MatrixStates {
         );
 
         let input_from_def = SRC::INPUT.to_label();
-        let i_labels: HashMap<u32, String> = index_values(input_labels);
-        let o_labels: HashMap<u32, String> = index_values(output_labels);
+        let i_labels: HashMap<u32, String> = index_values(input_channel_labels);
+        let o_labels: HashMap<u32, String> = index_values(output_channel_labels);
+        let preset_labels: HashMap<u32,String> = index_values(preset_labels);
         let i_visibility: HashMap<u32, bool> = index_values(input_visibility);
         let o_visibility: HashMap<u32, bool> = index_values(output_visibility);
+        
 
         for command in cmds {
             let cmd = MatrixCommandDatas::from(command);
@@ -122,6 +128,7 @@ impl MatrixStates {
             o_visibility,
             i_labels,
             o_labels,
+            preset_labels,
             current_preset,
             available: None,
             matrix_socket,

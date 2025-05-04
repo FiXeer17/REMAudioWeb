@@ -136,7 +136,8 @@ pub struct ClosedByAdmin{}
 pub enum Commands{
     SetMatrixCommand(SetCommand),
     SetVisibility(SetAttributes),
-    SetLabel(SetAttributes),
+    SetChannelLabel(SetAttributes),
+    SetPresetLabel(SetAttributes),
     ReCache
 }
 

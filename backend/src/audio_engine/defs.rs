@@ -88,19 +88,23 @@ pub mod sections{
     use super::{errors, fncodes::*};
 
     pub const VISIBILITY_LABEL :&str = "visibility";
-    pub const LABELS_LABEL : &str = "labels";
+    pub const CHANNEL_LABELS_LABEL : &str = "channel_labels";
+    pub const PRESET_LABELS_LABEL : &str = "preset_labels";
+
     pub enum Sections{
         Visibility,
-        Labels,
-        Command(FNCODE),
+        ChannelLabels,
+        PresetLabels,
+        MatrixCommand(FNCODE),
     }
 
     impl ToString for Sections{
         fn to_string(&self) -> String {
             match self{
-                Sections::Labels => String::from(LABELS_LABEL),
+                Sections::ChannelLabels => String::from(CHANNEL_LABELS_LABEL),
+                Sections::PresetLabels => String::from(PRESET_LABELS_LABEL),
                 Sections::Visibility => String::from(VISIBILITY_LABEL),
-                Sections::Command(cmd) => cmd.to_label(),
+                Sections::MatrixCommand(cmd) => cmd.to_label(),
             }
         }
     }
@@ -109,10 +113,11 @@ pub mod sections{
         fn from_str(s: &str) -> Result<Self, Self::Err> {
             match s {
                 VISIBILITY_LABEL => Ok(Sections::Visibility),
-                LABELS_LABEL => Ok(Sections::Labels),
-                VOLUME_LABEL => Ok(Sections::Command(FNCODE::VOLUME)),
-                MUTE_LABEL => Ok(Sections::Command(FNCODE::MUTE)),
-                SCENE_LABEL => Ok(Sections::Command(FNCODE::SCENE)),
+                CHANNEL_LABELS_LABEL => Ok(Sections::ChannelLabels),
+                PRESET_LABELS_LABEL => Ok(Sections::PresetLabels),
+                VOLUME_LABEL => Ok(Sections::MatrixCommand(FNCODE::VOLUME)),
+                MUTE_LABEL => Ok(Sections::MatrixCommand(FNCODE::MUTE)),
+                SCENE_LABEL => Ok(Sections::MatrixCommand(FNCODE::SCENE)),
                 _ => Err(errors::Error::InvalidSection)
             }
         }

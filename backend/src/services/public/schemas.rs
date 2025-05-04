@@ -12,10 +12,10 @@ pub struct Channel {
 }
 #[derive(Deserialize, Serialize, Debug, FromRow)]
 pub struct Preset {
-    id:i32,
-    label:String,
-    relative_identifier:i32,
-    socket_id:i32,
+    pub id:i32,
+    pub label:String,
+    pub relative_identifier:i32,
+    pub socket_id:i32,
 }
 
 pub trait IsContainedExt{

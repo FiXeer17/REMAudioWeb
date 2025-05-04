@@ -50,8 +50,9 @@ impl WsSession {
             match Sections::from_str(&set_state.section) {
                 Ok(section) => match section {
                     Sections::Visibility => return handle_visibility(set_state),
-                    Sections::Command(_) => return handle_command(set_state),
-                    Sections::Labels => return handle_label(set_state),
+                    Sections::MatrixCommand(_) => return handle_command(set_state),
+                    Sections::ChannelLabels => return handle_channel_label(set_state),
+                    Sections::PresetLabels => return handle_preset_label(set_state)
                 },
                 Err(e) => return HandleText::Error(e.to_string()),
             }
@@ -77,19 +78,18 @@ fn handle_visibility(set_state: SetState) -> HandleText {
     let Some(value) = set_state.value.clone() else {
         return HandleText::Error("value is none".to_string());
     };
-    let ch = ch.parse::<u32>();
-    if ch.is_err() {
+    let Ok(_) = ch.parse::<u32>()else{
         return HandleText::Error("channel is invalid".to_string());
     };
-    let value = value.parse::<bool>();
-    if value.is_err() {
+    let Ok(_) = value.parse::<bool>() else{
         return HandleText::Error("value is invalid".to_string());
     };
 
     let set_visibility = SetAttributes {
-        io: set_state.io.unwrap(),
-        channel: set_state.channel.unwrap(),
+        io: set_state.io,
+        channel: set_state.channel,
         value: set_state.value.unwrap(),
+        index:None
     };
     HandleText::SetVisibility(set_visibility)
 }
@@ -100,8 +100,8 @@ fn handle_command(set_state: SetState) -> HandleText {
     HandleText::Command(MatrixCommand::new_from_client(rw, set_state))
 }
 
-fn handle_label(set_state: SetState) -> HandleText{
-    let Some(io) = set_state.io else{
+fn handle_channel_label(set_state: SetState) -> HandleText{
+    let Some(_) = set_state.io else{
         return HandleText::Error("io is none".to_string());
     };
     let Some(ch) = set_state.channel.clone() else {
@@ -113,8 +113,21 @@ fn handle_label(set_state: SetState) -> HandleText{
     let Ok(_) = ch.parse::<u32>() else{
         return HandleText::Error("cannot parse channel".to_string());
     };
-    HandleText::SetLabels(SetAttributes{io,channel:ch,value})
-}   
+    HandleText::SetChannelLabels(SetAttributes{io:set_state.io,channel:set_state.channel,value,index:None})
+}
+
+fn handle_preset_label(set_state: SetState) -> HandleText{
+    let Some(index) = set_state.index.clone() else {
+        return HandleText::Error("index is none".to_string());
+    };
+    let Some(value) = set_state.value.clone() else {
+        return HandleText::Error("value is none".to_string());
+    };
+    let Ok(_) = index.parse::<u32>() else{
+        return HandleText::Error("cannot parse index".to_string());
+    };
+    HandleText::SetPresetLabels(SetAttributes{io:None,index:set_state.index,value,channel:None})
+}      
 
 impl Actor for WsSession {
     type Context = ws::WebsocketContext<Self>;

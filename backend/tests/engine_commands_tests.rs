@@ -259,7 +259,8 @@ fn ok_cmd_from_wsclient_simulation(){
         section: "volume".to_string(),
         io:Some("output".to_string()),
         channel: Some("16".to_string()),
-        value:Some("-60.0".to_string())
+        value:Some("-60.0".to_string()),
+        index: None
     };
 
     let cmd = MatrixCommand::new_from_client(rw::WRITE.to_string(),set_states);
