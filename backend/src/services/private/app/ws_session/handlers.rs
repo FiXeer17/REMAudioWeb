@@ -85,7 +85,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                             let msg = SetCommand { command: cmd };
                             self.srv.do_send(SetMessage {
                                 addr,
-                                command: Commands::SetCommand(msg),
+                                command: Commands::SetMatrixCommand(msg),
                             });
                         }
                         Err(e) => {
