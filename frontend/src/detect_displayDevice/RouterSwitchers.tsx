@@ -28,6 +28,9 @@ import { Presets as PresetsMobile  } from "@/pages/mobilePages/Presets"
 import { PreferenciesPresets as PreferenciesPresetsDesktop } from "@/pages/desktopPages/PreferenciesPresets"
 import { PreferenciesPresets as PreferenciesPresetsMobile } from "@/pages/mobilePages/PreferenciesPresets"
 
+import { PreferenciesChannels as PreferenciesChannelsDesktop } from "@/pages/desktopPages/PreferenciesChannels"
+import { PreferenciesChannels as PreferenciesChannelsMobile } from "@/pages/mobilePages/PreferenciesChannels"
+
 import { useIsDesktop } from "./useDeviceType"
 
 
@@ -81,5 +84,9 @@ export const PreferenciesPresets = () => {
     return isDesktop ? <PreferenciesPresetsDesktop /> : <PreferenciesPresetsMobile />;
 };
 
+export const PreferenciesChannels = () => {
+    const isDesktop = useIsDesktop();
+    return isDesktop ? <PreferenciesChannelsDesktop /> : <PreferenciesChannelsMobile />;
+};
 
 

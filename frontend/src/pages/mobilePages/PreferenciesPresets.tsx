@@ -1,5 +1,4 @@
 import { Clock } from "@phosphor-icons/react";
-import { useContext, useEffect, useState } from "react";
 import { GetData } from "@/lib/WebSocketData";
 import Navbar from "@/components/ui/navbar";
 import { Button as PresetsButton } from "@/components/ui/audio_video";
@@ -21,7 +20,7 @@ export const PreferenciesPresets = ()=>{
                     <span>LABELS</span> 
                     <span>PRESETS</span>
                 </PresetsButton>
-                <PresetsButton variant={"white"}>CHANNELS</PresetsButton>
+                <PresetsButton variant={"white"} onClick={()=>navigate("/preferenciesChannels")}>CHANNELS</PresetsButton>
           </div>
           <div className="flex flex-1 px-7 pb-5 overflow-hidden relative pt-5">
                 <Badge className="absolute left-12 top-3 transform -translate-x-1/2">
@@ -29,7 +28,7 @@ export const PreferenciesPresets = ()=>{
                 </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
                   {Presets.map((presets)=>(
-                    <ButtonEdit key={presets}/>
+                    <ButtonEdit key={presets} />
                   ))}
               </div>
           </div>

@@ -25,7 +25,6 @@ export const Volume=()=>{
           return initial;
         }
       );
-    const volumes=[1,2,3,4]
     const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
     const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
     const {socket,message} = useContext(SocketContext).socketState
@@ -56,7 +55,6 @@ export const Volume=()=>{
       } = SwipeVolumes(inputVolumesStates,outputVolumesStates);
       
     const handleMute=(channel: string, type: string)=>{
-        console.log()
         if (type === "IN") {;
             const data={"section":"mute","io":"input","channel":channel,"value":(!inputChannelStates[channel]).toString()}
             socket?.send(JSON.stringify(data))
