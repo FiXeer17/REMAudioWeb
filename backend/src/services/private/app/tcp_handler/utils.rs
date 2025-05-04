@@ -22,8 +22,7 @@ use crate::{
         },
         public::{
             interfaces::{
-                self, add_io_channels, retrieve_labels, retrieve_socketid_from_db,
-                retrieve_visibility, update_channel_visibility, update_labels_in_db,
+                self, add_io_channels, retrieve_channel_labels, retrieve_preset_labels, retrieve_socketid_from_db, retrieve_visibility, update_channel_labels_in_db, update_channel_visibility, update_preset_labels_in_db
             },
             utils::{retrieve_all_channels, retrieve_all_presets},
         },
@@ -271,13 +270,15 @@ impl TcpStreamActor {
             responses.push(cmd_from_buffer.unwrap());
             tokio::time::sleep(tcp_comunication_settings::get_command_delay()).await;
         }
-        let socket_id = retrieve_socketid_from_db(&pgpool, socket).await;
-        if socket_id.is_err() {
+        let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else{
             warn!("Cannot retrieve socket id from database");
             return;
-        }
-        let visibility = retrieve_visibility(&pgpool, socket_id.as_ref().unwrap()).await;
-        let labels = retrieve_labels(&pgpool, &socket_id.unwrap()).await;
+        };
+
+        let visibility = retrieve_visibility(&pgpool, &socket_id).await;
+        let channel_labels = retrieve_channel_labels(&pgpool, &socket_id).await;
+        let preset_labels = retrieve_preset_labels(&pgpool, &socket_id).await;
+
         if let Err(_) = visibility {
             ctx_addr.do_send(GeneralError {
                 error: "cannot attach visibility.".to_string(),
@@ -285,21 +286,32 @@ impl TcpStreamActor {
             });
             return;
         }
-        if let Err(_) = labels {
+        if let Err(_) = channel_labels {
             ctx_addr.do_send(GeneralError {
-                error: "cannot attach labels.".to_string(),
+                error: "cannot attach channel labels.".to_string(),
                 socket: Some(socket.clone()),
             });
             return;
         }
+
+        if let Err(_) = preset_labels {
+            ctx_addr.do_send(GeneralError {
+                error: "cannot attach preset labels.".to_string(),
+                socket: Some(socket.clone()),
+            });
+            return;
+        }
+
         let (i_visibility, o_visibility) = visibility.unwrap();
-        let (i_labels, o_labels) = labels.unwrap();
+        let (i_labels, o_labels) = channel_labels.unwrap();
+        let preset_labels = preset_labels.unwrap();
 
         let states = MatrixStates::new(
             responses,
             socket.to_string(),
             i_labels,
             o_labels,
+            preset_labels,
             i_visibility,
             o_visibility,
         );
@@ -368,13 +380,13 @@ impl TcpStreamActor {
         addr: Addr<WsSession>,
         selfaddr: Addr<TcpStreamActor>,
     ) {
-        let relative_identifier = sv.channel.parse::<i32>().unwrap();
+        let relative_identifier = sv.channel.unwrap().parse::<i32>().unwrap();
         let visibility = sv.value.parse::<bool>().unwrap();
         let stream_socket = self.stream_socket.clone();
         let states = self.machine_states.clone();
 
         let pgpool_clone = pgpool.clone();
-        let io_clone = sv.io.clone();
+        let io_clone = sv.io.clone().unwrap();
         let addr_clone = addr.clone();
 
         tokio::spawn(async move {
@@ -403,7 +415,7 @@ impl TcpStreamActor {
                 return;
             }
             if let Some(states) = states.clone().as_mut() {
-                if sv.io == SRC::INPUT.to_string() {
+                if sv.io.unwrap() == SRC::INPUT.to_string() {
                     if !states.i_visibility.is_empty() {
                         states
                             .i_visibility
@@ -425,36 +437,34 @@ impl TcpStreamActor {
             }
         });
     }
-
-    pub fn handle_set_label_command(
+    pub fn handle_set_channel_labels_command(
         &mut self,
         sv: SetAttributes,
         pgpool: actix_web::web::Data<AppState>,
         addr: Addr<WsSession>,
         selfaddr: Addr<TcpStreamActor>,
     ) {
-        let relative_identifier = sv.channel.parse::<i32>().unwrap();
+        let relative_identifier = sv.channel.unwrap().parse::<i32>().unwrap();
         let label = sv.value;
         let stream_socket = self.stream_socket.clone();
         let states = self.machine_states.clone();
 
         let pgpool_clone = pgpool.clone();
-        let io_clone = sv.io.clone();
+        let io_clone = sv.io.clone().unwrap();
         let addr_clone = addr.clone();
 
         tokio::spawn(async move {
-            let socket_id = retrieve_socketid_from_db(&pgpool, stream_socket).await;
-            if socket_id.is_err() {
+            let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else{
                 addr_clone.do_send(GeneralError {
                     error: "cannot retrieve socket id in database".to_string(),
                     socket: Some(stream_socket),
                 });
                 warn!("Cannot retrieve socket id from the database");
                 return;
-            }
-            let result = update_labels_in_db(
+            };
+            let result = update_channel_labels_in_db(
                 &pgpool_clone,
-                socket_id.unwrap(),
+                socket_id,
                 relative_identifier,
                 label.clone(),
                 io_clone,
@@ -468,7 +478,7 @@ impl TcpStreamActor {
                 return;
             }
             if let Some(states) = states.clone().as_mut() {
-                if sv.io == SRC::INPUT.to_string() {
+                if sv.io.unwrap() == SRC::INPUT.to_string() {
                     if !states.i_labels.is_empty() {
                         states.i_labels.insert(relative_identifier as u32, label);
                     }
@@ -486,6 +496,59 @@ impl TcpStreamActor {
             }
         });
     }
+    pub fn handle_set_preset_labels_command(
+        &mut self,
+        sv: SetAttributes,
+        pgpool: actix_web::web::Data<AppState>,
+        addr: Addr<WsSession>,
+        selfaddr: Addr<TcpStreamActor>,
+    ) {
+        let relative_identifier = sv.index.unwrap().parse::<i32>().unwrap();
+        let label = sv.value;
+        let stream_socket = self.stream_socket.clone();
+        let states = self.machine_states.clone();
+
+        let pgpool_clone = pgpool.clone();
+        let addr_clone = addr.clone();
+
+        tokio::spawn(async move {
+            let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else{
+                addr_clone.do_send(GeneralError {
+                    error: "cannot retrieve socket id in database".to_string(),
+                    socket: Some(stream_socket),
+                });
+                warn!("Cannot retrieve socket id from the database");
+                return;
+            };
+
+            let result = update_preset_labels_in_db(
+                &pgpool_clone,
+                socket_id,
+                relative_identifier,
+                label.clone(),
+            )
+            .await;
+
+            if let Err(_) = result {
+                addr_clone.do_send(GeneralError {
+                    error: "cannot update channel label in database".to_string(),
+                    socket: Some(stream_socket),
+                });
+                return;
+            }
+            if let Some(states) = states.clone().as_mut() {
+                if !states.preset_labels.is_empty(){
+                    states.preset_labels.insert(relative_identifier as u32, label);
+                }
+                let states_clone = states.clone();
+                selfaddr.do_send(MatrixReady {
+                    socket: stream_socket,
+                    states: states_clone,
+                });
+            }
+        });
+    }
+
 }
 
 pub mod errors {

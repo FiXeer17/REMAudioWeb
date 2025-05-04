@@ -1,5 +1,6 @@
 use std::time::Instant;
 
+use crate::services::private::socket::utils::Device;
 use crate::utils::common::toast;
 use actix::{ActorContext, AsyncContext, Handler, StreamHandler};
 use actix_web_actors::ws;
@@ -8,7 +9,7 @@ use serde_json::json;
 
 use super::super::messages::*;
 use super::session::WsSession;
-use super::utils::{check_channel, HandleText};
+use super::utils::{check_channel, check_preset, HandleText};
 
 impl Handler<StreamFailed> for WsSession {
     type Result = ();
@@ -85,7 +86,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                             let msg = SetCommand { command: cmd };
                             self.srv.do_send(SetMessage {
                                 addr,
-                                command: Commands::SetCommand(msg),
+                                command: Commands::SetMatrixCommand(msg),
                             });
                         }
                         Err(e) => {
@@ -104,8 +105,8 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                     }
                     HandleText::SetVisibility(sv) => {
                         let sv_clone = sv.clone();
-                        let channel = sv_clone.channel.parse::<u8>().unwrap();
-                        let io = sv_clone.io;
+                        let channel = sv_clone.channel.unwrap().parse::<u8>().unwrap();
+                        let io = sv_clone.io.unwrap();
                         if check_channel(io, channel) {
                             self.srv.do_send(SetMessage {
                                 addr,
@@ -113,17 +114,27 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                             });
                         }
                     },
-                    HandleText::SetLabels(sl) => {
+                    HandleText::SetChannelLabels(sl) => {
                         let sl_clone = sl.clone();
-                        let channel = sl_clone.channel.parse::<u8>().unwrap();
-                        let io = sl_clone.io;
+                        let channel = sl_clone.channel.unwrap().parse::<u8>().unwrap();
+                        let io = sl_clone.io.unwrap();
                         if check_channel(io, channel) {
                             self.srv.do_send(SetMessage {
                                 addr,
-                                command: Commands::SetLabel(sl),
+                                command: Commands::SetChannelLabel(sl),
                             });
                         }
-                    }
+                    },
+                    HandleText::SetPresetLabels(sl) => {
+                        let sl_clone = sl.clone();
+                        let index = sl_clone.index.unwrap().parse::<u8>().unwrap();
+                        if check_preset(index, Device::Audio) {
+                            self.srv.do_send(SetMessage {
+                                addr,
+                                command: Commands::SetPresetLabel(sl),
+                            });
+                        }
+                    },
                 }
             }
             ws::Message::Binary(_) => debug!("Unexpected binary"),

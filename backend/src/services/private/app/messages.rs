@@ -11,7 +11,7 @@ use serde::Serialize;
 use tokio::net::TcpStream;
 use uuid::Uuid;
 use std::collections::VecDeque;
-use std::{net::SocketAddrV4,collections::HashMap};
+use std::{net::SocketAddrV4,collections::HashSet};
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
@@ -134,9 +134,10 @@ pub struct ClosedByAdmin{}
 
 #[derive(Clone)]
 pub enum Commands{
-    SetCommand(SetCommand),
+    SetMatrixCommand(SetCommand),
     SetVisibility(SetAttributes),
-    SetLabel(SetAttributes),
+    SetChannelLabel(SetAttributes),
+    SetPresetLabel(SetAttributes),
     ReCache
 }
 
@@ -151,13 +152,8 @@ pub struct SetCommandOk{
 }
 
 #[derive(Message,Clone)]
-#[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
+#[rtype(result="Option<HashSet<Socket>>")]
 pub struct GetConnections{}
-
-#[derive(Message,Clone)]
-#[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
-pub struct GetLatestConnection{}
-
 
 #[derive(Message,Clone)]
 #[rtype(result="Option<i32>")]

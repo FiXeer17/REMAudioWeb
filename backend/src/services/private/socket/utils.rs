@@ -8,7 +8,7 @@ use crate::configs::ping_socket_settings;
 pub const AUDIO_LABEL:&str="matrix";
 pub const VIDEO_LABEL:&str="camera";
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,Hash,PartialEq,Eq)]
 pub enum Device{
     Audio,
     Video

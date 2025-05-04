@@ -2,8 +2,10 @@ use std::sync::Arc;
 
 use actix::{ActorContext, AsyncContext, Handler};
 use futures_util::lock::Mutex;
+use log::info;
 
 use crate::configs::tcp_comunication_settings;
+use crate::services::private::socket::utils::Device;
 
 use super::super::messages::*;
 use super::tcp_handler::TcpStreamActor;
@@ -12,15 +14,21 @@ use super::utils::command_polling;
 impl Handler<StreamStarted> for TcpStreamActor {
     type Result = ();
     fn handle(&mut self, msg: StreamStarted, ctx: &mut Self::Context) -> Self::Result {
-        let socket = self.stream_socket.clone();
-        let stream = Arc::new(Mutex::new(msg.tcp_stream));
-        let ctx_addr = ctx.address().clone();
-        let pgpool = self.pgpool.clone();
-        self.stream = Some(stream.clone());
-        
-        tokio::spawn(async move {
-            TcpStreamActor::read_states(ctx_addr, socket.clone(), stream,pgpool).await;
-        });
+        info!("Starting new {} tcp handler actor",self.device_type.to_string().to_uppercase());
+        match self.device_type {
+            Device::Audio => {
+                let socket = self.stream_socket.clone();
+                let stream = Arc::new(Mutex::new(msg.tcp_stream));
+                let ctx_addr = ctx.address().clone();
+                let pgpool = self.pgpool.clone();
+                self.stream = Some(stream.clone());
+
+                tokio::spawn(async move {
+                    TcpStreamActor::read_states(ctx_addr, socket.clone(), stream, pgpool).await;
+                });
+            },
+            Device::Video =>()
+        }
     }
 }
 
@@ -88,7 +96,7 @@ impl Handler<SetMessage> for TcpStreamActor {
     fn handle(&mut self, msg: SetMessage, ctx: &mut Self::Context) -> Self::Result {
         self.watch_inactive(ctx, msg.addr.clone());
         match msg.command {
-            Commands::SetCommand(sc) => self.handle_set_command(sc),
+            Commands::SetMatrixCommand(sc) => self.handle_set_command(sc),
             Commands::SetVisibility(sv) => {
                 if self.machine_states.is_some() {
                     self.handle_set_visibility_command(
@@ -99,14 +107,14 @@ impl Handler<SetMessage> for TcpStreamActor {
                     );
                 }
             }
-            Commands::SetLabel(sl) => {
-                if self.machine_states.is_some(){
-                    self.handle_set_label_command(
-                        sl,
-                        self.pgpool.clone(),
-                        msg.addr,
-                        ctx.address(),
-                    )
+            Commands::SetChannelLabel(sl) => {
+                if self.machine_states.is_some() {
+                    self.handle_set_channel_labels_command(sl, self.pgpool.clone(), msg.addr, ctx.address())
+                }
+            },
+            Commands::SetPresetLabel(sl) => {
+                if self.machine_states.is_some() {
+                    self.handle_set_preset_labels_command(sl, self.pgpool.clone(), msg.addr, ctx.address())
                 }
             }
             Commands::ReCache => self.handle_recache(ctx),

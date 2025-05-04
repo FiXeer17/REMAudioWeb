@@ -190,21 +190,28 @@ pub async fn insert_socket_in_db(
     socket: SocketAddrV4,
     device: String,
 ) -> Result<(), sqlx::Error> {
+    let mut tx = pgpool.db.begin().await?;
     let query_string: &str =
         "INSERT INTO sockets (socket_name,socket,latest,device) VALUES ($1,$2,$3,$4)
         ON CONFLICT (socket)
         DO UPDATE SET
             socket_name = EXCLUDED.socket_name,
-            device = EXCLUDED.device
-        ;";
+            device = EXCLUDED.device,
+            latest = EXCLUDED.latest;";
     sqlx::query(query_string)
         .bind(socket_name)
         .bind(socket.to_string())
         .bind(true)
-        .bind(device)
-        .fetch_optional(&pgpool.db)
+        .bind(device.clone())
+        .execute(&mut *tx)
         .await?;
 
+    let query_string :&str = "UPDATE sockets SET latest=false WHERE socket != $1 AND device = $2;";
+    sqlx::query(query_string)
+        .bind(socket.to_string())
+        .bind(device)
+        .execute(&mut *tx).await?;
+    tx.commit().await?;
     Ok(())
 }
 pub async fn remove_socket_in_db(
@@ -219,24 +226,6 @@ pub async fn remove_socket_in_db(
     Ok(())
 }
 
-pub async fn update_latest_socket_in_db(
-    pgpool: &AppState,
-    socket: SocketAddrV4,
-) -> Result<(), sqlx::Error> {
-    let update_other_latest_query: &str = "UPDATE sockets SET latest=false;";
-    let update_latest_query: &str = "UPDATE sockets SET latest=true WHERE socket=$1;";
-    sqlx::query(update_other_latest_query)
-        .bind(socket.to_string())
-        .fetch_optional(&pgpool.db)
-        .await?;
-
-    sqlx::query(update_latest_query)
-        .bind(socket.to_string())
-        .fetch_optional(&pgpool.db)
-        .await?;
-
-    Ok(())
-}
 
 pub async fn retrieve_socketid_from_db(
     pgpool: &AppState,
@@ -300,7 +289,7 @@ pub async fn retrieve_visibility(
     Ok((i_visibility, o_visibility))
 }
 
-pub async fn retrieve_labels(
+pub async fn retrieve_channel_labels(
     pgpool: &AppState,
     socket_id: &i32,
 ) -> Result<(Vec<String>, Vec<String>), sqlx::Error> {
@@ -312,20 +301,23 @@ pub async fn retrieve_labels(
     }
     let (mut i_labels, mut o_labels): (Vec<String>, Vec<String>) = (Vec::new(), Vec::new());
 
-    i_channels.iter().for_each(|chs| {
-        chs.iter().for_each(|ch| {
-            i_labels.push(ch.channel_name.clone());
-        });
-    });
-    o_channels.iter().for_each(|chs| {
-        chs.iter().for_each(|ch| {
-            o_labels.push(ch.channel_name.clone());
-        });
-    });
+    i_channels.unwrap().iter().for_each(|ch| {i_labels.push(ch.channel_name.clone());});
+    o_channels.unwrap().iter().for_each(|ch| {o_labels.push(ch.channel_name.clone());});
+
     Ok((i_labels, o_labels))
 }
+pub async fn retrieve_preset_labels(
+    pgpool: &AppState,
+    socket_id: &i32,
+) -> Result<Vec<String>, sqlx::Error> {
+    let socket_id = socket_id.clone();
+    let presets = retrieve_presets(pgpool, socket_id).await?;
+    if presets.is_none(){return Err(sqlx::Error::RowNotFound);}
+    Ok(presets.unwrap().into_iter().map(|p|{p.label}).collect::<Vec<String>>())
+    
+}
 
-pub async fn update_labels_in_db(
+pub async fn update_channel_labels_in_db(
     pgpool: &AppState,
     socket_id: i32,
     relative_identifier: i32,
@@ -338,7 +330,24 @@ pub async fn update_labels_in_db(
         .bind(socket_id)
         .bind(relative_identifier)
         .bind(src)
-        .fetch_optional(&pgpool.db)
+        .execute(&pgpool.db)
+        .await?;
+
+    Ok(())
+}
+
+pub async fn update_preset_labels_in_db(
+    pgpool: &AppState,
+    socket_id: i32,
+    relative_identifier: i32,
+    label: String,
+) -> Result<(), sqlx::Error> {
+    let query_string: &str = "UPDATE presets SET label=$1 WHERE socket_id=$2 AND relative_identifier=$3";
+    sqlx::query(query_string)
+        .bind(label)
+        .bind(socket_id)
+        .bind(relative_identifier)
+        .execute(&pgpool.db)
         .await?;
 
     Ok(())

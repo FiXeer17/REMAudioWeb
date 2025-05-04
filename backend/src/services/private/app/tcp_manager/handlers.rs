@@ -1,14 +1,20 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     net::SocketAddrV4,
     str::FromStr,
 };
 
 use crate::{
     services::{
-        private::{app::tcp_handler::{tcp_handler::TcpStreamActor, utils::{add_channels, add_presets}}, socket::utils::Device},
+        private::{
+            app::tcp_handler::{
+                tcp_handler::TcpStreamActor,
+                utils::{add_channels, add_presets},
+            },
+            socket::utils::Device,
+        },
         public::{
-            interfaces::{insert_socket_in_db, retrieve_socket_from_db, update_latest_socket_in_db},
+            interfaces::{insert_socket_in_db, retrieve_socket_from_db},
             schemas::Socket,
         },
     },
@@ -23,32 +29,45 @@ use super::{super::messages::*, tcp_manager::TcpStreamsManager};
 impl Handler<Connect> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: Connect, ctx: &mut Self::Context) -> Self::Result {
-        let socket = match &msg.socket {
-            Some(socket) => *socket,
-            None => match self.latest_socket {
-                Some(socket) => socket,
-                None => {
-                    msg.addr.do_send(GeneralConnectionError {
-                        socket: None,
-                        error: "Cannot find available socket.".to_string(),
-                    });
-                    return;
-                }
-            },
+        let to_connect:Vec<SocketAddrV4> = match &msg.socket {
+            Some(socket) => vec![*socket],
+            None => {
+            let latest_sockets:Vec<SocketAddrV4> = vec![self.latest_audio_socket,self.latest_video_socket].into_iter().flatten().collect();
+            if latest_sockets.is_empty(){
+                msg.addr.do_send(GeneralConnectionError {
+                    socket: None,
+                    error: "Cannot find available socket.".to_string(),
+                });
+                return;
+            }
+            latest_sockets
+        }
         };
-        info!("Connecting to {:?}", socket);
+        
         let pool_cloned = self.pgpool.clone();
+        let to_connect_clone = to_connect.clone();
         tokio::spawn(async move {
-            let Ok(dbsock) = retrieve_socket_from_db(&pool_cloned, socket).await else{ warn!("Couldn't retrieve socket from database."); return ;};
-            add_presets(pool_cloned.clone(), socket, dbsock.device).await;
-            add_channels(pool_cloned, socket).await;
+            for socket in to_connect_clone{
+                let Ok(dbsock) = retrieve_socket_from_db(&pool_cloned, socket).await else {
+                    warn!("Couldn't retrieve socket from database.");
+                    return;
+                };
+                let pool_for_presets = pool_cloned.clone();
+                add_presets(pool_for_presets.clone(), socket, dbsock.device).await;
+                add_channels(pool_for_presets, socket).await;
+            }
         });
+        for socket in to_connect{
+        info!("Connecting to {:?}", socket);
+        let addr_clone = msg.addr.clone();
         if let Some(open_stream) = self.streams.get_mut(&socket) {
-            open_stream.insert(msg.addr.clone());
+            
             let mut message = msg.clone();
+            open_stream.insert(addr_clone.clone());
+            
             if msg.socket.is_none() {
                 message = Connect {
-                    addr: msg.addr,
+                    addr: addr_clone,
                     socket: Some(socket),
                 };
             }
@@ -56,21 +75,27 @@ impl Handler<Connect> for TcpStreamsManager {
         } else {
             let ctx_addr = ctx.address().clone();
             let pool_cloned = self.pgpool.clone();
+            
+
             tokio::spawn(async move {
-                info!("New connection detected at socket {}, processing...",socket.to_string());
-                if let Ok(dbsock) = retrieve_socket_from_db(&pool_cloned, socket).await{
-                    let Ok(device_type) = Device::from_str(&dbsock.device) else{return;};
+                info!(
+                    "New connection detected at socket {}, processing...",
+                    socket.to_string()
+                );
+                if let Ok(dbsock) = retrieve_socket_from_db(&pool_cloned, socket).await {
+                    let Ok(device_type) = Device::from_str(&dbsock.device) else {
+                        return;
+                    };
                     let message = StartStream {
                         socket: Some(socket),
-                        client: msg.addr,
+                        client: addr_clone,
                         device_type,
                     };
                     ctx_addr.do_send(message);
                 }
-            } 
-        );
-            
+            });
         }
+    }
     }
 }
 impl Handler<SetSocket> for TcpStreamsManager {
@@ -80,26 +105,34 @@ impl Handler<SetSocket> for TcpStreamsManager {
             if let Some(socket) = self.uuids_sockets.get_mut(&uuid) {
                 *socket = Some(msg.socket.clone());
                 let sockv4 = check_socket(msg.socket).unwrap();
-                self.latest_socket = sockv4;
-                if sockv4.is_some() {
-                    self.sockets
-                        .insert(sockv4.clone().unwrap(), msg.socket_name.clone());
+
+                if msg.device == Device::Audio.to_string() {
+                    self.latest_audio_socket = sockv4;
+                } else if msg.device == Device::Video.to_string() {
+                    self.latest_video_socket = sockv4
+                }
+
+                if let Some(sockv4) = sockv4 {
+                    let new_sockets:HashSet<Socket> = self.sockets.to_owned().into_iter().map(|mut sock|{if sock.device ==msg.device {sock.latest=false;} sock}).collect();
+                    self.sockets = new_sockets;
+                    let socket = Socket {
+                        id: None,
+                        socket_name: msg.socket_name.clone(),
+                        socket: sockv4.to_string(),
+                        latest: true,
+                        device: msg.device.clone(),
+                    };
+                    self.sockets.remove(&socket);
+                    self.sockets.insert(socket);
+
                     let pool = self.pgpool.clone();
                     tokio::spawn(async move {
                         info!("Setting the new socket...");
-                        let result = insert_socket_in_db(
-                            &pool,
-                            msg.socket_name,
-                            sockv4.clone().unwrap(),
-                            msg.device,
-                        )
-                        .await;
+                        let result =
+                            insert_socket_in_db(&pool, msg.socket_name, sockv4.clone(), msg.device)
+                                .await;
                         if result.is_err() {
                             warn!("Couldn't save socket in database");
-                        }
-                        let result = update_latest_socket_in_db(&pool, sockv4.unwrap()).await;
-                        if result.is_err() {
-                            warn!("Couldn't update latest socket in database");
                         }
                         info!("Socket set succesfully.");
                     });
@@ -129,12 +162,18 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
             self.inactive_sockets.remove(index);
         }
 
-        if let Some(socket) = self.latest_socket {
+        if let Some(socket) = self.latest_audio_socket {
             if &socket == &msg.socket {
-                self.latest_socket = None;
+                self.latest_audio_socket = None;
             }
         }
-        
+
+        if let Some(socket) = self.latest_video_socket {
+            if &socket == &msg.socket {
+                self.latest_video_socket = None;
+            }
+        }
+
         if let Some(stream_actor) = self.streams_actors.remove(&msg.socket) {
             stream_actor.do_send(message.clone());
         }
@@ -156,8 +195,8 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
             let to_reset = self.uuids_sockets.get_mut(uuid).unwrap();
             *to_reset = None;
         });
-        self.sockets.remove(&msg.socket);
-        
+        self.sockets
+            .retain(|s| SocketAddrV4::from_str(&s.socket).unwrap() != msg.socket);
     }
 }
 
@@ -169,7 +208,7 @@ impl Handler<RetrieveSocket> for TcpStreamsManager {
 }
 
 impl Handler<GetConnections> for TcpStreamsManager {
-    type Result = Option<HashMap<SocketAddrV4, String>>;
+    type Result = Option<HashSet<Socket>>;
     fn handle(&mut self, _: GetConnections, _: &mut Self::Context) -> Self::Result {
         if self.sockets.is_empty() {
             return None;
@@ -178,18 +217,6 @@ impl Handler<GetConnections> for TcpStreamsManager {
     }
 }
 
-impl Handler<GetLatestConnection> for TcpStreamsManager {
-    type Result = Option<HashMap<SocketAddrV4, String>>;
-    fn handle(&mut self, _msg: GetLatestConnection, _ctx: &mut Self::Context) -> Self::Result {
-        if self.latest_socket.is_some() {
-            let sock = self.latest_socket.unwrap();
-            let mut latest_socket: HashMap<SocketAddrV4, String> = HashMap::new();
-            latest_socket.insert(sock, self.sockets.get(&sock).cloned().unwrap());
-            return Some(latest_socket);
-        }
-        None
-    }
-}
 impl Handler<InactiveQueue> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: InactiveQueue, _ctx: &mut Self::Context) -> Self::Result {
@@ -233,12 +260,17 @@ impl Handler<StartStream> for TcpStreamsManager {
         let socket = message.socket.unwrap();
         let stream = self.streams.entry(socket).or_insert(HashSet::new());
         stream.insert(message.client);
-        let stream_actor_addr =
-            TcpStreamActor::new(socket, ctx.address(), self.pgpool.clone(),message.device_type).start();
+        let stream_actor_addr = TcpStreamActor::new(
+            socket,
+            ctx.address(),
+            self.pgpool.clone(),
+            message.device_type,
+        )
+        .start();
         self.streams_actors
             .entry(socket)
             .or_insert(stream_actor_addr);
-        info!("Connection established at socket {}",socket.to_string());
+        info!("New TCP handler started at: {}", socket.to_string());
     }
 }
 
@@ -312,9 +344,14 @@ impl Handler<UnavailableSockets> for TcpStreamsManager {
     fn handle(&mut self, msg: UnavailableSockets, ctx: &mut Self::Context) -> Self::Result {
         msg.sockets.into_iter().for_each(|s| {
             let to_remove = SocketAddrV4::from_str(&s.socket).unwrap();
-            if let Some(soc) = self.latest_socket {
+            if let Some(soc) = self.latest_audio_socket {
                 if soc.to_string() == s.socket {
-                    self.latest_socket = None;
+                    self.latest_audio_socket = None;
+                }
+            }
+            if let Some(soc) = self.latest_video_socket {
+                if soc.to_string() == s.socket {
+                    self.latest_video_socket = None;
                 }
             }
             ctx.address().do_send(ClosedByRemotePeer {
@@ -323,7 +360,7 @@ impl Handler<UnavailableSockets> for TcpStreamsManager {
             });
 
             self.avail_map.remove(&to_remove);
-            self.sockets.remove(&to_remove);
+            self.sockets.retain(|s|{s.socket!=to_remove.to_string()});
 
             let to_remove_uuids: Vec<Uuid> = self
                 .uuids_sockets
@@ -352,14 +389,16 @@ impl Handler<SocketRestarted> for TcpStreamsManager {
     fn handle(&mut self, msg: SocketRestarted, _ctx: &mut Self::Context) -> Self::Result {
         let avail_socket: Socket;
         if let Some(socket) = msg.latest_socket {
-            self.latest_socket = Some(SocketAddrV4::from_str(&socket.socket).unwrap());
+            if socket.device == Device::Audio.to_string(){
+                self.latest_audio_socket = Some(SocketAddrV4::from_str(&socket.socket).unwrap());
+            }else{
+                self.latest_video_socket = Some(SocketAddrV4::from_str(&socket.socket).unwrap());
+
+            }
             avail_socket = socket;
         } else {
             avail_socket = msg.socket.unwrap();
         }
-        self.sockets.insert(
-            SocketAddrV4::from_str(&avail_socket.socket).unwrap(),
-            avail_socket.socket_name,
-        );
+        self.sockets.insert(avail_socket);
     }
 }
