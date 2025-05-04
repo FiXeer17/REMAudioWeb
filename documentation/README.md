@@ -6,6 +6,7 @@
 
 - [POST] sign-in: `/api/auth/signin`
 - [GET] get connections: `/api`
+- [GET] all saved connections `/api/get_all`
 
 ## Json body:
 
@@ -27,18 +28,55 @@
 		{
             "name":"socket name"
 			"ip": "172.18.0.2",
-			"port": "2000"
+			"port": "2000",
+            "device_type":"matrix"
 		},
         ...
         ...
 	]
-    "latest_socket": {
+    "latest_audio_socket": {
         "name":"socket name",
-        "ip":"172.18.0.2",
-        "port":"2000"
+        "ip":"172.18.0.5",
+        "port":"2001",
+        "device_type":matrix
+    },
+    "latest_video_socket": {
+        "name":"socket name",
+        "ip":"172.18.0.1",
+        "port":"2003",
+        "device_type":"camera"
     }
 }
 ```
+
+`/api/get_all`:
+```
+{
+	"sockets": [
+		{
+            "name":"socket name"
+			"ip": "172.18.0.2",
+			"port": "2000",
+            "device_type":"matrix"
+		},
+        ...
+        ...
+	]
+    "latest_audio_socket": {
+        "name":"socket name",
+        "ip":"172.18.0.5",
+        "port":"2001",
+        "device_type":matrix
+    },
+    "latest_video_socket": {
+        "name":"socket name",
+        "ip":"172.18.0.1",
+        "port":"2003",
+        "device_type":"camera"
+    }
+}
+```
+
 `/api/auth/signin`:
 ```
 {
@@ -121,10 +159,22 @@ To do so you have to send a json formatted WebSocket message with this body:
 {
     "section": "[POSSIBLE SECTIONS]",
     "io": "[POSSIBLE IO]", -> OPTIONAL                   
-    "channel": String,  -> OPTIONAL
+    "channel": String,  -> OPTIONAL,
+    "index": String -> OPTIONAL,
     "value" : "[POSSIBLE VALUES]", 
 }
 ```
+
+### SET COMMANDS FIELDS
+| | section | io | channnel | index | value |
+|-|---------|----|----------|-------|-------|
+| change channel labels | yes | yes | yes | no | yes |
+| change preset labels | yes | no | no | yes | yes |
+| change channel visibility | yes | yes | yes | no | yes |
+| change the current preset | yes | no | no | no | yes |
+| mute channel | yes | yes | yes | no | yes |
+| change the volume of the channel | yes | yes | yes | no | yes
+
 
 ### POSSIBLE DEVICE TYPES
 currently you can control audio and video devices setting sockets with these keywords:
@@ -138,7 +188,8 @@ currently you can control audio and video devices setting sockets with these key
 sections are specific keywords, here is a list of sections that the engine currently support:
 | function | keyword |
 |---------|---------|
-| change channel labels | "labels" |
+| change channel labels | "channel_labels" |
+| change preset labels | "preset_labels" |
 | change channel visibility | "visibility" |
 | change the current preset | "preset" |
 | mute channel | "mute" |
