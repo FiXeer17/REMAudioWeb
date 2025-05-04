@@ -12,23 +12,22 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - debug_net
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     volumes:
-      # mount source code for live reload
       - ./backend/src:/usr/src/app/src
       - ./backend/Cargo.toml:/usr/src/app/Cargo.toml
       - ./backend/Cargo.lock:/usr/src/app/Cargo.lock
       - ./backend/migrations:/usr/src/app/migrations
-      # mount target for incremental compilation caching
       - cargo_target:/usr/src/app/target
-      # cache Cargo dependencies to speed up rebuilds
       - cargo_registry:/usr/local/cargo/registry
     ports:
-      - "8000:8000" 
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -36,31 +35,53 @@ services:
       - ./backend/.env
     environment:
       - RUST_LOG=info
+    networks:
+      - debug_net
+
   matrix-simulator-1:
-    image: i3elle/matrix-engine:latest
+    image: i3elle/matrix-engine:stable
     environment:
       - MATRIX_HOST=0.0.0.0
       - MATRIX_PORT=2000
     ports:
       - "2000:2000"
     command: ./matrix-engine
+    networks:
+      debug_net:
+        ipv4_address: 172.20.0.21
+
   matrix-simulator-2:
-    image: i3elle/matrix-engine:latest
+    image: i3elle/matrix-engine:stable
     environment:
       - MATRIX_HOST=0.0.0.0
       - MATRIX_PORT=2001
     ports:
       - "2001:2001"
     command: ./matrix-engine
+    networks:
+      debug_net:
+        ipv4_address: 172.20.0.22
+
   matrix-simulator-3:
-    image: i3elle/matrix-engine:latest
+    image: i3elle/matrix-engine:stable
     environment:
       - MATRIX_HOST=0.0.0.0
       - MATRIX_PORT=2002
     ports:
       - "2002:2002"
     command: ./matrix-engine
-           
+    networks:
+      debug_net:
+        ipv4_address: 172.20.0.23
+
+networks:
+  debug_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
 volumes:
   postgres_data:
   cargo_target:
