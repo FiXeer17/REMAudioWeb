@@ -415,7 +415,7 @@ impl TcpStreamActor {
                 return;
             }
             if let Some(states) = states.clone().as_mut() {
-                if sv.io.unwrap() == SRC::INPUT.to_string() {
+                if sv.io.unwrap() == SRC::INPUT.to_label() {
                     if !states.i_visibility.is_empty() {
                         states
                             .i_visibility
