@@ -121,7 +121,7 @@ pub async fn remove_socket(
     };
 
     
-    let socket = match check_socket(socket.to_string()) {
+    match check_socket(socket.to_string()) {
         Ok(s) => {
             if let Err(e) = remove_socket_in_db(&pgpool, s.unwrap()).await{
                 error!("Cannot remove socket from database, error:\n{}",e.to_string());
@@ -157,7 +157,7 @@ pub async fn remove_socket(
         }
     };
 
-    let response = json!({"socket": socket});
+    let response = json!({"socket": request_body.socket});
     HttpResponse::Ok().json(response)
 }
 
