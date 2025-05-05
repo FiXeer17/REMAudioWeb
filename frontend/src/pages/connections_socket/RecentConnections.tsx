@@ -14,7 +14,7 @@ type Connection = {
     name:string,
     ip: string;
     port: number;
-    isLatest?: boolean;
+    isLatestAudio?: boolean;
   };
 
   type RecentConnectionsProps = {
@@ -120,7 +120,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                     
                     {displayedConnections.map((element:Connection)=>(
                         <div className={`flex flex-col items-start justify-center text-white w-fit px-6 text-sm border-2 rounded-2xl ${
-                            element.isLatest
+                            element.isLatestAudio
                             ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text"
                             : "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
                         }`} key={element.ip}>

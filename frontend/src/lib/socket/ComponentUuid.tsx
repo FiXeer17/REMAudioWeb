@@ -47,16 +47,21 @@ export const ConnectionsProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const value = await getSocket();
       if (isAdmin) {
-        const allSockets = value.data.sockets ;
-        const latest = value.data.latest_socket;
 
-        const updatedSockets = allSockets || latest
-            ? [...(allSockets ?? []),...(latest ? [{ ...latest, isLatest: true }] : []),]
-            : null;
+        const allSockets = value.data.sockets ;
+        const latest_audio = value.data.latest_audio_socket;
+        const latest_video = value.data.latest_video_socket;
+
+        const updatedSockets = allSockets || latest_audio || latest_video
+        ? [
+          ...(allSockets ?? []),
+          ...(latest_audio ? [{ ...latest_audio, isLatestAudio: true }] : []),
+          ...(latest_video ? [{ ...latest_video, isLatestVideo: true }] : []),
+        ]:null
             
         setSockets(updatedSockets)
       } else {
-        setSockets(value.data.latest_socket ? [value.data.latest_socket] : null);
+        //setSockets(value.data.latest_socket ? [value.data.latest_socket] : null);
       }
       setUuid(prevUuid)
     } catch (error) {

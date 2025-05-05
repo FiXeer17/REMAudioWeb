@@ -6,7 +6,7 @@ interface TextPreset {
   onClick?: () => void;
 }
 
-export const ButtonPresets = ({ text }: TextPreset) => {
+export const ButtonPresets = ({ text,onClick }: TextPreset) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
@@ -31,7 +31,7 @@ export const ButtonPresets = ({ text }: TextPreset) => {
   }, []);
 
   return (
-    <Button className="border-[1px] border-home_colors-Selected_Borders/text text-home_colors-Selected_Borders/text font-sans font-bold h-11 w-32 px-2 py-4">
+    <Button onClick={onClick} className="border-[1px] border-home_colors-Selected_Borders/text text-home_colors-Selected_Borders/text font-sans font-bold h-11 w-32 px-2 py-4">
       <div ref={containerRef} className="relative w-full overflow-hidden">
         <div
           ref={textRef}
