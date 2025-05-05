@@ -14,14 +14,16 @@ export const Presets = () => {
     const [currentPresets,setCurrentPresets]=useState(0)
     const [isAvailable, setIsAvailable] = useState(true)
     const [colorNav] = useState<string>(() => location.state);
+    const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
 
 
     useEffect(()=>{
 
-      const { isAvailable,currentPresets }=GetData(message)      
+      const { isAvailable,currentPresets,labelPresets }=GetData(message)      
       setIsAvailable(isAvailable)
       setCurrentPresets(currentPresets)
+      setlabelPresets(labelPresets)
  
     },[message])
 
@@ -59,7 +61,7 @@ export const Presets = () => {
                 </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
                   {Presets.map((Presets)=>(
-                    <PresetsButton size={"presets"} variant={currentPresets === Presets ? "blue" : "white"} key={Presets} onClick={()=>handleSetPreset(Presets)}>Presets {Presets}</PresetsButton>
+                    <PresetsButton size={"presets"} variant={currentPresets === Presets ? "blue" : "white"} key={Presets} onClick={()=>handleSetPreset(Presets)}>{labelPresets[Presets.toString()]}</PresetsButton>
                   ))}
               </div>
           </div>

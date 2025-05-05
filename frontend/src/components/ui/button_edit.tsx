@@ -1,7 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export const ButtonEdit=()=> {
+
+interface textPreset {
+  onChange: (value:string) => void;
+  Text:string
+}
+
+export const ButtonEdit=({onChange,Text}:textPreset)=> {
   const [text, setText] = useState("");
   const [editing, setEditing] = useState(false);
   const [shouldScroll, setShouldScroll] = useState(false);
@@ -17,13 +23,17 @@ export const ButtonEdit=()=> {
     }
   };
   
+  const handleText=(value:string)=>{
+    onChange(value)
+  }
+
   useLayoutEffect(() => {
     measureElements();
-  }, [text, editing]);
+  }, [editing,Text]);
   
   useEffect(() => {
     if (!containerRef.current || !textRef.current) return;
-    
+
     const observer = new MutationObserver(measureElements);
     
     observer.observe(containerRef.current, { attributes: true, childList: true, subtree: true });
@@ -39,6 +49,7 @@ export const ButtonEdit=()=> {
   }, []);
   
   const handleEditComplete = () => {
+    handleText(text)
     setEditing(false);
     setTimeout(measureElements, 0);
   };
@@ -69,7 +80,7 @@ export const ButtonEdit=()=> {
                 
               }}
             >
-              {text}
+              {Text}
             </div>
           </div>
         </Button>

@@ -16,19 +16,32 @@ export const PreferenciesChannels=()=>{
     const [InOut,setInOut]=useState<"IN"|"OUT">("IN")
     const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
     const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
+    const [labelChannelInput,setLabelChannelInput]=useState<{[key: string]: string;}>({})
+    const [labelChannelOutput,setLabelChannelOutput]=useState<{[key: string]: string;}>({})
 
     const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
 
 
     useEffect(()=>{
-        const { outputVisibility, inputVisibility } = GetData(message);
+        const { outputVisibility, inputVisibility,labelChannelsInput,labelChannelsOutput } = GetData(message);
         setInputVisibility(inputVisibility)
         setOutputVisibility(outputVisibility)
-
+        setLabelChannelOutput(labelChannelsOutput)
+        setLabelChannelInput(labelChannelsInput)
       },[message])
 
+    const handleSetNameChannel=(value:string,channel:number)=>{
+      if (InOut === "IN") {
+      const data={"section":"channel_labels","io":"input","channel":channel.toString(),"value":value}
+      socket?.send(JSON.stringify(data))
+      }else if(InOut==="OUT"){
+        const data={"section":"channel_labels","io":"output","channel":channel.toString(),"value":value}
+        socket?.send(JSON.stringify(data))
+      }
+    }
+
     const handleVisibility=(presets:string)=>{
-        if (InOut === "IN") {;
+        if (InOut === "IN") {
             const data={"section":"visibility","io":"input","channel":presets,"value":(!inputVisibility[presets]).toString()}
             socket?.send(JSON.stringify(data))
           }else if(InOut==="OUT"){
@@ -39,7 +52,7 @@ export const PreferenciesChannels=()=>{
 
 
     return(
-            <div className="grid grid-rows-[70px,1fr,auto] h-screen relative">
+        <div className="grid grid-rows-[70px,1fr,auto] h-screen relative">
           <div className="flex items-center justify-center gap-3" >
                 <PresetsButton  variant={"white"} className="flex flex-col gap-0 items-center justify-center text-center " onClick={()=>navigate("/preferenciesPresets")}>
                     <span>LABELS</span> 
@@ -54,23 +67,22 @@ export const PreferenciesChannels=()=>{
               <div className="flex flex-col px-6 pt-10 pb-6 w-full  bg-home_colors-Navbar/Selection_Bg rounded-2xl items-center gap-6">
                 <div className="grid grid-cols-2 h-full w-full  gap-5 overflow-y-auto">
                 {Presets.map((presets,index) => {
-                        const right = (index+1) %2 == 0
-
-                        return(
-                            <div className="flex items-center gap-2 w-full py-1" key={presets}>
-                                
-                                { !right ? <div className="flex-shrink-0 cursor-pointer" onClick={()=>handleVisibility(presets.toString())}>
-                                    {InOut==="IN" ? inputVisibility[presets] ? <Eye color="#FFFFFF" size={22}/> : <EyeSlash color="#FFFFFF" size={22}/>
-                                                    :outputVisibility[presets] ? <Eye color="#FFFFFF" size={22}/> : <EyeSlash color="#FFFFFF" size={22}/>}                          
-                                </div> : null}
-                                <div className="flex-1 min-w-0"> 
-                                    <ButtonEdit  />
-                                </div>
-                                { right ? <div className="flex-shrink-0 cursor-pointer" onClick={()=>handleVisibility(presets.toString())}>
+                  const right = (index+1) %2 == 0
+                  return(
+                        <div className="flex items-center gap-2 w-full py-1" key={presets}>
+                            { !right ? <div className="flex-shrink-0 cursor-pointer" onClick={()=>handleVisibility(presets.toString())}>
                                 {InOut==="IN" ? inputVisibility[presets] ? <Eye color="#FFFFFF" size={22}/> : <EyeSlash color="#FFFFFF" size={22}/>
-                                                    :outputVisibility[presets] ? <Eye color="#FFFFFF" size={22}/> : <EyeSlash color="#FFFFFF" size={22}/>}
-                                </div> : null}
+                                                :outputVisibility[presets] ? <Eye color="#FFFFFF" size={22}/> : <EyeSlash color="#FFFFFF" size={22}/>}                          
+                            </div> : null}
+                            <div className="flex-1 min-w-0"> 
+                                <ButtonEdit onChange={(value)=>{handleSetNameChannel(value,presets)}} 
+                                            Text={InOut==="IN"?labelChannelInput[presets.toString()]:labelChannelOutput[presets.toString()]}/>
                             </div>
+                            { right ? <div className="flex-shrink-0 cursor-pointer" onClick={()=>handleVisibility(presets.toString())}>
+                            {InOut==="IN" ? inputVisibility[presets] ? <Eye color="#FFFFFF" size={22}/> : <EyeSlash color="#FFFFFF" size={22}/>
+                                                :outputVisibility[presets] ? <Eye color="#FFFFFF" size={22}/> : <EyeSlash color="#FFFFFF" size={22}/>}
+                            </div> : null}
+                        </div>
                         )
                     })}
 

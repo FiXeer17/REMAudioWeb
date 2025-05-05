@@ -9,6 +9,7 @@ import { useState, useContext, useEffect } from "react";
 import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { Circle, Clock } from "@phosphor-icons/react";
+import { ButtonPresets } from "@/components/ui/button_presets";
 
 export const HomeAudio=() => {
   const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
@@ -18,16 +19,18 @@ export const HomeAudio=() => {
   const {socket,message} = useContext(SocketContext).socketState
   const [isAvailable, setIsAvailable] = useState(true)
   const [currentPresets,setCurrentPresets]=useState(0)
+  const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
 
   useEffect(()=>{
 
-    const { inputChannelStates, outputChannelStates,isAvailable,outputVisibility, inputVisibility,currentPresets } = GetData(message);
+    const { inputChannelStates, outputChannelStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message);
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
       setInputVisibility(inputVisibility)
       setOutputVisibility(outputVisibility)
       setIsAvailable(isAvailable)
       setCurrentPresets(currentPresets)
+      setlabelPresets(labelPresets)
   },[message])
   const navigate = useNavigate();
 
@@ -92,9 +95,7 @@ export const HomeAudio=() => {
     <div className="grid grid-rows-[auto,1fr,1fr,auto] min-h-svh" >
       
       <div className="flex justify-center  pb-5 pt-4 ">
-
-        <PresetsButton variant={"blue"} onClick={()=>{navigate("/presets",{state:"house"})}}>PRESETS {currentPresets}</PresetsButton>
-          
+        <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"house"})}}/>
       </div>
       <div className="flex flex-col px-7 py-6">
         <div

@@ -6,12 +6,26 @@ import { Badge } from "@/components/ui/badge";
 import SocketContext from "@/lib/socket/context";
 import { useLocation, useNavigate } from "react-router-dom";
 import {ButtonEdit} from "@/components/ui/button_edit";
+import { useContext, useEffect, useState } from "react";
+
+
+
 
 export const PreferenciesPresets = ()=>{
     const navigate=useNavigate()
-    const location=useLocation()
-    //const {socket,message} = useContext(SocketContext).socketState
+    const {socket,message} = useContext(SocketContext).socketState
+    const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+
+    useEffect(()=>{
+        const { labelPresets } = GetData(message);
+        setlabelPresets(labelPresets)
+      },[message])
+
+      const handleSetNamePreset=(value:string,Preset:number)=>{
+        const dataoutput={"section":"preset_labels","index":Preset.toString(),"value":value}
+        socket?.send(JSON.stringify(dataoutput))
+      }
 
     return(
         <div className="grid grid-rows-[70px,1fr,auto] h-screen relative">
@@ -28,7 +42,7 @@ export const PreferenciesPresets = ()=>{
                 </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
                   {Presets.map((presets)=>(
-                    <ButtonEdit key={presets} />
+                    <ButtonEdit key={presets} onChange={(value)=>{handleSetNamePreset(value,presets)}} Text={labelPresets[presets.toString()]}/>
                   ))}
               </div>
           </div>

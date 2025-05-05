@@ -8,6 +8,9 @@ export function GetData(data:string){
     const inputVisibility=dataJson.i_visibility
     const isAvailable=dataJson.available
     const currentPresets=dataJson.current_preset
+    const labelPresets=dataJson.preset_labels
+    const labelChannelsOutput=dataJson.o_labels
+    const labelChannelsInput=dataJson.i_labels
 
-    return { inputChannelStates,outputChannelStates,inputVolumesStates,outputVolumesStates,isAvailable,outputVisibility,inputVisibility,currentPresets }   
+    return { inputChannelStates,outputChannelStates,inputVolumesStates,outputVolumesStates,isAvailable,outputVisibility,inputVisibility,currentPresets,labelPresets,labelChannelsInput,labelChannelsOutput }   
 }

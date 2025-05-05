@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { GetData } from "@/lib/WebSocketData";
 import SocketContext from "@/lib/socket/context";
+import { ButtonPresets } from "@/components/ui/button_presets";
 
 export const Volume=()=>{
     const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
@@ -29,10 +30,11 @@ export const Volume=()=>{
     const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
     const {socket,message} = useContext(SocketContext).socketState
     const [isAvailable, setIsAvailable] = useState(true)
+    const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const [currentPresets,setCurrentPresets]=useState(0)
     
     useEffect(()=>{
-    const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets } = GetData(message);
+    const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message);
         setInputChannelStates(inputChannelStates);
         setOutputChannelStates(outputChannelStates);
         setInputVolumesStates(inputVolumesStates);
@@ -41,6 +43,7 @@ export const Volume=()=>{
         setOutputVisibility(outputVisibility)
         setIsAvailable(isAvailable)
         setCurrentPresets(currentPresets)
+        setlabelPresets(labelPresets)
       },[message])
     const navigate = useNavigate()
     
@@ -65,11 +68,9 @@ export const Volume=()=>{
     }
 
     return(
-        <div className="grid grid-rows-[0.5fr_2fr,auto] mx-5 min-h-svh">
-            <div className="flex items-center justify-center">
-                <PresetButton variant={"preset"} size={"preset"} onClick={()=>{navigate("/presets",{state:"speaker"})}}>
-                    PRESET
-                </PresetButton>
+        <div className="grid grid-rows-[0.5fr_2fr,auto]  min-h-svh">
+            <div className="flex items-top justify-center pt-4">
+                <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"house"})}}/>
             </div>
             <div className="flex justify-center">
                 <div className="flex gap-2 pb-3  "
@@ -117,7 +118,7 @@ export const Volume=()=>{
                 
                 </div>
             </div>
-            <div className="flex flex-col justify-end items-center gap-4 pb-3">
+            <div className="flex flex-col justify-end items-center gap-4 pb-3 px-5">
                 <Circle size={12} color="#ffffff" />
                 <Navbar selectedColor="speaker"/>
             </div>

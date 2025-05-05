@@ -1,24 +1,47 @@
-import SocketContext from "@/lib/socket/context"
-import { useContext, useEffect, useState } from "react"
+import { Clock } from "@phosphor-icons/react";
+import { GetData } from "@/lib/WebSocketData";
+import Navbar from "@/components/ui/navbar";
+import { Button as PresetsButton } from "@/components/ui/audio_video";
+import { Badge } from "@/components/ui/badge";
+import SocketContext from "@/lib/socket/context";
+import { useLocation, useNavigate } from "react-router-dom";
+import {ButtonEdit} from "@/components/ui/button_edit";
+import { useContext, useEffect, useState } from "react";
 
-export default function Test2() {
 
-    const {socket}=useContext(SocketContext).socketState
-    const [message, setMessage]=useState("")
-    
-    useEffect(() => {
-        if (!socket) return;
-    
-        socket.onmessage = (event) => {
-          setMessage(event.data);
-        };
-    
-      });
+
+
+export const Test2 = ()=>{
+    const navigate=useNavigate()
+    //const {socket,message} = useContext(SocketContext).socketState
+    const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
+    const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+    const [s,setS]=useState("")
+
+
 
     return(
-
-        <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
-                   <div className="w-10 h-10 border-4  border-white border-t-transparent rounded-full animate-spin"></div>
-                </div>
+        <div className="grid grid-rows-[70px,1fr,auto] h-screen relative">
+          <div className="flex items-center justify-center gap-3" >
+                <PresetsButton  variant={"blue"} className="flex flex-col gap-0 items-center justify-center text-center ">
+                    <span>LABELS</span> 
+                    <span>PRESETS</span>
+                </PresetsButton>
+                <PresetsButton variant={"white"} onClick={()=>navigate("/preferenciesChannels")}>CHANNELS</PresetsButton>
+          </div>
+          <div className="flex flex-1 px-7 pb-5 overflow-hidden relative pt-5">
+                <Badge className="absolute left-12 top-3 transform -translate-x-1/2">
+                  PRESETS
+                </Badge>
+              <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
+                  {Presets.map((presets)=>(
+                    <ButtonEdit key={presets} onChange={setS} Text={s}/>
+                  ))}
+              </div>
+          </div>
+          <div className="flex justify-between items-center pb-3 gap-12 pt-3">
+                <Navbar selectedColor={"settings"}/>
+          </div>
+        </div>
     )
 }
