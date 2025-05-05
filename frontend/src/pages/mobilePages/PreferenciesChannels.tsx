@@ -57,7 +57,7 @@ export const PreferenciesChannels=()=>{
                         const right = (index+1) %2 == 0
 
                         return(
-                            <div className="flex items-center gap-2 w-full" key={presets}>
+                            <div className="flex items-center gap-2 w-full py-1" key={presets}>
                                 
                                 { !right ? <div className="flex-shrink-0 cursor-pointer" onClick={()=>handleVisibility(presets.toString())}>
                                     {InOut==="IN" ? inputVisibility[presets] ? <Eye color="#FFFFFF" size={22}/> : <EyeSlash color="#FFFFFF" size={22}/>
