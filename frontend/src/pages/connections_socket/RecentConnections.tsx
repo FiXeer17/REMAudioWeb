@@ -1,4 +1,4 @@
-import { ArrowLeft,Plus,Trash } from "@phosphor-icons/react";
+import { ArrowLeft,Plus,Trash,Camera,HardDrive } from "@phosphor-icons/react";
 import { Link,useNavigate,useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -14,7 +14,10 @@ type Connection = {
     name:string,
     ip: string;
     port: number;
+    device_type:string;
     isLatestAudio?: boolean;
+    isLatestVideo?: boolean;
+    
   };
 
   type RecentConnectionsProps = {
@@ -47,7 +50,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                     uuid:uuid,
                     socket_name:element.name,
                     socket:`${element.ip}:${element.port}`,
-                    device_type:"matrix"
+                    device_type:element.device_type
                 }
                 const value = await setSocket(headers);
                 if (value.status===200){
@@ -100,7 +103,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                    <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                 </div>:<div className="absolute inset-0 z-10"></div>}
             <div className="absolute inset-0 bg-black z-20">
-                <div className="grid grid-rows-5 min-h-svh">
+                <div className="grid grid-rows-6 min-h-svh">
                     <div className="flex justify-between mt-9 ml-7 mr-7">
                         <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
                             <ArrowLeft size={32} color="#FFFFFF" />
@@ -109,7 +112,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                             <Plus color="#FFFFFF" size={32}/>
                         </Link>
                     </div>
-                    <div className="grid row-span-3 grid-rows-4 mx-10 gap-4 justify-center" style={{
+                    <div className="grid row-span-4 grid-rows-4 mx-10 gap-5 justify-center" style={{
                     transform: `translateX(${Offset}px)`,
                     transition: Offset === 0 ? "transform 0.3s ease" : "none",
                         }}
@@ -119,13 +122,16 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                         >
                     
                     {displayedConnections.map((element:Connection)=>(
-                        <div className={`flex flex-col items-start justify-center text-white w-fit px-6 text-sm border-2 rounded-2xl ${
+                        <div className={`flex flex-col items-start justify-center text-white w-fit px-6 py-3 text-sm border-2 rounded-2xl ${
                             element.isLatestAudio
                             ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text"
                             : "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
                         }`} key={element.ip}>
                             <div className="flex justify-between w-full items-center ">
-                                <p className="flex ">{element.name}</p>
+                                <div className="flex items-center gap-3">
+                                    {element.device_type==="matrix"? <HardDrive size={20}/>:<Camera size={20}/>}
+                                    <p className="flex ">{element.name}</p>
+                                </div>
                                 <div className="bg-red-900 rounded-sm py-1 px-1 cursor-pointer" onClick={()=>handleRevome(element)}>
                                     <Trash size={22}/>
                                 </div>

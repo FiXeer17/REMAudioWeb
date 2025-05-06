@@ -201,7 +201,7 @@ export const HomeAudio=() => {
         </div>
       </div>
       
-      <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3 px-5">
+      <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3 px-5 w-full">
         <Mute onClick={()=>handleState("","all")}>MUTE ALL</Mute>
         <Navbar selectedColor="house"/>
       </div>

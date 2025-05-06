@@ -35,7 +35,7 @@ export function getUUID():Promise<AxiosResponse<{uuid:string}>>{
   return client.get("ws/auth")
 }
 
-export function getSocket():Promise<AxiosResponse<{ sockets: { name: string; ip: string; port: number }[] | null;latest_audio_socket: { name: string; ip: string; port: number } | null;latest_video_socket: { name: string; ip: string; port: number } | null;}>>{
+export function getSocket():Promise<AxiosResponse<{ sockets: { name: string; ip: string; port: number; device_type:string }[] | null;latest_audio_socket: { name: string; ip: string; port: number; device_type:string } | null;latest_video_socket: { name: string; ip: string; port: number; device_type:string } | null;}>>{
   return client.get("api")
 }
 

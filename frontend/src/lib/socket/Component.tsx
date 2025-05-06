@@ -29,7 +29,6 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       socket.onopen=()=>{};
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
-
         const datajson=JSON.parse(event.data)
         if (!datajson.hasOwnProperty('reason')){
           socketDispatch({ type: 'new_message', payload: event.data })

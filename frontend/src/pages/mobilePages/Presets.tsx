@@ -59,13 +59,13 @@ export const Presets = () => {
                 <Badge className="absolute left-12 top-3 transform -translate-x-1/2">
                   PRESETS
                 </Badge>
-              <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
+              <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto scroll">
                   {Presets.map((Presets)=>(
                     <PresetsButton size={"presets"} variant={currentPresets === Presets ? "blue" : "white"} key={Presets} onClick={()=>handleSetPreset(Presets)}>{labelPresets[Presets.toString()]}</PresetsButton>
                   ))}
               </div>
           </div>
-          <div className="flex justify-between items-center pb-3 gap-12 pt-3">
+          <div className="flex items-center pb-3 pt-3">
                 <Navbar selectedColor={colorNav}/>
           </div>
         </div>

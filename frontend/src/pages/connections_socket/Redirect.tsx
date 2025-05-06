@@ -10,7 +10,6 @@ const UUIDLayout = () => {
 
   useEffect(() => {
     const handleRedirect = async () => {
-      
       if(!sockets&&!uuid) return
       if (isAdmin) {
         if (sockets === null) {
@@ -27,7 +26,9 @@ const UUIDLayout = () => {
           }
         }
       } else {
+        
         if (sockets !== null) {
+          
           navigate("/homeAudio");
         } else {
           if (location.state?.show === true) {

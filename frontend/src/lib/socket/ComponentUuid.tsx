@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 
 interface ConnectionsContextType {
   uuid: string | undefined;
-  sockets: { name: string; ip: string; port: number }[] | null;
+  sockets: { name: string; ip: string; port: number; device_type:string }[] | null;
   isAdmin:boolean;
   triggerRedirect: () => void;
 }
@@ -17,17 +17,9 @@ export const ConnectionsProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [uuid, setUuid] = useState<string>();
   const [prevUuid, setPrevUuid] = useState<string>();
-  const [sockets, setSockets] = useState<{ name: string; ip: string; port: number }[] | null>(null);
-  const location = useLocation();
-  
+  const [sockets, setSockets] = useState<{ name: string; ip: string; port: number; device_type:string }[] | null>(null);
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
-
-  const [isAdmin]=useState<boolean>(()=>{
-    if (location.state===null)
-      return Boolean(localStorage.getItem("isAdmin"))
-    else
-      return location.state.isAdmin
-  })
   
 
   useEffect(() => {
@@ -44,14 +36,14 @@ export const ConnectionsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchSocket = async () => {
     if (!prevUuid) return;
+    
     try {
       const value = await getSocket();
+      const latest_audio = value.data.latest_audio_socket;
+      const latest_video = value.data.latest_video_socket;
       if (isAdmin) {
-
+        
         const allSockets = value.data.sockets ;
-        const latest_audio = value.data.latest_audio_socket;
-        const latest_video = value.data.latest_video_socket;
-
         const updatedSockets = allSockets || latest_audio || latest_video
         ? [
           ...(allSockets ?? []),
@@ -61,7 +53,15 @@ export const ConnectionsProvider: React.FC<{ children: React.ReactNode }> = ({
             
         setSockets(updatedSockets)
       } else {
-        //setSockets(value.data.latest_socket ? [value.data.latest_socket] : null);
+        if (latest_audio || latest_video) {
+          const updatedSockets = [
+            ...(latest_audio ? [{ ...latest_audio, isLatestAudio: true }] : []),
+            ...(latest_video ? [{ ...latest_video, isLatestVideo: true }] : []),
+          ];
+          setSockets(updatedSockets);
+        } else {
+          setSockets(null);
+        }
       }
       setUuid(prevUuid)
     } catch (error) {

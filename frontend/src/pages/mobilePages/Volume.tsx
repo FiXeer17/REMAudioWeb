@@ -67,6 +67,14 @@ export const Volume=()=>{
           }
     }
 
+    const handleSwipe=(newValue:number[], channel:string, source:string)=>{
+      
+      const data={"section":"volume","io":"input","channel":channel,"value": newValue[0].toString()}
+      console.log(data)
+      socket?.send(JSON.stringify(data))
+
+    }
+
     return(
         <div className="grid grid-rows-[0.5fr_2fr,auto]  min-h-svh">
             <div className="flex items-top justify-center pt-4">
@@ -102,7 +110,7 @@ export const Volume=()=>{
                         return (
                           <div className="flex flex-col items-center gap-3" key={key}>
                             <p className="text-home_colors-Similar_White text-sm font-bold">{value} db </p>
-                            <Slider orientation="vertical" className="h-full" disabled={channelState[key] ? true : false } min={-60} max={15} value={channelState[key] ? [-60] : [value]} />
+                            <Slider orientation="vertical" className="h-full" disabled={channelState[key] ? true : false } min={-60} max={15} value={channelState[key] ? [-60] : [value]} onValueChange={(newValue) => handleSwipe(newValue, key, source)}/>
                             <p className="text-home_colors-Similar_White text-sm font-bold"> CH{key} </p>
                             <InOutButton onChange={handleSourceChange} />
                             <Mute size={"mute_preset"} 

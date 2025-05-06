@@ -14,6 +14,9 @@ type Connection = {
   name:string;
   ip: string;
   port: number;
+  device_type:string;
+  isLatestAudio?: boolean;
+  isLatestVideo?: boolean;
 };
 
 export const SwipeConnections = (
