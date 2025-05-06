@@ -64,11 +64,11 @@ export const HomeAudio=() => {
     }else if(type==="O"){
       const data={"section":"mute","io":"output","channel":channel,"value":(!outputChannelStates[channel]).toString()}
       socket?.send(JSON.stringify(data))
-    }else if(type==="all"){
+    }else if(type==="ALL"){
       for (let channel=1;channel<=16;channel++){
-        const dataoutput={"section":"mute","io":"output","channel":channel.toString(),"value":"false"}
+        const dataoutput={"section":"mute","io":"output","channel":channel.toString(),"value":"true"}
         socket?.send(JSON.stringify(dataoutput))
-        const datainput={"section":"mute","io":"input","channel":channel.toString(),"value":"false"}
+        const datainput={"section":"mute","io":"input","channel":channel.toString(),"value":"true"}
         socket?.send(JSON.stringify(datainput))
       }
     }
@@ -124,8 +124,8 @@ export const HomeAudio=() => {
                   variant={
                     inputVisibility[channel]?
                         inputChannelStates[channel]
-                        ? "channels_activated"
-                        : "channels_disabled"
+                        ? "channels_disabled"
+                        : "channels_activated"
                       : "channels_notVisible"
                   }
                   onClick={() => handleState(channel, "I")}
@@ -175,8 +175,8 @@ export const HomeAudio=() => {
                   variant={
                     outputVisibility[channel]?
                         outputChannelStates[channel]
-                        ? "channels_activated"
-                        : "channels_disabled"
+                        ? "channels_disabled"
+                        : "channels_activated"
                       : "channels_notVisible"
                   }
                   onClick={() => handleState(channel, "O")}
@@ -202,7 +202,7 @@ export const HomeAudio=() => {
       </div>
       
       <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3 px-5 w-full">
-        <Mute onClick={()=>handleState("","all")}>MUTE ALL</Mute>
+        <Mute onClick={()=>handleState("","ALL")}>MUTE ALL</Mute>
         <Navbar selectedColor="house"/>
       </div>
       </div>

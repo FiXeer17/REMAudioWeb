@@ -6,19 +6,21 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { addSocket } from "@/lib/services";
 import { useConnections } from "@/lib/socket/ComponentUuid";
 import { toast } from "sonner";
-
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 
 type FormFields = {
     name:string;
     ip: string;
     port: string;
+    device_type:string;
   }
 
 
 export const CreateConnections=()=>{
 
     const navigate=useNavigate()
-    const { register,handleSubmit } =useForm<FormFields>();
+    const { register,handleSubmit,setValue } =useForm<FormFields>();
     const {uuid}=useConnections()
 
 
@@ -27,7 +29,8 @@ export const CreateConnections=()=>{
             const values={
                 uuid:uuid,
                 socket_name:data.name,
-                socket:`${data.ip}:${data.port}`
+                socket:`${data.ip}:${data.port}`,
+                device_type: data.device_type
                 }
             await addSocket(values)
             navigate("/homeAudio")
@@ -56,10 +59,24 @@ export const CreateConnections=()=>{
                             <p className="text-white font-sans">MATRIX IP</p>
                             <Input {...register("ip")} placeholder="ip" className="w-full"/>
                         </div>
-                        <div className="flex flex-col mt-5 gap-1">
-                            <p className="text-white font-sans">MATRIX PORT</p>
-                            <Input {...register("port")} placeholder="port" className="w-1/3"/>
-                        </div>
+                        <div className="flex mt-5 items-end ">
+                    <div className="flex w-1/2 flex-col gap-1">
+                        <p className="text-white font-sans ">MATRIX PORT</p>
+                        <Input {...register("port")} placeholder="port" className="w-2/3"/>
+                    </div>
+                    <div >
+                        <RadioGroup onValueChange={(value) => setValue("device_type", value)}>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem  value="matrix"  />
+                                <Label htmlFor="matrix">Matrix</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem  value="camera" />
+                                <Label htmlFor="camera">Camera</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+                </div>
                         <div className="flex justify-center mt-7">
                             <Button className="text-black bg-white" type="submit">
                                 Continue

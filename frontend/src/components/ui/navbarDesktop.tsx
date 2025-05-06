@@ -12,7 +12,7 @@ export default function NavbarDesktop({selectedColor}:NavbarColor){
             <div onClick={()=>navigate("/homeAudio")} className="flex flex-col items-center cursor-pointer">
             {selectedColor==="house" ? <House size={40} weight="thin" color="#007AFF" />
             : <House size={40} weight="thin" color="#FAFAFA" />}
-            {selectedColor==="house" ?<p className="text-home_colors-Selected_Borders/text text-sm">Audio</p>
+            {selectedColor==="house" ?<p className="text-home_colors-Selected_Borders/text text-sm">Home</p>
             :<p className="text-home_colors-Similar_White text-sm">Home</p>}
             </div>
             <div onClick={()=>navigate("/volume")} className="flex flex-col items-center cursor-pointer">
