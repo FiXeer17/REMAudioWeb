@@ -16,11 +16,7 @@ pub enum HandleText {
 
 pub fn check_channel(io:String,ch: u8) -> bool {
     if io == SRC::INPUT.to_string() {
-        if ch <= channels_settings::get_i_channel_number() && ch > 0 {
-            return true;
-        }
-    } else if io == SRC::OUTPUT.to_string() {
-        if ch <= channels_settings::get_o_channel_number() && ch > 0 {
+        if ch <= channels_settings::get_channels_number() && ch > 0 {
             return true;
         }
     }
