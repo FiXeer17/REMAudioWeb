@@ -2,7 +2,7 @@ use crate::{
     configs::ping_socket_settings,
     services::{
         private::app::{
-            messages::{MatrixReady, SetMessage, UnavailableSockets}, utils::CommandsExt, ws_session::session::WsSession
+            messages::{CameraReady, DeviceReady, MatrixReady, SetMessage, UnavailableSockets}, schemas::MachineStates, utils::{CommandsExt, HasStatesMessage}, ws_session::session::WsSession
         },
         public::{interfaces::retrieve_sockets, schemas::Socket},
     },
@@ -13,7 +13,7 @@ use super::{
     super::tcp_handler::tcp_handler::TcpStreamActor,
     utils::{attach_availability, remove_inactive_connection},
 };
-use actix::{Actor, Addr, AsyncContext, Context};
+use actix::{Actor, Addr, AsyncContext, Context, Message};
 use uuid::Uuid;
 
 use std::{
@@ -70,16 +70,19 @@ impl TcpStreamsManager {
             }
         }
     }
-    pub fn post_middleware(&mut self, msg: MatrixReady, session: Addr<WsSession>) -> MatrixReady {
-        self.avail_map.entry(msg.socket).or_insert(None);
-        let availability = self.avail_map.get(&msg.socket).unwrap();
+    pub fn post_middleware<T>(&mut self, msg: T, session: Addr<WsSession>) -> DeviceReady
+    where T : Message+Clone+ HasStatesMessage{
+        let socket = msg.get_socket();
+        let states = msg.get_states();
+        self.avail_map.entry(socket).or_insert(None);
+        let availability = self.avail_map.get(&socket).unwrap();
 
-        let mut states = msg.states;
-        states = attach_availability(states, availability, &session);
+        let mut states = states;
+        attach_availability(&mut states, availability, &session);
 
-        MatrixReady {
-            states,
-            socket: msg.socket,
+        match states {
+            MachineStates::CameraStates(cs) => DeviceReady::CameraReady(CameraReady{socket,states:cs}),
+            MachineStates::MatrixStates(ms) => DeviceReady::MatrixReady(MatrixReady{socket,states:ms})
         }
     }
 }

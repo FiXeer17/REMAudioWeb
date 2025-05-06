@@ -73,9 +73,10 @@ pub struct MatrixStates {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CameraStates{
     pub preset_labels: HashMap<u32,String>,
-    pub avaiable: Option<bool>,
+    pub available: Option<bool>,
     pub device_type: String,
     pub camera_socket: String,
+    pub current_preset: i32,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

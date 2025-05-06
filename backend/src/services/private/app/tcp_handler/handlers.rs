@@ -6,6 +6,7 @@ use log::info;
 
 use crate::configs::tcp_comunication_settings;
 use crate::services::private::app::schemas::MachineStates;
+use crate::services::private::app::utils::HasStatesMessage;
 use crate::services::private::socket::utils::Device;
 
 use super::super::messages::*;
@@ -58,11 +59,10 @@ impl Handler<ClosedByAdmin> for TcpStreamActor {
     }
 }
 
-impl Handler<MatrixReady> for TcpStreamActor {
+impl Handler<DeviceReady> for TcpStreamActor{
     type Result = ();
-    fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
-        
-        self.machine_states = Some(MachineStates::MatrixStates(msg.states.clone()));
+    fn handle(&mut self, msg: DeviceReady, ctx: &mut Self::Context) -> Self::Result {
+        self.machine_states = Some(msg.get_states());
         self.tcp_manager.do_send(msg);
         if self.cmd_poller.is_none() {
             let cmd_poller = ctx.run_interval(
@@ -71,8 +71,10 @@ impl Handler<MatrixReady> for TcpStreamActor {
             );
             self.cmd_poller = Some(cmd_poller);
         }
+
     }
 }
+
 
 impl Handler<GeneralError> for TcpStreamActor {
     type Result = ();
@@ -93,7 +95,7 @@ impl Handler<Connect> for TcpStreamActor {
                     socket: msg.socket.unwrap(),
                     states,
                 };
-                self.tcp_manager.do_send(message);
+                self.tcp_manager.do_send(DeviceReady::MatrixReady(message));
             },
             MachineStates::CameraStates(_) =>()
         }

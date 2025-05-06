@@ -2,6 +2,7 @@ use crate::audio_engine::lib::MatrixCommand;
 use crate::services::private::socket::utils::Device;
 use crate::services::public::schemas::Socket;
 
+use super::schemas::CameraStates;
 use super::schemas::MatrixStates;
 use super::schemas::SetAttributes;
 use super::ws_session::session::WsSession;
@@ -89,6 +90,20 @@ pub struct MatrixReady{
     pub socket: SocketAddrV4,
     pub states: MatrixStates
 }
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct CameraReady{
+    pub socket: SocketAddrV4,
+    pub states: CameraStates
+}
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub enum DeviceReady{
+    MatrixReady(MatrixReady),
+    CameraReady(CameraReady)
+}
+
+
 #[derive(Message,Clone,Serialize)]
 #[rtype(result="()")]
 pub struct GeneralConnectionError{

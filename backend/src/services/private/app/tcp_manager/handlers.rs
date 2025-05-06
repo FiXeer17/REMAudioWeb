@@ -7,10 +7,10 @@ use std::{
 use crate::{
     services::{
         private::{
-            app::tcp_handler::{
+            app::{tcp_handler::{
                 tcp_handler::TcpStreamActor,
                 utils::{add_channels, add_presets},
-            },
+            }, utils::HasStatesMessage},
             socket::utils::Device,
         },
         public::{
@@ -314,10 +314,11 @@ impl Handler<ClosedByRemotePeer> for TcpStreamsManager {
 }
 
 // POST-MIDDLEWARE (everything to push in response after the matrix response is recieved)
-impl Handler<MatrixReady> for TcpStreamsManager {
+impl Handler<DeviceReady> for TcpStreamsManager {
     type Result = ();
-    fn handle(&mut self, msg: MatrixReady, _: &mut Self::Context) -> Self::Result {
-        if let Some(sessions) = self.streams.get(&msg.socket).cloned() {
+    fn handle(&mut self, msg: DeviceReady, _: &mut Self::Context) -> Self::Result {
+        let socket = msg.get_socket();
+        if let Some(sessions) = self.streams.get(&socket).cloned() {
             for session in sessions {
                 let message = self.post_middleware(msg.clone(), session.clone());
                 session.do_send(message);
@@ -325,6 +326,7 @@ impl Handler<MatrixReady> for TcpStreamsManager {
         }
     }
 }
+
 
 impl Handler<CheckSessionUUID> for TcpStreamsManager {
     type Result = bool;
