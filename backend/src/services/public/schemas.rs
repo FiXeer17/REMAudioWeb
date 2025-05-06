@@ -24,7 +24,7 @@ pub trait IsContainedExt{
 }
 impl IsContainedExt for HashSet<Socket>{
     fn socket_is_contained(&self,socket:&str)->bool {
-        self.iter().any(|s|&s.socket == socket)
+        self.iter().any(|s|&s.device == socket)
     }
     fn latest_is_contained(&self) -> Option<Socket>{
         self.iter().find_map(|s|{if s.latest {return Some(s.clone())}; None})
@@ -38,6 +38,7 @@ pub struct Socket {
     pub socket: String,
     pub latest: bool,
     pub device: String,
+    pub latest_preset: Option<i32>
 }
 
 impl Hash for Socket{

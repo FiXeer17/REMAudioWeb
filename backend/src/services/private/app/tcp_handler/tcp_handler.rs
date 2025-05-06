@@ -1,10 +1,15 @@
-use super::super::{
-    messages::{StreamFailed, StreamStarted},
-    schemas::MatrixStates,
-};
+use super::super::messages::{StreamFailed, StreamStarted};
 
 use crate::{
-    audio_engine::lib::MatrixCommand, configs::tcp_comunication_settings, services::private::{app::tcp_manager::tcp_manager::TcpStreamsManager, socket::utils::Device}, AppState
+    configs::tcp_comunication_settings,
+    services::private::{
+        app::{
+            schemas::{DeviceCommnd, MachineStates},
+            tcp_manager::tcp_manager::TcpStreamsManager,
+        },
+        socket::utils::Device,
+    },
+    AppState,
 };
 use actix::{Actor, Addr, AsyncContext, Context, SpawnHandle};
 use actix_web::web::Data;
@@ -17,16 +22,21 @@ pub struct TcpStreamActor {
     pub stream_socket: SocketAddrV4,
     pub tcp_manager: Addr<TcpStreamsManager>,
     pub stream: Option<Arc<Mutex<TcpStream>>>,
-    pub commands_queue: VecDeque<MatrixCommand>,
-    pub machine_states: Option<MatrixStates>,
+    pub commands_queue: VecDeque<DeviceCommnd>,
+    pub machine_states: Option<MachineStates>,
     pub cmd_poller: Option<SpawnHandle>,
     pub owner: Option<SpawnHandle>,
-    pub pgpool:Data<AppState>,
-    pub device_type : Device
+    pub pgpool: Data<AppState>,
+    pub device_type: Device,
 }
 
 impl TcpStreamActor {
-    pub fn new(stream_socket: SocketAddrV4, tcp_manager: Addr<TcpStreamsManager>,pgpool: actix_web::web::Data<AppState>,device_type:Device) -> Self {
+    pub fn new(
+        stream_socket: SocketAddrV4,
+        tcp_manager: Addr<TcpStreamsManager>,
+        pgpool: actix_web::web::Data<AppState>,
+        device_type: Device,
+    ) -> Self {
         Self {
             stream_socket,
             tcp_manager,
@@ -39,7 +49,6 @@ impl TcpStreamActor {
             device_type,
         }
     }
-    
 }
 
 impl Actor for TcpStreamActor {
@@ -50,7 +59,7 @@ impl Actor for TcpStreamActor {
         let ctx_address = ctx.address().clone();
         tokio::spawn(async move {
             let mut retries: u8 = 0;
-            while retries <= tcp_comunication_settings::get_max_connection_retries(){
+            while retries <= tcp_comunication_settings::get_max_connection_retries() {
                 match tokio::time::timeout(
                     tcp_comunication_settings::get_connection_timeout(),
                     TcpStream::connect(socket.to_string()),

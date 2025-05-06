@@ -5,6 +5,7 @@ use futures_util::lock::Mutex;
 use log::info;
 
 use crate::configs::tcp_comunication_settings;
+use crate::services::private::app::schemas::MachineStates;
 use crate::services::private::socket::utils::Device;
 
 use super::super::messages::*;
@@ -15,19 +16,22 @@ impl Handler<StreamStarted> for TcpStreamActor {
     type Result = ();
     fn handle(&mut self, msg: StreamStarted, ctx: &mut Self::Context) -> Self::Result {
         info!("Starting new {} tcp handler actor",self.device_type.to_string().to_uppercase());
+        let socket = self.stream_socket.clone();
+        let stream = Arc::new(Mutex::new(msg.tcp_stream));
+        let ctx_addr = ctx.address().clone();
+        let pgpool = self.pgpool.clone();
+        self.stream = Some(stream.clone());
         match self.device_type {
             Device::Audio => {
-                let socket = self.stream_socket.clone();
-                let stream = Arc::new(Mutex::new(msg.tcp_stream));
-                let ctx_addr = ctx.address().clone();
-                let pgpool = self.pgpool.clone();
-                self.stream = Some(stream.clone());
-
                 tokio::spawn(async move {
-                    TcpStreamActor::read_states(ctx_addr, socket.clone(), stream, pgpool).await;
+                    TcpStreamActor::read_audio_states(ctx_addr, socket, stream, pgpool).await;
                 });
             },
-            Device::Video =>()
+            Device::Video =>{
+                tokio::spawn(async move {
+                    TcpStreamActor::read_video_states(ctx_addr,socket, stream,pgpool).await;
+                });
+            }
         }
     }
 }
@@ -57,7 +61,8 @@ impl Handler<ClosedByAdmin> for TcpStreamActor {
 impl Handler<MatrixReady> for TcpStreamActor {
     type Result = ();
     fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
-        self.machine_states = Some(msg.states.clone());
+        
+        self.machine_states = Some(MachineStates::MatrixStates(msg.states.clone()));
         self.tcp_manager.do_send(msg);
         if self.cmd_poller.is_none() {
             let cmd_poller = ctx.run_interval(
@@ -82,12 +87,17 @@ impl Handler<Connect> for TcpStreamActor {
         if self.machine_states.is_none() {
             return;
         }
-        let states = self.machine_states.clone().unwrap();
-        let message = MatrixReady {
-            socket: msg.socket.unwrap(),
-            states,
-        };
-        self.tcp_manager.do_send(message);
+        match self.machine_states.clone().unwrap(){
+            MachineStates::MatrixStates(states) =>{
+                let message = MatrixReady {
+                    socket: msg.socket.unwrap(),
+                    states,
+                };
+                self.tcp_manager.do_send(message);
+            },
+            MachineStates::CameraStates(_) =>()
+        }
+        
     }
 }
 

@@ -1,0 +1,462 @@
+use actix_web::web::Data;
+use futures_util::lock::Mutex;
+use std::{net::SocketAddrV4, sync::Arc};
+
+use crate::{
+    audio_engine::{
+        defs::datas::io::SRC,
+        lib::{read_all_states, MatrixCommand},
+    }, configs::tcp_comunication_settings, services::{
+        private::app::{
+            messages::{GeneralError, SetCommand, SetHandlerState},
+            schemas::{DeviceCommnd, MachineStates, SetAttributes},
+            ws_session::session::WsSession,
+        },
+        public::interfaces::{
+            retrieve_channel_labels, retrieve_preset_labels, retrieve_socket_from_db, retrieve_socketid_from_db, retrieve_visibility, update_channel_labels_in_db, update_channel_visibility, update_preset_labels_in_db
+        },
+    }, video_engine::{camera_presets_lib::call_preset, defs::status_codes::StatusCode}, AppState
+};
+use actix::{Addr, AsyncContext, Context};
+use log::warn;
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpStream,
+};
+
+use super::{
+    super::{
+        messages::{ClosedByRemotePeer, MatrixReady, StreamFailed},
+        schemas::MatrixStates,
+    },
+    tcp_handler::TcpStreamActor,
+};
+
+impl TcpStreamActor {
+    pub async fn read_audio_states(
+        ctx_addr: Addr<TcpStreamActor>,
+        socket: SocketAddrV4,
+        stream: Arc<Mutex<TcpStream>>,
+        pgpool: Data<AppState>,
+    ) {
+        let commands = read_all_states().unwrap();
+        let mut buffer = [0u8; 128];
+        let mut responses: Vec<MatrixCommand> = Vec::new();
+
+        for command in commands {
+            let cmd = command.to_byte_hex().unwrap();
+            let written_bytes = {
+                let mut stream = stream.lock().await;
+                stream.write(&cmd[..]).await
+            };
+
+            if let Err(e) = written_bytes {
+                ctx_addr.do_send(ClosedByRemotePeer {
+                    message: e.to_string(),
+                    socket,
+                });
+                return;
+            }
+
+            let read_bytes = {
+                let mut stream = stream.lock().await;
+                tokio::time::timeout(
+                    tcp_comunication_settings::get_read_timeout(),
+                    stream.read(&mut buffer),
+                )
+                .await
+            };
+            if let Ok(Ok(n)) = read_bytes {
+                if n == 0 {
+                    ctx_addr.do_send(ClosedByRemotePeer {
+                        message: "Closed by remote peer".to_string(),
+                        socket,
+                    });
+                    return;
+                }
+            }
+
+            if let Err(e) = read_bytes {
+                ctx_addr.do_send(StreamFailed {
+                    socket,
+                    error: e.to_string(),
+                });
+                return;
+            }
+
+            if let Ok(Err(e)) = read_bytes {
+                let message = StreamFailed {
+                    error: e.to_string(),
+                    socket,
+                };
+                ctx_addr.do_send(message);
+                return;
+            }
+
+            let read_bytes = read_bytes.unwrap();
+
+            let buffer = &buffer[..read_bytes.unwrap()];
+            let cmd_from_buffer = MatrixCommand::try_from(buffer);
+
+            if let Err(e) = cmd_from_buffer {
+                ctx_addr.do_send(StreamFailed {
+                    socket,
+                    error: e.to_string(),
+                });
+                return;
+            }
+            responses.push(cmd_from_buffer.unwrap());
+            tokio::time::sleep(tcp_comunication_settings::get_command_delay()).await;
+        }
+        let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
+            warn!("Cannot retrieve socket id from database");
+            return;
+        };
+
+        let visibility = retrieve_visibility(&pgpool, &socket_id).await;
+        let channel_labels = retrieve_channel_labels(&pgpool, &socket_id).await;
+        let preset_labels = retrieve_preset_labels(&pgpool, &socket_id).await;
+
+        if let Err(_) = visibility {
+            ctx_addr.do_send(GeneralError {
+                error: "cannot attach visibility.".to_string(),
+                socket: Some(socket.clone()),
+            });
+            return;
+        }
+        if let Err(_) = channel_labels {
+            ctx_addr.do_send(GeneralError {
+                error: "cannot attach channel labels.".to_string(),
+                socket: Some(socket.clone()),
+            });
+            return;
+        }
+
+        if let Err(_) = preset_labels {
+            ctx_addr.do_send(GeneralError {
+                error: "cannot attach preset labels.".to_string(),
+                socket: Some(socket.clone()),
+            });
+            return;
+        }
+
+        let (i_visibility, o_visibility) = visibility.unwrap();
+        let (i_labels, o_labels) = channel_labels.unwrap();
+        let preset_labels = preset_labels.unwrap();
+
+        let states = MatrixStates::new(
+            responses,
+            socket.to_string(),
+            i_labels,
+            o_labels,
+            preset_labels,
+            i_visibility,
+            o_visibility,
+        );
+
+        ctx_addr.clone().do_send(MatrixReady { states, socket });
+    }
+
+    pub async fn read_video_states(
+        ctx_addr: Addr<TcpStreamActor>,
+        socket: SocketAddrV4,
+        stream: Arc<Mutex<TcpStream>>,
+        pgpool: Data<AppState>,){
+            let Ok(sock) = retrieve_socket_from_db(&pgpool, socket).await else{
+                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"cannot retrieve socket from db".to_string()});
+                return;
+            };
+            let current_preset = {
+                if let Some(lp) = sock.latest_preset {lp}
+                else {
+                    let lp = 0;
+                    
+                    let written_bytes = {
+                        let cmd = call_preset(lp).unwrap();
+                        let mut stream =stream.lock().await;
+                        stream.write(&cmd[..]).await
+                    };
+
+                    if let Err(e) = written_bytes {
+                        ctx_addr.do_send(ClosedByRemotePeer {
+                            message: e.to_string(),
+                            socket,
+                        });
+                        return;
+                    }
+                    let mut buffer = [0u8;128];
+                    let read_bytes = {
+                        let mut stream = stream.lock().await;
+                        tokio::time::timeout(
+                            tcp_comunication_settings::get_read_timeout(),
+                            stream.read(&mut buffer),
+                        )
+                        .await
+                    };
+                    if let Ok(Ok(n)) = read_bytes {
+                        if n == 0 {
+                            ctx_addr.do_send(ClosedByRemotePeer {
+                                message: "Closed by remote peer".to_string(),
+                                socket,
+                            });
+                            return;
+                        }else{
+                            //let Ok(status) = StatusCode::try_from(&buffer[..]);
+                            
+                        }
+                    }
+        
+                    lp as i32
+                }
+            };
+
+
+
+        }
+
+    pub fn set_handler_state(&mut self, state: Option<Addr<WsSession>>) {
+        self.tcp_manager.do_send(SetHandlerState {
+            socket: self.stream_socket,
+            state,
+        });
+    }
+    pub fn watch_inactive(&mut self, ctx: &mut Context<Self>, addr: Addr<WsSession>) {
+        if self.owner.is_none() {
+            self.set_handler_state(Some(addr));
+        } else {
+            ctx.cancel_future(self.owner.unwrap());
+            self.owner = None;
+        }
+        self.owner = Some(ctx.run_interval(
+            tcp_comunication_settings::get_inactivity_timeout(),
+            |act, ctx| {
+                if act.commands_queue.is_empty() {
+                    if let Some(owner) = act.owner {
+                        ctx.cancel_future(owner);
+                        act.owner = None;
+                        act.set_handler_state(None);
+                        if let Some(states) = &act.machine_states {
+                            match states{
+                                MachineStates::MatrixStates(states) => {act.tcp_manager.do_send(MatrixReady {
+                                    socket: act.stream_socket,
+                                    states: states.clone(),
+                                });},
+                                MachineStates::CameraStates(_) => {()}
+                            }
+                            
+                        }
+                    }
+                }
+            },
+        ));
+    }
+    /*
+       If a matrix command type is recieved it will be pushed inside the commands queue,
+       command_polling fn will take care of it.
+    */
+    pub fn handle_set_command(&mut self, sc: SetCommand) {
+        self.commands_queue
+            .push_front(DeviceCommnd::MatrixCommand(sc.command));
+    }
+    pub fn handle_recache(&mut self, ctx: &mut Context<Self>) {
+        if self.machine_states.is_some() {
+            if let Some(poller) = self.cmd_poller {
+                ctx.cancel_future(poller);
+                self.cmd_poller = None;
+            }
+            let ctx_addr = ctx.address().clone();
+            let socket = self.stream_socket.clone();
+            let stream = self.stream.as_mut().unwrap().clone();
+            let pgpool = self.pgpool.clone();
+            tokio::spawn(async move {
+                TcpStreamActor::read_audio_states(ctx_addr, socket, stream, pgpool).await;
+            });
+        }
+    }
+    pub fn handle_set_visibility_command(
+        &mut self,
+        sv: SetAttributes,
+        pgpool: actix_web::web::Data<AppState>,
+        addr: Addr<WsSession>,
+        selfaddr: Addr<TcpStreamActor>,
+    ) {
+        let relative_identifier = sv.channel.unwrap().parse::<i32>().unwrap();
+        let visibility = sv.value.parse::<bool>().unwrap();
+        let stream_socket = self.stream_socket.clone();
+        let states = self.machine_states.clone();
+
+        let pgpool_clone = pgpool.clone();
+        let io_clone = sv.io.clone().unwrap();
+        let addr_clone = addr.clone();
+
+        tokio::spawn(async move {
+            let socket_id = retrieve_socketid_from_db(&pgpool, stream_socket).await;
+            if socket_id.is_err() {
+                addr_clone.do_send(GeneralError {
+                    error: "cannot retrieve socket id in database".to_string(),
+                    socket: Some(stream_socket),
+                });
+                warn!("Cannot retrieve socket id from the database");
+                return;
+            }
+            let result = update_channel_visibility(
+                &pgpool_clone,
+                socket_id.unwrap(),
+                relative_identifier,
+                visibility,
+                io_clone,
+            )
+            .await;
+            if let Err(_) = result {
+                addr_clone.do_send(GeneralError {
+                    error: "cannot update channel visibility in database".to_string(),
+                    socket: Some(stream_socket),
+                });
+                return;
+            }
+            if let Some(states) = states.clone().as_mut() {
+                let MachineStates::MatrixStates(states) = states else {return;};
+                if sv.io.unwrap() == SRC::INPUT.to_label() {
+                    if !states.i_visibility.is_empty() {
+                        states
+                            .i_visibility
+                            .insert(relative_identifier as u32, visibility);
+                    }
+                } else {
+                    if !states.o_visibility.is_empty() {
+                        states
+                            .o_visibility
+                            .insert(relative_identifier as u32, visibility);
+                    }
+                }
+
+                let states_clone = states.clone();
+                selfaddr.do_send(MatrixReady {
+                    socket: stream_socket,
+                    states: states_clone,
+                });
+            }
+        });
+    }
+    pub fn handle_set_channel_labels_command(
+        &mut self,
+        sv: SetAttributes,
+        pgpool: actix_web::web::Data<AppState>,
+        addr: Addr<WsSession>,
+        selfaddr: Addr<TcpStreamActor>,
+    ) {
+        let relative_identifier = sv.channel.unwrap().parse::<i32>().unwrap();
+        let label = sv.value;
+        let stream_socket = self.stream_socket.clone();
+        let states = self.machine_states.clone();
+
+        let pgpool_clone = pgpool.clone();
+        let io_clone = sv.io.clone().unwrap();
+        let addr_clone = addr.clone();
+
+        tokio::spawn(async move {
+            let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else {
+                addr_clone.do_send(GeneralError {
+                    error: "cannot retrieve socket id in database".to_string(),
+                    socket: Some(stream_socket),
+                });
+                warn!("Cannot retrieve socket id from the database");
+                return;
+            };
+            let result = update_channel_labels_in_db(
+                &pgpool_clone,
+                socket_id,
+                relative_identifier,
+                label.clone(),
+                io_clone,
+            )
+            .await;
+            if let Err(_) = result {
+                addr_clone.do_send(GeneralError {
+                    error: "cannot update channel label in database".to_string(),
+                    socket: Some(stream_socket),
+                });
+                return;
+            }
+            if let Some(states) = states.clone().as_mut() {
+                let MachineStates::MatrixStates(states) = states else {return;};
+
+                if sv.io.unwrap() == SRC::INPUT.to_label() {
+                    if !states.i_labels.is_empty() {
+                        states.i_labels.insert(relative_identifier as u32, label);
+                    }
+                } else {
+                    if !states.o_labels.is_empty() {
+                        states.o_labels.insert(relative_identifier as u32, label);
+                    }
+                }
+
+                let states_clone = states.clone();
+                selfaddr.do_send(MatrixReady {
+                    socket: stream_socket,
+                    states: states_clone,
+                });
+            }
+        });
+    }
+    pub fn handle_set_preset_labels_command(
+        &mut self,
+        sv: SetAttributes,
+        pgpool: actix_web::web::Data<AppState>,
+        addr: Addr<WsSession>,
+        selfaddr: Addr<TcpStreamActor>,
+    ) {
+        let relative_identifier = sv.index.unwrap().parse::<i32>().unwrap();
+        let label = sv.value;
+        let stream_socket = self.stream_socket.clone();
+        let states = self.machine_states.clone();
+
+        let pgpool_clone = pgpool.clone();
+        let addr_clone = addr.clone();
+
+        tokio::spawn(async move {
+            let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else {
+                addr_clone.do_send(GeneralError {
+                    error: "cannot retrieve socket id in database".to_string(),
+                    socket: Some(stream_socket),
+                });
+                warn!("Cannot retrieve socket id from the database");
+                return;
+            };
+
+            let result = update_preset_labels_in_db(
+                &pgpool_clone,
+                socket_id,
+                relative_identifier,
+                label.clone(),
+            )
+            .await;
+
+            if let Err(_) = result {
+                addr_clone.do_send(GeneralError {
+                    error: "cannot update channel label in database".to_string(),
+                    socket: Some(stream_socket),
+                });
+                return;
+            }
+            if let Some(mut states) = states {
+                if let Some(inner) =states.as_mut_trait(){
+                let preset_labels =inner.preset_labels_mut();
+                if !preset_labels.is_empty() {
+                        preset_labels
+                        .insert(relative_identifier as u32, label);
+                }
+            }
+                
+                match states {
+                    MachineStates::MatrixStates(ms)=> selfaddr.do_send(MatrixReady {
+                        socket: stream_socket,
+                        states: ms,
+                    }),
+                    MachineStates::CameraStates(_) => ()
+                }
+                
+            }
+        });
+    }
+}

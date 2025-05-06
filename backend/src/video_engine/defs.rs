@@ -20,8 +20,9 @@ pub mod status_codes{
         Accepted,
         Executed,
         SyntaxError,
-        NotExecutable
+        NotExecutable,
     }
+
     impl TryFrom<&[u8]> for StatusCode{
         type Error = super::status_codes::Error;
         fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
