@@ -188,7 +188,7 @@ pub async fn add_presets(pgpool: Data<AppState>, socket: SocketAddrV4, device: S
     };
     if let None = presets {
         let Ok(_) = interfaces::add_presets(&pgpool, socket_id, device.clone()).await else {
-            warn!("Cannot add io channels");
+            warn!("Cannot add presets");
             return;
         };
     }

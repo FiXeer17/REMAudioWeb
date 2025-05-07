@@ -6,16 +6,26 @@ use crate::{
     audio_engine::{
         defs::datas::io::SRC,
         lib::{read_all_states, MatrixCommand},
-    }, configs::tcp_comunication_settings, services::{
-        private::{app::{
-            messages::{CameraReady, DeviceReady, GeneralError, SetCommand, SetHandlerState},
-            schemas::{CameraStates, DeviceCommnd, MachineStates, SetAttributes},
-            ws_session::session::WsSession,
-        }, socket::utils::Device},
-        public::interfaces::{
-            retrieve_channel_labels, retrieve_preset_labels, retrieve_socket_from_db, retrieve_socketid_from_db, retrieve_visibility, update_channel_labels_in_db, update_channel_visibility, update_preset_labels_in_db
+    },
+    configs::tcp_comunication_settings,
+    services::{
+        private::{
+            app::{
+                messages::{CameraReady, DeviceReady, GeneralError, SetCommand, SetHandlerState},
+                schemas::{CameraStates, DeviceCommnd, MachineStates, SetAttributes},
+                ws_session::session::WsSession,
+            },
+            socket::utils::Device,
         },
-    }, video_engine::{camera_presets_lib::call_preset, status_codes_lib::successfull}, AppState
+        public::interfaces::{
+            retrieve_channel_labels, retrieve_preset_labels, retrieve_socket_from_db,
+            retrieve_socketid_from_db, retrieve_visibility, update_channel_labels_in_db,
+            update_channel_visibility, update_latest_preset_in_sockets_db,
+            update_preset_labels_in_db,
+        },
+    },
+    video_engine::{camera_presets_lib::call_preset, status_codes_lib::successfull},
+    AppState,
 };
 use actix::{Addr, AsyncContext, Context};
 use log::warn;
@@ -116,7 +126,7 @@ impl TcpStreamActor {
         let visibility = retrieve_visibility(&pgpool, &socket_id).await;
         let channel_labels = retrieve_channel_labels(&pgpool, &socket_id).await;
         let preset_labels = retrieve_preset_labels(&pgpool, &socket_id).await;
-        
+
         if let Err(_) = visibility {
             warn!("Cannot retrieve visibility");
             ctx_addr.do_send(GeneralError {
@@ -126,7 +136,7 @@ impl TcpStreamActor {
             return;
         }
         if let Err(_) = channel_labels {
-            warn!("Cannot attach channel labels.");
+            warn!("Cannot retrieve channel labels.");
             ctx_addr.do_send(GeneralError {
                 error: "error occurred on matrix".to_string(),
                 socket: Some(socket.clone()),
@@ -135,7 +145,7 @@ impl TcpStreamActor {
         }
 
         if let Err(_) = preset_labels {
-            warn!("Cannot attach preset labels.");
+            warn!("Cannot retrieve preset labels.");
             ctx_addr.do_send(GeneralError {
                 error: "error occurred on matrix".to_string(),
                 socket: Some(socket.clone()),
@@ -157,61 +167,80 @@ impl TcpStreamActor {
             o_visibility,
         );
 
-        ctx_addr.clone().do_send(DeviceReady::MatrixReady(MatrixReady { states, socket }));
+        ctx_addr
+            .clone()
+            .do_send(DeviceReady::MatrixReady(MatrixReady { states, socket }));
     }
 
     pub async fn read_video_states(
         ctx_addr: Addr<TcpStreamActor>,
         socket: SocketAddrV4,
         stream: Arc<Mutex<TcpStream>>,
-        pgpool: Data<AppState>,){
-            let Ok(sock) = retrieve_socket_from_db(&pgpool, socket).await else{
-                warn!("Cannot retrieve socket id from db");
-                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"error occurred on camera".to_string()});
-                return;
-            };
-            let current_preset = {
-                if let Some(lp) = sock.latest_preset {lp}
-                else {
-                    let lp = 0;
-                    
-                    let written_bytes = {
-                        let cmd = call_preset(lp).unwrap();
-                        let mut stream =stream.lock().await;
-                        stream.write(&cmd[..]).await
-                    };
+        pgpool: Data<AppState>,
+    ) {
+        let Ok(sock) = retrieve_socket_from_db(&pgpool, socket).await else {
+            warn!("Cannot retrieve socket id from db");
+            ctx_addr.do_send(GeneralError {
+                socket: Some(socket),
+                error: "error occurred on camera".to_string(),
+            });
+            return;
+        };
+        
+        let Ok(preset_labels) = retrieve_preset_labels(&pgpool, &sock.id.unwrap()).await else {
+            warn!("Cannot retrieve preset labels from db");
+            ctx_addr.do_send(GeneralError {
+                socket: Some(socket),
+                error: "error occurred on camera".to_string(),
+            });
+            return;
+        };
+        let current_preset = {
+            if let Some(lp) = sock.latest_preset {
+                lp
+            } else {
+                let lp = 0;
 
-                    if let Err(_) = written_bytes {
+                let written_bytes = {
+                    let cmd = call_preset(lp).unwrap();
+                    let mut stream = stream.lock().await;
+                    stream.write(&cmd[..]).await
+                };
+
+                if let Err(_) = written_bytes {
+                    ctx_addr.do_send(ClosedByRemotePeer {
+                        message: "error occurred on camera".to_string(),
+                        socket,
+                    });
+                    return;
+                }
+                match successfull(stream).await {
+                    Ok(true) => {
+                        if update_latest_preset_in_sockets_db(&pgpool, sock.id.unwrap(), lp as i32).await.is_err(){
+                            ctx_addr.do_send(ClosedByRemotePeer {
+                                message: "error occurred on camera".to_string(),
+                                socket,
+                            });
+                            return;
+                        }
+                    }
+                    _ => {
                         ctx_addr.do_send(ClosedByRemotePeer {
                             message: "error occurred on camera".to_string(),
                             socket,
                         });
                         return;
                     }
-                    match successfull(stream).await{
-                        Ok(true) =>(),
-                        _=>{ctx_addr.do_send(ClosedByRemotePeer {
-                            message: "error occurred on camera".to_string(),
-                            socket,
-                        });
-                        return;},
-                    };
-                    
+                };
+
+                lp as i32
+            }
+        };
         
-                    lp as i32
-                }
-            };
-            let Ok(preset_labels) = retrieve_preset_labels(&pgpool, &sock.id.unwrap()).await else{
-                warn!("Cannot retrieve preset labels from db");
-                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"error occurred on camera".to_string()});
-                return;
-            };
-            
-            let states = CameraStates::new(sock.socket, preset_labels,current_preset);
-            ctx_addr.do_send(DeviceReady::CameraReady(CameraReady { states, socket}));
 
-
-        }
+        let states = CameraStates::new(sock.socket, preset_labels, current_preset);
+        ctx_addr.do_send(DeviceReady::CameraReady(CameraReady { states, socket }));
+    }
 
     pub fn set_handler_state(&mut self, state: Option<Addr<WsSession>>) {
         self.tcp_manager.do_send(SetHandlerState {
@@ -235,14 +264,17 @@ impl TcpStreamActor {
                         act.owner = None;
                         act.set_handler_state(None);
                         if let Some(states) = &act.machine_states {
-                            match states{
-                                MachineStates::MatrixStates(states) => {act.tcp_manager.do_send(DeviceReady::MatrixReady(MatrixReady {
-                                    socket: act.stream_socket,
-                                    states: states.clone(),
-                                }) );},
-                                MachineStates::CameraStates(_) => {()}
+                            match states {
+                                MachineStates::MatrixStates(states) => {
+                                    act.tcp_manager.do_send(DeviceReady::MatrixReady(
+                                        MatrixReady {
+                                            socket: act.stream_socket,
+                                            states: states.clone(),
+                                        },
+                                    ));
+                                }
+                                MachineStates::CameraStates(_) => (),
                             }
-                            
                         }
                     }
                 }
@@ -315,7 +347,9 @@ impl TcpStreamActor {
                 return;
             }
             if let Some(states) = states.clone().as_mut() {
-                let MachineStates::MatrixStates(states) = states else {return;};
+                let MachineStates::MatrixStates(states) = states else {
+                    return;
+                };
                 if sv.io.unwrap() == SRC::INPUT.to_label() {
                     if !states.i_visibility.is_empty() {
                         states
@@ -380,7 +414,9 @@ impl TcpStreamActor {
                 return;
             }
             if let Some(states) = states.clone().as_mut() {
-                let MachineStates::MatrixStates(states) = states else {return;};
+                let MachineStates::MatrixStates(states) = states else {
+                    return;
+                };
 
                 if sv.io.unwrap() == SRC::INPUT.to_label() {
                     if !states.i_labels.is_empty() {
@@ -406,7 +442,7 @@ impl TcpStreamActor {
         pgpool: actix_web::web::Data<AppState>,
         addr: Addr<WsSession>,
         selfaddr: Addr<TcpStreamActor>,
-        device: Device
+        device: Device,
     ) {
         let relative_identifier = sv.index.unwrap().parse::<i32>().unwrap();
         let label = sv.value;
@@ -419,7 +455,7 @@ impl TcpStreamActor {
         tokio::spawn(async move {
             let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else {
                 addr_clone.do_send(GeneralError {
-                    error: format!("error occured on {}",device.to_string()),
+                    error: format!("error occured on {}", device.to_string()),
                     socket: Some(stream_socket),
                 });
                 warn!("Cannot retrieve socket id from the database");
@@ -437,28 +473,28 @@ impl TcpStreamActor {
             if let Err(_) = result {
                 warn!("Cannot update preset label indatabase");
                 addr_clone.do_send(GeneralError {
-                    error: format!("error occured on {}",device.to_string()),
+                    error: format!("error occured on {}", device.to_string()),
                     socket: Some(stream_socket),
                 });
                 return;
             }
             if let Some(mut states) = states {
-                if let Some(inner) =states.as_mut_trait(){
-                let preset_labels =inner.preset_labels_mut();
-                if !preset_labels.is_empty() {
-                        preset_labels
-                        .insert(relative_identifier as u32, label);
+                if let Some(inner) = states.as_mut_trait() {
+                    let preset_labels = inner.preset_labels_mut();
+                    if !preset_labels.is_empty() {
+                        preset_labels.insert(relative_identifier as u32, label);
+                    }
                 }
-            }
-                
+
                 match states {
-                    MachineStates::MatrixStates(ms)=> selfaddr.do_send(DeviceReady::MatrixReady(MatrixReady {
-                        socket: stream_socket,
-                        states: ms,
-                    })),
-                    MachineStates::CameraStates(_) => ()
+                    MachineStates::MatrixStates(ms) => {
+                        selfaddr.do_send(DeviceReady::MatrixReady(MatrixReady {
+                            socket: stream_socket,
+                            states: ms,
+                        }))
+                    }
+                    MachineStates::CameraStates(_) => (),
                 }
-                
             }
         });
     }
