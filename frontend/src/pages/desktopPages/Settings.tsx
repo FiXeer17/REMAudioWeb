@@ -19,7 +19,7 @@ export const Settings=()=>{
     return(
         <div className="grid grid-cols-[100px,1fr] h-screen">
             <div>
-                <NavbarDesktop selectedColor="house" />
+                <NavbarDesktop selectedColor="settings" />
             </div>
             <div className="flex items-center justify-center pr-10">
                 <div className="grid grid-rows-[1fr,1fr,1/2fr] border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[650px] w-[600px]  px-24">

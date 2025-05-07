@@ -30,9 +30,12 @@ export const Volume=()=>{
     const [isAvailable, setIsAvailable] = useState(true)
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const [currentPresets,setCurrentPresets]=useState(0)
+    const [matrixMessage,setMatrixMessage]=useState()
 
     
     useEffect(()=>{
+
+      
     const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message);
         setInputChannelStates(inputChannelStates);
         setOutputChannelStates(outputChannelStates);
@@ -81,8 +84,8 @@ export const Volume=()=>{
             <div className="flex items-top justify-center pt-4">
                 <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"house"})}}/>
             </div>
-            <div className="flex justify-center overflow-hidden mx-5">
-                <div className="flex gap-3 pb-3 overflow-x-auto ">
+            <div className="flex justify-center overflow-hidden items-center mx-5">
+                <div className="flex gap-3 pb-3 overflow-x-auto h-[400px] ">
                   <div className="flex flex-col items-center gap-3 pr-3 border-r-2">
                   <p className="text-home_colors-Similar_White text-sm font-bold">{outputChannelStates["1"] && outputChannelStates["2"] ? [-60] : [outputVolumesStates["2"]]} db </p>
                     <Slider orientation="vertical" className="h-full" 

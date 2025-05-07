@@ -10,9 +10,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 export const Presets = () => {
     const navigate=useNavigate()
     const location=useLocation()
+    const [isLoading,setIsLoading] = useState(false)
     const {socket,message} = useContext(SocketContext).socketState
     const [currentPresets,setCurrentPresets]=useState(0)
-    const [isAvailable, setIsAvailable] = useState(true)
     const [colorNav] = useState<string>(() => location.state);
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
@@ -20,36 +20,32 @@ export const Presets = () => {
 
     useEffect(()=>{
 
-      const { isAvailable,currentPresets,labelPresets }=GetData(message)      
-      setIsAvailable(isAvailable)
+      const { currentPresets,labelPresets }=GetData(message)      
+
       setCurrentPresets(currentPresets)
       setlabelPresets(labelPresets)
  
     },[message])
 
+    useEffect(()=>{
+      if (isLoading===true){
+        setIsLoading(false)
+        colorNav==="house" ? navigate("/homeAudio") : navigate("/volume")
+        }
+    },[currentPresets])
+
     const handleSetPreset=(Preset:number)=>{
       const dataoutput={"section":"preset","value":Preset.toString()}
       socket?.send(JSON.stringify(dataoutput))
-      colorNav==="house" ? navigate("/homeAudio") : navigate("/volume")
+      setIsLoading(true)
     }
 
   return (
     <>
-      {isAvailable ? (
-        <div className="absolute inset-0 z-10"></div>
-      ) : (
-        <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
-          <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
-            <div className="mt-1">
-              <Clock weight="bold"></Clock>
-            </div>
-            <div>
-              <p>Matrix Unvailable</p>
-              <p>Please wait...</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {isLoading ? 
+                <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
+                   <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>:<div className="absolute inset-0 z-10"></div>}
       <div className="absolute inset-0 bg-black z-20">
         <div className="grid grid-rows-[70px,1fr,auto] h-screen relative">
           <div >

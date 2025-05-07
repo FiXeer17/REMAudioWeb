@@ -25,15 +25,21 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       const socketServerUrl = `ws://localhost:8000/ws/app?uuid=${uuid}`;  
 
       const socket = new WebSocket(socketServerUrl)
+      let closedByServer = false
+      let manuallyClosed = false;
 
       socket.onopen=()=>{};
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
+        
         const datajson=JSON.parse(event.data)
+        console.log(datajson)
         if (!datajson.hasOwnProperty('reason')){
           socketDispatch({ type: 'new_message', payload: event.data })
           setLoading(false)
         }else{
+          closedByServer=true
+          
           if (isAdmin){
             const handleRedirect = async () => {
             await triggerRedirect()
@@ -45,8 +51,16 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
             navigate("/callAdministrator")
         }
       }
-      socket.onclose=()=>{}
+      socket.onclose=()=>{
+        if (!closedByServer && !manuallyClosed) {
+          
+          localStorage.removeItem("accessToken");
+          navigate("/login");
+        }
+        }
+
       return () => {
+        manuallyClosed = true;
         socket.close();
       };
     },[uuid])

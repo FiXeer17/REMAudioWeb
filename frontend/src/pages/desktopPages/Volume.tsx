@@ -15,25 +15,20 @@ export const Volume=()=>{
     const [inputVolumesStates, setInputVolumesStates] = useState<{[key: string]: number;}>({});
     const [outputVolumesStates, setOutputVolumesStates] = useState<{[key: string]: number;}>({});
 
-    const [channelSources, setChannelSources] = useState<{ [key: string]: "IN" | "OUT" }>(
-        () => {
-          const initial: { [key: string]: "IN" | "OUT" } = {};
-          for (let i = 1; i <= 16; i++) {
-            initial[i] = "IN";
-          }
-          return initial;
-        }
-      );
     const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
     const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
+
     const {socket,message} = useContext(SocketContext).socketState
     const [isAvailable, setIsAvailable] = useState(true)
+
+    const [labelChannelsInput,setlabelChannelInput]=useState<{[key: string]: string;}>({})
+    const [labelChannelsOutput,setlabelChannelOutput]=useState<{[key: string]: string;}>({})
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const [currentPresets,setCurrentPresets]=useState(0)
 
     
     useEffect(()=>{
-    const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message);
+    const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility, currentPresets, labelPresets, labelChannelsInput, labelChannelsOutput } = GetData(message);
         setInputChannelStates(inputChannelStates);
         setOutputChannelStates(outputChannelStates);
         setInputVolumesStates(inputVolumesStates);
@@ -43,6 +38,8 @@ export const Volume=()=>{
         setIsAvailable(isAvailable)
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
+        setlabelChannelInput(labelChannelsInput)
+        setlabelChannelOutput(labelChannelsOutput)
       },[message])
     const navigate = useNavigate()
 
@@ -82,17 +79,70 @@ export const Volume=()=>{
                 <NavbarDesktop selectedColor="speaker" />
             </div>
             <div className="flex flex-col items-end justify-center gap-8 mr-6">
-                <div className="grid grid-rows-6 border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[330px] w-[600px]  px-24">
-                
+                <div className="flex border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[330px] w-[600px] overflow-hidden px-24  ">
+                  <div className="flex gap-3 pb-3 overflow-x-auto ">
+                    {Object.entries(inputVolumesStates).map(([key])=>{
+
+                            return(
+                              
+                              <div className="flex flex-col items-center justify-center gap-3">
+                                <p className="text-home_colors-Similar_White text-sm font-bold">{ inputVolumesStates[key] } db </p>
+                                <Slider orientation="vertical" className="h-full" 
+                                        disabled={inputVisibility[key] ? inputChannelStates[key] : false} min={-60} max={15} 
+                                        value={ inputVisibility[key] ? inputChannelStates[key] ? [-60] : [inputVolumesStates[key]] : [-60] } 
+                                        onValueChange={(newValue) => handleSliderChange(newValue, key, "IN")} 
+                                        onValueCommit={(newValue) => handleSliderCommit(newValue, key, "IN")}/>
+                                <p className="text-home_colors-Similar_White text-sm font-bold"> {labelChannelsInput[key]} </p>
+                                <div className="text-home_colors-Selected_Borders/text border-[0.9px] w-10 justify-center text-center text-sm border-home_colors-Selected_Borders/text font-bold">IN</div>
+                                <Mute size={"mute_preset"} 
+                                    disabled={!(inputVisibility[key]) }
+                                    variant={ inputVisibility[key] ?
+                                              inputChannelStates[key] ? "muted": "unmuted"
+                                                                    :"notAvailable" 
+                                    } 
+                                    onClick={()=>handleMute(key,"IN")}>
+                                    MUTE
+                                </Mute>
+                              </div>
+                                  
+                            )
+                          })}
+                  </div>
                 </div>
-                <div className="grid grid-rows-6 border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[330px] w-[600px]  px-24">
-            
+                <div className="flex border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[330px] w-[600px] overflow-hidden px-24">
+                    <div className="flex gap-3 pb-3 overflow-x-auto ">
+                      {Object.entries(outputVolumesStates).map(([key])=>{
+                        if (key === "1" || key === "2") return null;
+                        return(
+                          
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <p className="text-home_colors-Similar_White text-sm font-bold">{ outputVolumesStates[key] } db </p>
+                            <Slider orientation="vertical" className="h-full" 
+                                    disabled={outputVisibility[key] ? outputChannelStates[key] : false} min={-60} max={15} 
+                                    value={ outputVisibility[key] ? outputChannelStates[key] ? [-60] : [outputVolumesStates[key]] : [-60] } 
+                                    onValueChange={(newValue) => handleSliderChange(newValue, key, "OUT")} 
+                                    onValueCommit={(newValue) => handleSliderCommit(newValue, key, "OUT")}/>
+                            <p className="text-home_colors-Similar_White text-sm font-bold"> {labelChannelsOutput[key]} </p>
+                            <div className="text-home_colors-Selected_Borders/text border-[0.9px] w-10 justify-center text-center text-sm border-home_colors-Selected_Borders/text font-bold">OUT</div>
+                            <Mute size={"mute_preset"} 
+                                disabled={!(outputVisibility[key]) }
+                                variant={ outputVisibility[key] ?
+                                          outputChannelStates[key] ? "muted": "unmuted"
+                                                                :"notAvailable" 
+                                } 
+                                onClick={()=>handleMute(key,"OUT")}>
+                                MUTE
+                            </Mute>
+                          </div>
+                              
+                        )
+                      })}
+                  </div>
                 </div>
             </div>
             <div className="flex flex-col gap-5 items-center justify-center">
-                <ButtonPresets text={"Presets"} onClick={()=>{navigate("/presets",{state:"house"})}}/>
+                <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"house"})}}/>
                 <div className="flex flex-col items-center gap-3 border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[550px] w-[100px] py-20  ">
-                    
                         <p className="text-home_colors-Similar_White text-sm font-bold">{outputChannelStates["1"] && outputChannelStates["2"] ? [-60] : [outputVolumesStates["2"]]} db </p>
                         <Slider orientation="vertical" className="h-full" 
                                 min={-60} max={15} 

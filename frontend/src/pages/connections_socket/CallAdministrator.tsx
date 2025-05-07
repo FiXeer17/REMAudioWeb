@@ -5,7 +5,7 @@ export const CallAdministrator=() => {
   return (
     <div className="grid grid-rows-[auto,1fr] min-h-svh">
       <div className=" mt-9 ml-7">
-        <Link to={"/Login"}>
+        <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
           <ArrowLeft size={32} color="#FFFFFF" />
         </Link>
       </div>
