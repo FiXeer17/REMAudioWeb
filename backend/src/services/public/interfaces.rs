@@ -98,14 +98,13 @@ pub async fn retrieve_channels(
 pub async fn add_io_channels(pgpool: &AppState, socket_id: i32) -> Result<(), sqlx::Error> {
     let query_string: &str ="INSERT INTO channels (channel_name,visible,src,socket_id,relative_identifier) VALUES ($1,$2,$3,$4,$5);";
 
-    let (i_channels, o_channels, default_visibility, channel_prefix) = (
-        channels_settings::get_i_channel_number(),
-        channels_settings::get_o_channel_number(),
+    let (channels_number, default_visibility, channel_prefix) = (
+        channels_settings::get_channels_number(),
         channels_settings::get_default_visibility(),
         channels_settings::get_channel_default_prefix(),
     );
 
-    for i in 1..i_channels + 1 {
+    for i in 1..channels_number + 1 {
         sqlx::query(query_string)
             .bind(format!("{}{}", channel_prefix, i))
             .bind(default_visibility)
@@ -115,7 +114,7 @@ pub async fn add_io_channels(pgpool: &AppState, socket_id: i32) -> Result<(), sq
             .fetch_optional(&pgpool.db)
             .await?;
     }
-    for i in 1..o_channels + 1 {
+    for i in 1..channels_number + 1 {
         sqlx::query(query_string)
             .bind(format!("{}{}", channel_prefix, i))
             .bind(default_visibility)

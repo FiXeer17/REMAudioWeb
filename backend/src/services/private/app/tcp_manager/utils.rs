@@ -11,9 +11,7 @@ use crate::{
     services::{
         private::{
             app::{
-                messages::{InactiveQueue, SocketRestarted, UnavailableSockets},
-                schemas::MatrixStates,
-                ws_session::session::WsSession,
+                messages::{InactiveQueue, SocketRestarted, UnavailableSockets}, utils::DeviceState, ws_session::session::WsSession
             },
             socket::utils::{try_connection, Device},
         },
@@ -24,21 +22,22 @@ use crate::{
 
 use super::tcp_manager::TcpStreamsManager;
 
-pub fn attach_availability(
-    mut states: MatrixStates,
+pub fn attach_availability<T>(
+    states: &mut T,
     availability: &Option<Addr<WsSession>>,
     session: &Addr<WsSession>,
-) -> MatrixStates {
+)  where T:DeviceState{
+    
     if let Some(wsocket) = availability {
         if wsocket != session {
-            states.available = Some(false)
+            states.set_avaiable(false);
         } else {
-            states.available = Some(true)
+            states.set_avaiable(true);
         }
     } else {
-        states.available = Some(true)
+        states.set_avaiable(true);
     }
-    states
+    
 }
 
 pub async fn load_sockets_from_db(

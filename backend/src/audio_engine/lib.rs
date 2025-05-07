@@ -92,7 +92,7 @@ impl MatrixCommand {
     pub fn check_channel(ch: String) -> Result<u8, Error> {
         match u8::from_str_radix(&ch, 16) {
             Ok(v) => {
-                if v > channels_settings::get_i_channel_number() || v<1{
+                if v > channels_settings::get_channels_number() || v<1{
                     return Err(Error::InvalidChannel);
                 }
                 return Ok(v);

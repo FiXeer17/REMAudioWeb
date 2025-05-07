@@ -41,8 +41,7 @@ pub struct DatabaseEnv {
 #[derive(Serialize,Deserialize,Clone)]
 pub struct channels_settings {
     channel_label_prefix:String,   
-    i_channels_number:u8,
-    o_channels_number:u8,         
+    channels_number:u8,        
     default_visibility:bool 
 }
 #[allow(non_camel_case_types,dead_code)]
@@ -196,11 +195,8 @@ impl GeneralSettings{
 }
 
 impl channels_settings {
-    pub fn get_i_channel_number() -> u8{
-        GeneralSettings::get_vars().channels_settings.i_channels_number
-    }
-    pub fn get_o_channel_number() -> u8{
-        GeneralSettings::get_vars().channels_settings.o_channels_number
+    pub fn get_channels_number() -> u8{
+        GeneralSettings::get_vars().channels_settings.channels_number
     }
     pub fn get_default_visibility() -> bool{
         GeneralSettings::get_vars().channels_settings.default_visibility

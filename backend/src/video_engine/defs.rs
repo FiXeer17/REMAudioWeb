@@ -15,13 +15,17 @@ pub mod status_codes{
         focus.
     */
 
-    pub const INVALID_STATUS_CODE_LABEL: &str = "Invalid status code";
+    pub const INVALID_STATUS_CODE_LABEL: &str = "Invalid status code.";
+    pub const TIMED_OUT_CODE_LABEL: &str = "Timed out.";
+    pub const CLOSED_BY_REMOTE_CODE_LABEL: &str = "Closed by remote peer.";
+
     pub enum StatusCode{
         Accepted,
         Executed,
         SyntaxError,
-        NotExecutable
+        NotExecutable,
     }
+
     impl TryFrom<&[u8]> for StatusCode{
         type Error = super::status_codes::Error;
         fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
@@ -41,12 +45,16 @@ pub mod status_codes{
 
     #[derive(Debug,Clone,PartialEq)]
     pub enum Error{
-        InvalidStatusCode
+        InvalidStatusCode,
+        TimedOut,
+        ClosedByRemotePeer,
     }
     impl ToString for Error{
         fn to_string(&self) -> String {
             match self {
-                Self::InvalidStatusCode => String::from(INVALID_STATUS_CODE_LABEL)
+                Self::InvalidStatusCode => String::from(INVALID_STATUS_CODE_LABEL),
+                Self::ClosedByRemotePeer => String::from(CLOSED_BY_REMOTE_CODE_LABEL),
+                Self::TimedOut => String::from(TIMED_OUT_CODE_LABEL)
             }
         }
     }

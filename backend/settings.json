@@ -2,8 +2,7 @@
     "channels_settings":{
 
         "channel_label_prefix": "ch",   
-        "i_channels_number":16,
-        "o_channels_number":16,         
+        "channels_number":16,        
         "default_visibility":true       
     },
     "presets_settings": {

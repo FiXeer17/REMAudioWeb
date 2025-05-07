@@ -19,12 +19,12 @@ pub struct Preset {
 }
 
 pub trait IsContainedExt{
-    fn socket_is_contained(&self,socket:&str)->bool;
+    fn socket_is_contained(&self,socket:&str)->Option<Socket>;
     fn latest_is_contained(&self)-> Option<Socket>;
 }
 impl IsContainedExt for HashSet<Socket>{
-    fn socket_is_contained(&self,socket:&str)->bool {
-        self.iter().any(|s|&s.socket == socket)
+    fn socket_is_contained(&self,socket:&str)->Option<Socket> {
+        self.iter().find_map(|s|if &s.socket == socket {return Some(s.clone())} else {None}) 
     }
     fn latest_is_contained(&self) -> Option<Socket>{
         self.iter().find_map(|s|{if s.latest {return Some(s.clone())}; None})
@@ -38,6 +38,7 @@ pub struct Socket {
     pub socket: String,
     pub latest: bool,
     pub device: String,
+    pub latest_preset: Option<i32>
 }
 
 impl Hash for Socket{

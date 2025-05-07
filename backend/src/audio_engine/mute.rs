@@ -3,6 +3,7 @@ use std::str::FromStr;
 use crate::audio_engine::defs;
 use crate::audio_engine::defs::{datas::io, fncodes};
 use crate::audio_engine::lib::MatrixCommand;
+use crate::configs::channels_settings;
 use crate::services::private::app::schemas::SetState;
 use super::defs::datas::io::SRC;
 use super::defs::datas::mute_status::MuteStatus;
@@ -24,7 +25,7 @@ pub fn read_mute_all(src: io::SRC) -> Result<Vec<MatrixCommand>, Error> {
     let rw = defs::datas::rw::READ.to_string();
     let io = src.to_string();
     let mut commands: Vec<MatrixCommand> = Vec::new();
-    for ch in 1..=16 {
+    for ch in 1..=channels_settings::get_channels_number() {
         let ch = format!("{:02X}", ch);
         let data = Some(vec![io.clone(), ch]);
         commands.push(MatrixCommand::new(rw.clone(), fcode.clone(), data).unwrap());
