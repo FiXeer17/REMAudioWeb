@@ -74,6 +74,30 @@ services:
       debug_net:
         ipv4_address: 172.20.0.23
 
+  camera-simulator-1:
+    image: i3elle/camera-engine:stable
+    environment:
+      - MATRIX_HOST=0.0.0.0
+      - MATRIX_PORT=2003
+    ports:
+      - "2003:2003"
+    command: ./camera-engine
+    networks:
+      debug_net:
+        ipv4_address: 172.20.0.24
+
+  camera-simulator-2:
+    image: i3elle/camera-engine:stable
+    environment:
+      - MATRIX_HOST=0.0.0.0
+      - MATRIX_PORT=2004
+    ports:
+      - "2004:2004"
+    command: ./camera-engine
+    networks:
+      debug_net:
+        ipv4_address: 172.20.0.25
+
 networks:
   debug_net:
     driver: bridge
