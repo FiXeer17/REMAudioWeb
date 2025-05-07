@@ -134,7 +134,6 @@ pub struct SetSocket{
 #[rtype(result="()")]
 pub struct RemoveSocket{
     pub socket:SocketAddrV4,
-    pub uuid: String
 }
 #[derive(Message,Clone)]
 #[rtype(result="()")]

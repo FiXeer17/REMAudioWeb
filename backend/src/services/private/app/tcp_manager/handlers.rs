@@ -240,12 +240,14 @@ impl Handler<SessionOpened> for TcpStreamsManager {
 
 impl Handler<GeneralError> for TcpStreamsManager {
     type Result = ();
-    fn handle(&mut self, msg: GeneralError, _ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: GeneralError, ctx: &mut Self::Context) -> Self::Result {
         if let Some(sock) = msg.socket {
             self.streams.get(&sock).unwrap().iter().for_each(|addr| {
                 addr.do_send(msg.clone());
             });
+            ctx.address().do_send(RemoveSocket{socket:sock});
         }
+        
     }
 }
 
@@ -294,22 +296,23 @@ impl Handler<Disconnect> for TcpStreamsManager {
 
 impl Handler<StreamFailed> for TcpStreamsManager {
     type Result = ();
-    fn handle(&mut self, msg: StreamFailed, _ctx: &mut Self::Context) -> Self::Result {
-        for session in self.streams.remove(&msg.socket).unwrap() {
+    fn handle(&mut self, msg: StreamFailed, ctx: &mut Self::Context) -> Self::Result {
+        for session in self.streams.get(&msg.socket).unwrap() {
             session.do_send(msg.clone())
         }
+        ctx.address().do_send(RemoveSocket{socket:msg.socket});
     }
 }
 
 impl Handler<ClosedByRemotePeer> for TcpStreamsManager {
     type Result = ();
-    fn handle(&mut self, msg: ClosedByRemotePeer, _ctx: &mut Self::Context) -> Self::Result {
-        self.streams_actors.remove(&msg.socket);
-        if let Some(removed) = self.streams.remove(&msg.socket) {
+    fn handle(&mut self, msg: ClosedByRemotePeer, ctx: &mut Self::Context) -> Self::Result {
+        if let Some(removed) = self.streams.get(&msg.socket) {
             for session in removed {
                 session.do_send(msg.clone());
             }
         }
+        ctx.address().do_send(RemoveSocket{socket:msg.socket});
     }
 }
 

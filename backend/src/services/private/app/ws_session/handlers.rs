@@ -37,19 +37,6 @@ impl Handler<ClosedByAdmin> for WsSession {
     }
 }
 
-// POST-MIDDLEWARE
-impl Handler<DeviceReady> for WsSession {
-    type Result = ();
-    fn handle(&mut self, msg: DeviceReady, ctx: &mut Self::Context) -> Self::Result {
-        let states = msg.get_states();
-        let message = match states{
-            MachineStates::CameraStates(cs) => serde_json::to_string_pretty(&cs).unwrap(),
-            MachineStates::MatrixStates(ms) => serde_json::to_string(&ms).unwrap()
-        };
-        ctx.text(message);
-    }
-}
-
 impl Handler<GeneralError> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: GeneralError, ctx: &mut Self::Context) -> Self::Result {
@@ -64,6 +51,22 @@ impl Handler<GeneralConnectionError> for WsSession {
         ctx.stop();
     }
 }
+
+
+
+// POST-MIDDLEWARE
+impl Handler<DeviceReady> for WsSession {
+    type Result = ();
+    fn handle(&mut self, msg: DeviceReady, ctx: &mut Self::Context) -> Self::Result {
+        let states = msg.get_states();
+        let message = match states{
+            MachineStates::CameraStates(cs) => serde_json::to_string_pretty(&cs).unwrap(),
+            MachineStates::MatrixStates(ms) => serde_json::to_string(&ms).unwrap()
+        };
+        ctx.text(message);
+    }
+}
+
 
 
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {

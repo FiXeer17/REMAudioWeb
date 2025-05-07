@@ -7,11 +7,11 @@ use crate::{
         defs::datas::io::SRC,
         lib::{read_all_states, MatrixCommand},
     }, configs::tcp_comunication_settings, services::{
-        private::app::{
+        private::{app::{
             messages::{CameraReady, DeviceReady, GeneralError, SetCommand, SetHandlerState},
             schemas::{CameraStates, DeviceCommnd, MachineStates, SetAttributes},
             ws_session::session::WsSession,
-        },
+        }, socket::utils::Device},
         public::interfaces::{
             retrieve_channel_labels, retrieve_preset_labels, retrieve_socket_from_db, retrieve_socketid_from_db, retrieve_visibility, update_channel_labels_in_db, update_channel_visibility, update_preset_labels_in_db
         },
@@ -116,25 +116,28 @@ impl TcpStreamActor {
         let visibility = retrieve_visibility(&pgpool, &socket_id).await;
         let channel_labels = retrieve_channel_labels(&pgpool, &socket_id).await;
         let preset_labels = retrieve_preset_labels(&pgpool, &socket_id).await;
-
+        
         if let Err(_) = visibility {
+            warn!("Cannot retrieve visibility");
             ctx_addr.do_send(GeneralError {
-                error: "cannot attach visibility.".to_string(),
+                error: "error occured on matrix".to_string(),
                 socket: Some(socket.clone()),
             });
             return;
         }
         if let Err(_) = channel_labels {
+            warn!("Cannot attach channel labels.");
             ctx_addr.do_send(GeneralError {
-                error: "cannot attach channel labels.".to_string(),
+                error: "error occured on matrix".to_string(),
                 socket: Some(socket.clone()),
             });
             return;
         }
 
         if let Err(_) = preset_labels {
+            warn!("Cannot attach preset labels.");
             ctx_addr.do_send(GeneralError {
-                error: "cannot attach preset labels.".to_string(),
+                error: "error occured on matrix".to_string(),
                 socket: Some(socket.clone()),
             });
             return;
@@ -163,7 +166,8 @@ impl TcpStreamActor {
         stream: Arc<Mutex<TcpStream>>,
         pgpool: Data<AppState>,){
             let Ok(sock) = retrieve_socket_from_db(&pgpool, socket).await else{
-                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"cannot retrieve socket from db".to_string()});
+                warn!("Cannot retrieve socket id from db");
+                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"error occured on camera".to_string()});
                 return;
             };
             let current_preset = {
@@ -198,7 +202,8 @@ impl TcpStreamActor {
                 }
             };
             let Ok(preset_labels) = retrieve_preset_labels(&pgpool, &sock.id.unwrap()).await else{
-                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"cannot retrieve preset labels from db".to_string()});
+                warn!("Cannot retrieve preset labels from db");
+                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"error occured on camera".to_string()});
                 return;
             };
             
@@ -287,7 +292,7 @@ impl TcpStreamActor {
             let socket_id = retrieve_socketid_from_db(&pgpool, stream_socket).await;
             if socket_id.is_err() {
                 addr_clone.do_send(GeneralError {
-                    error: "cannot retrieve socket id in database".to_string(),
+                    error: "error occured on matrix".to_string(),
                     socket: Some(stream_socket),
                 });
                 warn!("Cannot retrieve socket id from the database");
@@ -302,8 +307,9 @@ impl TcpStreamActor {
             )
             .await;
             if let Err(_) = result {
+                warn!("Cannot update channel visibility in database");
                 addr_clone.do_send(GeneralError {
-                    error: "cannot update channel visibility in database".to_string(),
+                    error: "error occured on matrix".to_string(),
                     socket: Some(stream_socket),
                 });
                 return;
@@ -351,7 +357,7 @@ impl TcpStreamActor {
         tokio::spawn(async move {
             let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else {
                 addr_clone.do_send(GeneralError {
-                    error: "cannot retrieve socket id in database".to_string(),
+                    error: "error occured on matrix".to_string(),
                     socket: Some(stream_socket),
                 });
                 warn!("Cannot retrieve socket id from the database");
@@ -366,8 +372,9 @@ impl TcpStreamActor {
             )
             .await;
             if let Err(_) = result {
+                warn!("Cannot update channel label in database");
                 addr_clone.do_send(GeneralError {
-                    error: "cannot update channel label in database".to_string(),
+                    error: "error occured on matrix".to_string(),
                     socket: Some(stream_socket),
                 });
                 return;
@@ -399,6 +406,7 @@ impl TcpStreamActor {
         pgpool: actix_web::web::Data<AppState>,
         addr: Addr<WsSession>,
         selfaddr: Addr<TcpStreamActor>,
+        device: Device
     ) {
         let relative_identifier = sv.index.unwrap().parse::<i32>().unwrap();
         let label = sv.value;
@@ -411,7 +419,7 @@ impl TcpStreamActor {
         tokio::spawn(async move {
             let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else {
                 addr_clone.do_send(GeneralError {
-                    error: "cannot retrieve socket id in database".to_string(),
+                    error: format!("error occured on {}",device.to_string()),
                     socket: Some(stream_socket),
                 });
                 warn!("Cannot retrieve socket id from the database");
@@ -427,8 +435,9 @@ impl TcpStreamActor {
             .await;
 
             if let Err(_) = result {
+                warn!("Cannot update preset label indatabase");
                 addr_clone.do_send(GeneralError {
-                    error: "cannot update channel label in database".to_string(),
+                    error: format!("error occured on {}",device.to_string()),
                     socket: Some(stream_socket),
                 });
                 return;

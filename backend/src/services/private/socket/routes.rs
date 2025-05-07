@@ -133,17 +133,16 @@ pub async fn remove_socket(
                 if let Some(connections) = connections{
                     match connections.socket_is_contained(&s.unwrap().to_string()){
                         true => (),
-                        false => { 
-                                     
+                        false => {  
                             return HttpResponse::Ok().json(json!({"socket": s.unwrap().to_string()}));
                         }
                     }
                 }
                 
             }
+            
             let message = RemoveSocket {
                 socket:s.unwrap(),
-                uuid: uuid.uuid.clone(),
             };
             srv.do_send(message);
             s.unwrap();
