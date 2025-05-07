@@ -134,6 +134,7 @@ pub struct SetSocket{
 #[rtype(result="()")]
 pub struct RemoveSocket{
     pub socket:SocketAddrV4,
+    pub forced: bool
 }
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -144,7 +145,10 @@ pub struct SetMessage{
 
 #[derive(Message,Clone,Debug)]
 #[rtype(result="()")]
-pub struct ClosedByAdmin{}
+pub struct ClosedByAdmin{
+    pub sessions: Option<HashSet<Addr<WsSession>>>,
+    pub device: Option<Device>,
+}
 
 #[derive(Clone)]
 pub enum Commands{

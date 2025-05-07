@@ -47,7 +47,7 @@ pub async fn process_response(
         Ok(n) => {
             if n == 0 {
                 let message = ClosedByRemotePeer {
-                    message: "Closed by remote peer.".to_string(),
+                    message: "error occurred on matrix".to_string(),
                     socket,
                 };
                 ctx_addr.do_send(message);
@@ -72,9 +72,9 @@ pub async fn process_response(
                 }
             }
         }
-        Err(e) => {
+        Err(_) => {
             let message = StreamFailed {
-                error: e.to_string(),
+                error: "error occurred on matrix".to_string(),
                 socket,
             };
             ctx_addr.do_send(message);
@@ -106,15 +106,16 @@ pub fn handle_matrix_polling(
     let socket = act.stream_socket;
     let MachineStates::MatrixStates(states) = act.machine_states.as_mut().unwrap().clone() else {return;};
     let pgpool = act.pgpool.clone();
+    let device_type_clone = act.device_type.clone();
     tokio::spawn(async move {
         let written_bytes = {
             let mut steram_guard = stream.lock().await;
             steram_guard.write(&cmd.to_byte_hex().unwrap()).await
         };
 
-        if let Err(e) = written_bytes {
+        if let Err(_) = written_bytes {
             ctx_addr.do_send(ClosedByRemotePeer {
-                message: e.to_string(),
+                message: format!("error occurred on {}",device_type_clone.to_string()),
                 socket,
             });
             return;
@@ -145,10 +146,9 @@ pub fn handle_matrix_polling(
                 )
                 .await
             }
-            Err(t) => {
-                let reason = format!("read error:{}", t.to_string());
+            Err(_) => {
                 let message = StreamFailed {
-                    error: reason,
+                    error: "error occurred on matrix".to_string(),
                     socket,
                 };
                 ctx_addr.do_send(message);

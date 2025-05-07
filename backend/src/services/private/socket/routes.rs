@@ -49,8 +49,8 @@ pub async fn add_socket(
                 if let Ok(connections) = sockets {
                     if let Some(connections) = connections{
                         match connections.socket_is_contained(&s.unwrap().to_string()) {
-                            true => (),
-                            false => {
+                            Some(_) => (),
+                            None => {
                                 if !try_connection(sock).await {
                                     return HttpResponse::BadRequest().json(toast(
                                         &format!("{} doesn't respond.", sock),
@@ -132,8 +132,8 @@ pub async fn remove_socket(
             if let Ok(connections) = sockets{
                 if let Some(connections) = connections{
                     match connections.socket_is_contained(&s.unwrap().to_string()){
-                        true => (),
-                        false => {  
+                        Some(_) => (),
+                        None => {  
                             return HttpResponse::Ok().json(json!({"socket": s.unwrap().to_string()}));
                         }
                     }
@@ -142,6 +142,7 @@ pub async fn remove_socket(
             }
             
             let message = RemoveSocket {
+                forced: true,
                 socket:s.unwrap(),
             };
             srv.do_send(message);

@@ -50,9 +50,9 @@ impl TcpStreamActor {
                 stream.write(&cmd[..]).await
             };
 
-            if let Err(e) = written_bytes {
+            if let Err(_) = written_bytes {
                 ctx_addr.do_send(ClosedByRemotePeer {
-                    message: e.to_string(),
+                    message: "error occurred on matrix".to_string(),
                     socket,
                 });
                 return;
@@ -69,7 +69,7 @@ impl TcpStreamActor {
             if let Ok(Ok(n)) = read_bytes {
                 if n == 0 {
                     ctx_addr.do_send(ClosedByRemotePeer {
-                        message: "Closed by remote peer".to_string(),
+                        message: "error occurred on matrix".to_string(),
                         socket,
                     });
                     return;
@@ -120,7 +120,7 @@ impl TcpStreamActor {
         if let Err(_) = visibility {
             warn!("Cannot retrieve visibility");
             ctx_addr.do_send(GeneralError {
-                error: "error occured on matrix".to_string(),
+                error: "error occurred on matrix".to_string(),
                 socket: Some(socket.clone()),
             });
             return;
@@ -128,7 +128,7 @@ impl TcpStreamActor {
         if let Err(_) = channel_labels {
             warn!("Cannot attach channel labels.");
             ctx_addr.do_send(GeneralError {
-                error: "error occured on matrix".to_string(),
+                error: "error occurred on matrix".to_string(),
                 socket: Some(socket.clone()),
             });
             return;
@@ -137,7 +137,7 @@ impl TcpStreamActor {
         if let Err(_) = preset_labels {
             warn!("Cannot attach preset labels.");
             ctx_addr.do_send(GeneralError {
-                error: "error occured on matrix".to_string(),
+                error: "error occurred on matrix".to_string(),
                 socket: Some(socket.clone()),
             });
             return;
@@ -167,7 +167,7 @@ impl TcpStreamActor {
         pgpool: Data<AppState>,){
             let Ok(sock) = retrieve_socket_from_db(&pgpool, socket).await else{
                 warn!("Cannot retrieve socket id from db");
-                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"error occured on camera".to_string()});
+                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"error occurred on camera".to_string()});
                 return;
             };
             let current_preset = {
@@ -181,9 +181,9 @@ impl TcpStreamActor {
                         stream.write(&cmd[..]).await
                     };
 
-                    if let Err(e) = written_bytes {
+                    if let Err(_) = written_bytes {
                         ctx_addr.do_send(ClosedByRemotePeer {
-                            message: e.to_string(),
+                            message: "error occurred on camera".to_string(),
                             socket,
                         });
                         return;
@@ -191,7 +191,7 @@ impl TcpStreamActor {
                     match successfull(stream).await{
                         Ok(true) =>(),
                         _=>{ctx_addr.do_send(ClosedByRemotePeer {
-                            message: "failed to write video preset".to_string(),
+                            message: "error occurred on camera".to_string(),
                             socket,
                         });
                         return;},
@@ -203,7 +203,7 @@ impl TcpStreamActor {
             };
             let Ok(preset_labels) = retrieve_preset_labels(&pgpool, &sock.id.unwrap()).await else{
                 warn!("Cannot retrieve preset labels from db");
-                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"error occured on camera".to_string()});
+                ctx_addr.do_send(GeneralError{socket:Some(socket),error:"error occurred on camera".to_string()});
                 return;
             };
             
@@ -292,7 +292,7 @@ impl TcpStreamActor {
             let socket_id = retrieve_socketid_from_db(&pgpool, stream_socket).await;
             if socket_id.is_err() {
                 addr_clone.do_send(GeneralError {
-                    error: "error occured on matrix".to_string(),
+                    error: "error occurred on matrix".to_string(),
                     socket: Some(stream_socket),
                 });
                 warn!("Cannot retrieve socket id from the database");
@@ -309,7 +309,7 @@ impl TcpStreamActor {
             if let Err(_) = result {
                 warn!("Cannot update channel visibility in database");
                 addr_clone.do_send(GeneralError {
-                    error: "error occured on matrix".to_string(),
+                    error: "error occurred on matrix".to_string(),
                     socket: Some(stream_socket),
                 });
                 return;
@@ -357,7 +357,7 @@ impl TcpStreamActor {
         tokio::spawn(async move {
             let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else {
                 addr_clone.do_send(GeneralError {
-                    error: "error occured on matrix".to_string(),
+                    error: "error occurred on matrix".to_string(),
                     socket: Some(stream_socket),
                 });
                 warn!("Cannot retrieve socket id from the database");
@@ -374,7 +374,7 @@ impl TcpStreamActor {
             if let Err(_) = result {
                 warn!("Cannot update channel label in database");
                 addr_clone.do_send(GeneralError {
-                    error: "error occured on matrix".to_string(),
+                    error: "error occurred on matrix".to_string(),
                     socket: Some(stream_socket),
                 });
                 return;

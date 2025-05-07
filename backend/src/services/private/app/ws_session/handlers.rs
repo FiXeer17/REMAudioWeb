@@ -7,7 +7,6 @@ use crate::utils::common::toast;
 use actix::{ActorContext, AsyncContext, Handler, StreamHandler};
 use actix_web_actors::ws;
 use log::debug;
-use serde_json::json;
 
 use super::super::messages::*;
 use super::session::WsSession;
@@ -17,23 +16,19 @@ impl Handler<StreamFailed> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: StreamFailed, ctx: &mut Self::Context) -> Self::Result {
         ctx.text(toast(&msg.error.to_string()).to_string());
-        ctx.stop();
     }
 }
 impl Handler<ClosedByRemotePeer> for WsSession {
     type Result = ();
     fn handle(&mut self, msg: ClosedByRemotePeer, ctx: &mut Self::Context) -> Self::Result {
         ctx.text(toast(&msg.message.to_string()).to_string());
-
-        ctx.stop();
     }
 }
 
 impl Handler<ClosedByAdmin> for WsSession {
     type Result = ();
-    fn handle(&mut self, _msg: ClosedByAdmin, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(json!({"reason":"socket deleted by admin."}).to_string());
-        ctx.stop();
+    fn handle(&mut self, msg: ClosedByAdmin, ctx: &mut Self::Context) -> Self::Result {
+        ctx.text(toast(&format!("{} closed by admin",msg.device.unwrap().to_string())).to_string());
     }
 }
 
