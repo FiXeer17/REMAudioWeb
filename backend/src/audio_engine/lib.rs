@@ -1,5 +1,6 @@
 use super::{
-    defs::{datas::mute_status::MuteStatus, status_codes::StatusCodes},
+    defs::status_codes::StatusCodes,
+    matrix_mixing::{self},
     mute, presets, volume,
 };
 use errors::Error;
@@ -12,7 +13,8 @@ use crate::{
         presets::read_current_preset,
         volume::read_volume_all,
     },
-    services::private::app::schemas::SetState, configs::channels_settings,
+    configs::channels_settings,
+    services::private::app::schemas::SetState,
 };
 
 use core::fmt;
@@ -51,6 +53,8 @@ pub struct MatrixCommandDatas {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub io: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub index: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub channel: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<f32>,
@@ -58,6 +62,8 @@ pub struct MatrixCommandDatas {
     pub muted: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preset: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub connected: Option<bool>,
 }
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct MatrixReturnCode {
@@ -92,7 +98,7 @@ impl MatrixCommand {
     pub fn check_channel(ch: String) -> Result<u8, Error> {
         match u8::from_str_radix(&ch, 16) {
             Ok(v) => {
-                if v > channels_settings::get_channels_number() || v<1{
+                if v > channels_settings::get_channels_number() || v < 1 {
                     return Err(Error::InvalidChannel);
                 }
                 return Ok(v);
@@ -107,6 +113,7 @@ impl MatrixCommand {
             Ok(FNCODE::MUTE) => datas = Some(mute::into_data(data)?),
             Ok(FNCODE::SCENE) => datas = Some(presets::into_data(data)?),
             Ok(FNCODE::VOLUME) => datas = Some(volume::into_data(data)?),
+            Ok(FNCODE::MATRIXMIXING) => datas = Some(matrix_mixing::into_data(data)?),
             Ok(_) => {}
             Err(_) => return Err(Error::InvalidFunctionCode),
         };
@@ -141,51 +148,39 @@ impl MatrixCommandDatas {
 
 impl From<MatrixCommand> for MatrixCommandDatas {
     fn from(value: MatrixCommand) -> Self {
-        let function = fncodes::FNCODE::from_str(&value.fcode)
-            .expect("Cannot retrieve fcode")
-            .to_label();
+        let fncode = fncodes::FNCODE::from_str(&value.fcode).expect("Cannot retrieve fcode");
+        let function = fncode.to_label();
         let data_length =
             u32::from_str_radix(&value.data_length.unwrap_or("00".to_string()), 16).unwrap();
-        let (mut io, mut ch, mut v, mut muted, mut preset) = (None, None, None, None, None);
-
-        if let Some(mut data) = value.data {
-            if function != fncodes::FNCODE::SCENE.to_label() {
-                io = Some(
-                    SRC::from_str(&data.remove(0))
-                        .expect("Cannot retrieve io code")
-                        .to_label(),
-                );
-            } else {
-                let value = data.remove(0);
-                preset = Some(u8::from_str_radix(&value, 16).unwrap())
-            }
-            if data.len() > 0 {
-                ch = Some(
-                    u32::from_str_radix(&data.remove(0), 16).expect("Cannot find channel code"),
-                    
-                );
-
-                if !data.is_empty() && function == FNCODE::VOLUME.to_label() {
-                    data.reverse();
-                    let decimal = u16::from_str_radix(&data.concat(), 16)
-                        .expect("Cannot convert data code")
-                        as i16;
-                    v = Some(decimal as f32 * STEP_UNIT)
-                } else if !data.is_empty() && function == FNCODE::MUTE.to_label() {
-                    let value = data.get(0).unwrap();
-                    let status = MuteStatus::from_str(value).expect("Cannot convert mute code");
-                    muted = Some(status.to_label());
+        let (mut io, mut ch, mut v, mut muted, mut preset, mut indx, mut connected) =
+            (None, None, None, None, None, None, None);
+        if let Some(data) = value.data {
+            match fncode {
+                FNCODE::SCENE => {
+                    preset = presets::into_deserialized(data);
                 }
+                FNCODE::VOLUME => {
+                    (io, ch, v) = volume::into_deserialized(data);
+                }
+                FNCODE::MUTE => {
+                    (io, ch, muted) = mute::into_deserialized(data);
+                }
+                FNCODE::MATRIXMIXING => {
+                    (indx, ch, connected) = matrix_mixing::into_deserialized(data);
+                }
+                _ => eprintln!("invalid datas"),
             }
         }
         Self {
             machine_id: value.id,
             function,
             data_length,
+            index: indx,
             io,
             channel: ch,
             value: v,
             muted,
+            connected,
             preset,
         }
     }
@@ -196,10 +191,10 @@ impl TryFrom<&[u8]> for MatrixCommand {
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         let raw_cmd = value
             .iter()
-            .map(|byte|  format!("{:02X}", byte))
+            .map(|byte| format!("{:02X}", byte))
             .collect::<Vec<String>>()
             .join(" ");
-       
+
         MatrixCommand::from_str(&raw_cmd)
     }
 }

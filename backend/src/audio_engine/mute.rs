@@ -41,3 +41,19 @@ pub fn into_data(data: SetState) ->Result<Vec<String>,Error> {
     let value = MuteStatus::from_str(data.value.unwrap().as_str())?;
     Ok(vec![io.to_string(), channel, value.to_string()])
 }
+
+pub fn into_deserialized(mut data:Vec<String>) -> (Option<String>,Option<u32>,Option<bool>){
+    let io = Some(
+        SRC::from_str(&data.remove(0))
+            .expect("Cannot retrieve io code")
+            .to_label(),
+    );
+    let ch = Some(
+        u32::from_str_radix(&data.remove(0), 16).expect("Cannot find channel code"),
+    );
+    let value = data.remove(0);
+    let status = MuteStatus::from_str(&value).expect("Cannot convert mute code");
+    let muted = Some(status.to_label());
+    
+    (io,ch,muted)
+}

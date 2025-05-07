@@ -15,31 +15,24 @@ pub mod fncodes {
     pub const VOLUME: &str = "04";
     pub const GAIN_IN_STEP: &str = "05";
     pub const MIC_SENSITIVITY: &str = "06";
+    pub const MATRIX_MIXING:&str = "09";
 
     pub const SCENE_LABEL: &str = "preset";
     pub const MUTE_LABEL: &str = "mute";
     pub const VOLUME_LABEL: &str = "volume";
     pub const GAIN_IN_STEP_LABEL: &str = "gain_in_step";
     pub const MIC_SENSITIVITY_LABEL: &str = "mic_sensitivity";
+    pub const MATRIX_MIXING_LABEL: &str = "matrix_mixing";
     pub enum FNCODE {
         SCENE,
         MUTE,
         VOLUME,
         GAINSTEP,
         MICSENSITIVITY,
+        MATRIXMIXING
     }
 
-    impl From<FNCODE> for &'static str {
-        fn from(code: FNCODE) -> Self {
-            match code {
-                FNCODE::SCENE => SCENE,
-                FNCODE::MUTE => MUTE,
-                FNCODE::VOLUME => VOLUME,
-                FNCODE::GAINSTEP => GAIN_IN_STEP,
-                FNCODE::MICSENSITIVITY => MIC_SENSITIVITY,
-            }
-        }
-    }
+  
     impl ToString for FNCODE{
         fn to_string(&self) -> String {
             match self{
@@ -48,6 +41,7 @@ pub mod fncodes {
                 FNCODE::VOLUME => String::from(VOLUME),
                 FNCODE::GAINSTEP => String::from(GAIN_IN_STEP),
                 FNCODE::MICSENSITIVITY => String::from(MIC_SENSITIVITY),
+                FNCODE::MATRIXMIXING => String::from(MATRIX_MIXING)
             }
         }
     }
@@ -59,6 +53,7 @@ pub mod fncodes {
                 FNCODE::VOLUME => String::from(VOLUME_LABEL),
                 FNCODE::GAINSTEP => String::from(GAIN_IN_STEP_LABEL),
                 FNCODE::MICSENSITIVITY => String::from(MIC_SENSITIVITY_LABEL),
+                FNCODE::MATRIXMIXING => String::from(MATRIX_MIXING_LABEL)
             }
         }
     }
@@ -71,11 +66,13 @@ pub mod fncodes {
                 VOLUME => Ok(FNCODE::VOLUME),
                 GAIN_IN_STEP => Ok(FNCODE::GAINSTEP),
                 MIC_SENSITIVITY => Ok(FNCODE::MICSENSITIVITY),
+                MATRIX_MIXING => Ok(FNCODE::MATRIXMIXING),
                 SCENE_LABEL => Ok(FNCODE::SCENE),
                 MUTE_LABEL => Ok(FNCODE::MUTE),
                 VOLUME_LABEL => Ok(FNCODE::VOLUME),
                 GAIN_IN_STEP_LABEL => Ok(FNCODE::GAINSTEP),
                 MIC_SENSITIVITY_LABEL => Ok(FNCODE::MICSENSITIVITY),
+                MATRIX_MIXING_LABEL => Ok(FNCODE::MATRIXMIXING),
                 _ => Err(())
             }
         }
@@ -241,6 +238,53 @@ pub mod datas {
                 }
             }
         }
+    }
+    pub mod matrix_mixing_status{
+        use std::str::FromStr;
+
+        use crate::audio_engine::defs::errors::Error;
+
+        pub const CONNECTED:&str = "01";
+        pub const DISCONNECTED: &str = "00";
+        pub const CONNECTED_LABEL:&str = "connected";
+        pub const DISCONNECTED_LABEL:&str = "disconnected";
+
+        #[derive(Debug,Clone)]
+        pub enum MatrixMixingStatus{
+            CONNECTED,
+            DISCONNECTED,
+        }
+
+        impl MatrixMixingStatus{
+            pub fn to_label(&self) -> bool {
+                match self {
+                     MatrixMixingStatus::CONNECTED => true,
+                     MatrixMixingStatus::DISCONNECTED => false,
+                }
+            }
+        }
+
+        impl FromStr for MatrixMixingStatus{
+            type Err = Error;
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    CONNECTED => Ok(MatrixMixingStatus::CONNECTED),
+                    DISCONNECTED => Ok(MatrixMixingStatus::DISCONNECTED),
+                    CONNECTED_LABEL => Ok(MatrixMixingStatus::CONNECTED),
+                    DISCONNECTED_LABEL=> Ok(MatrixMixingStatus::DISCONNECTED),
+                    _ => Err(Error::ConversionError("cannot convert matrix mixing status.".to_string()))
+                }
+            }
+        }
+        impl ToString for MatrixMixingStatus{
+            fn to_string(&self) -> String {
+                match self{
+                    MatrixMixingStatus::CONNECTED => CONNECTED.to_string(),
+                    MatrixMixingStatus::DISCONNECTED => DISCONNECTED.to_string(), 
+                }
+            }
+        }
+
     }
 }
 // STATUS CODES RETURNING FROM MATRIX

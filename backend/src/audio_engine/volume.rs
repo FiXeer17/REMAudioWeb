@@ -57,3 +57,25 @@ pub fn into_data(data: SetState) -> Result<Vec<String>, Error> {
         Err(e) => return Err(Error::ConversionError(e.to_string())),
     }
 }
+
+
+pub fn into_deserialized(mut data:Vec<String>) -> (Option<String>,Option<u32>,Option<f32>){
+    let mut v = None; 
+    let io = Some(
+        SRC::from_str(&data.remove(0))
+            .expect("Cannot retrieve io code")
+            .to_label(),
+    );
+    let ch = Some(
+        u32::from_str_radix(&data.remove(0), 16).expect("Cannot find channel code"),
+    );
+    if data.len()>0{
+        data.reverse();
+        let decimal = u16::from_str_radix(&data.concat(), 16)
+            .expect("Cannot convert data code")
+            as i16;
+        v = Some(decimal as f32 * STEP_UNIT)
+    }
+    
+    (io,ch,v)
+}

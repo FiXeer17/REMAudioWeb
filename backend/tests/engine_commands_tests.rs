@@ -205,7 +205,6 @@ A5 C3 3C 5A FF 63 02 00 EE"
 )
 }
 
-
 #[test]
 fn ok_from_str_to_matrix_command(){
     let cmd = MatrixCommand::from_str("A5 C3 3C 5A FF 63 03 02 02 10 EE").unwrap();
@@ -255,6 +254,7 @@ fn parse_preset_to_cmd(){
 
 #[test]
 fn ok_cmd_from_wsclient_simulation(){
+    
     let set_states = SetState{
         section: "volume".to_string(),
         io:Some("output".to_string()),
@@ -263,8 +263,28 @@ fn ok_cmd_from_wsclient_simulation(){
         index: None
     };
 
+
     let cmd = MatrixCommand::new_from_client(rw::WRITE.to_string(),set_states);
     assert!(cmd.is_ok());
-    println!("{}",cmd.clone().unwrap().to_string());
-    assert_eq!(cmd.unwrap().to_string(),"A5 C3 3C 5A FF 36 04 04 02 10 A8 FD EE".to_string())
+    assert_eq!(cmd.unwrap().to_string(),"A5 C3 3C 5A FF 36 04 04 02 10 A8 FD EE".to_string());
+
+    let set_states = SetState{
+        section: "matrix_mixing".to_string(),
+        index: Some("1".to_string()),
+        channel: Some("1".to_string()),
+        value:Some("connected".to_string()),
+        io:None
+    };
+
+    let cmd = MatrixCommand::new_from_client(rw::WRITE.to_string(),set_states);
+    assert!(cmd.is_ok());
+    assert_eq!(cmd.unwrap().to_string(),"A5 C3 3C 5A FF 36 09 03 01 01 01 EE".to_string());
+}
+
+
+#[test]
+fn ok_cmd_deserialized(){
+    let cmd = MatrixCommand::from_str("A5 C3 3C 5A FF 63 02 00 EE").unwrap();
+    dbg!(MatrixCommandDatas::from(cmd));
+    
 }
