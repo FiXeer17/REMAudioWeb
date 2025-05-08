@@ -1,6 +1,6 @@
 use super::utils::HandleText;
 use crate::{
-    audio_engine::{
+    engines::audio_engine::{
         defs::{datas, sections::Sections},
         lib::MatrixCommand,
     },
@@ -49,8 +49,8 @@ impl WsSession {
         if let Ok(set_state) = serde_json::from_str::<SetState>(&text) {
             match Sections::from_str(&set_state.section) {
                 Ok(section) => match section {
-                    Sections::Visibility => return handle_visibility(set_state),
                     Sections::MatrixCommand(_) => return handle_command(set_state),
+                    Sections::Visibility => return handle_visibility(set_state),
                     Sections::ChannelLabels => return handle_channel_label(set_state),
                     Sections::PresetLabels => return handle_preset_label(set_state)
                 },

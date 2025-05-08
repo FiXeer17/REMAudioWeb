@@ -129,7 +129,7 @@ pub mod datas {
         use core::fmt;
         use std::str::FromStr;
 
-        use crate::audio_engine::defs::errors::Error;
+        use crate::engines::audio_engine::defs::errors::Error;
 
         pub const GENERAL: &str = "00";
         pub const INPUT: &str = "01";
@@ -197,7 +197,7 @@ pub mod datas {
     pub mod mute_status{
         use std::str::FromStr;
 
-        use crate::audio_engine::defs::errors::Error;
+        use crate::engines::audio_engine::defs::errors::Error;
 
         pub const NOTMUTED: &str = "00";
         pub const MUTED: &str = "01";
@@ -243,7 +243,7 @@ pub mod datas {
     pub mod matrix_mixing_status{
         use std::str::FromStr;
 
-        use crate::audio_engine::defs::errors::Error;
+        use crate::engines::audio_engine::defs::errors::Error;
 
         pub const CONNECTED:&str = "01";
         pub const DISCONNECTED: &str = "00";

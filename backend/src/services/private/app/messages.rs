@@ -1,4 +1,4 @@
-use crate::audio_engine::lib::MatrixCommand;
+use crate::engines::audio_engine::lib::MatrixCommand;
 use crate::services::private::socket::utils::Device;
 use crate::services::public::schemas::Socket;
 
