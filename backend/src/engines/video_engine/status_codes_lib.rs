@@ -1,9 +1,11 @@
-use super::defs::status_codes::{Error, StatusCode};
+use super::defs::status_codes::StatusCode;
 use crate::configs::tcp_comunication_settings;
 use futures_util::lock::Mutex;
 use log::warn;
 use std::sync::Arc;
 use tokio::{io::AsyncReadExt, net::TcpStream};
+use super::defs::errors::Error;
+
 
 pub async fn read_from_video(stream: Arc<Mutex<TcpStream>>) -> Result<StatusCode, Error> {
     let mut buffer = [0u8; 128];

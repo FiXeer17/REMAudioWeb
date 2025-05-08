@@ -10,7 +10,9 @@ pub struct SetState {
     pub io: Option<String>,
     pub channel: Option<String>,
     pub value: Option<String>,
-    pub index: Option<String>
+    pub index: Option<String>,
+    pub velocity: Option<String>,
+    pub direction: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

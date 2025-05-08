@@ -20,6 +20,7 @@ impl CommandsExt for Commands{
             Commands::SetPresetLabel(_) => Device::Audio,
             Commands::SetMatrixCommand(_)=> Device::Audio,
             Commands::SetVisibility(_)=> Device::Audio,
+            Commands::SetCameraCommand(_) => Device::Video,
             
         }
     }

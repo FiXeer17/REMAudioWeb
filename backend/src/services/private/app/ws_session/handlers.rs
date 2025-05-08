@@ -85,9 +85,9 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                 self.hb = Instant::now();
                 let addr = ctx.address(); // deserialize_text detect the command type sent by the client.
                 match self.deserialize_text(text.to_string()) {
-                    HandleText::Command(cmd) => match cmd {
+                    HandleText::MatrixCommand(cmd) => match cmd {
                         Ok(cmd) => {
-                            let msg = SetCommand { command: cmd };
+                            let msg = SetMatrixCommand { command: cmd };
                             self.srv.do_send(SetMessage {
                                 addr,
                                 command: Commands::SetMatrixCommand(msg),
@@ -97,7 +97,18 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                             ctx.text(e.to_string());
                         }
                     },
-
+                    HandleText::CameraCommand(cmd) => match cmd {
+                        Ok(cmd) => {
+                            let msg = SetCameraCommand {command:cmd};
+                            self.srv.do_send(SetMessage{
+                                addr,
+                                command:Commands::SetCameraCommand(msg)
+                            });
+                        },
+                        Err(e) =>{
+                            ctx.text(e.to_string());
+                        }
+                    }
                     HandleText::Recache => {
                         self.srv.do_send(SetMessage {
                             addr,

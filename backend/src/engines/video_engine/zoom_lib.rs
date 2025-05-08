@@ -1,12 +1,20 @@
-use super::defs::camera_zoom::{Error,TELE_VARIABLE,WIDE_VARIABLE};
+use super::defs::camera_zoom::{TELE_VARIABLE,WIDE_VARIABLE};
+use super::defs::errors::Error;
 
 
-pub fn zoom_tele(p:u8)-> Result<[u8;6],Error>{
+
+pub fn zoom_tele(p:String)-> Result<Vec<u8>,Error>{
+    let Ok(p) = p.parse::<u8>() else{
+        return Err(Error::InvalidCoefficient)
+    };
     let mut tele = TELE_VARIABLE;
-    if p <= 0xF {tele[4] |= p; Ok(tele) } else {Err(Error::InvalidCoefficient)}
+    if p <= 0xF {tele[4] |= p; Ok(tele.to_vec()) } else {Err(Error::InvalidCoefficient)}
 }
 
-pub fn zoom_wide(p:u8) -> Result<[u8;6],Error>{
+pub fn zoom_wide(p:String) -> Result<Vec<u8>,Error>{
+    let Ok(p) = p.parse::<u8>() else{
+        return Err(Error::InvalidCoefficient)
+    };
     let mut wide = WIDE_VARIABLE;
-    if p <= 0xF {wide[4] |= p; Ok(wide)} else {Err(Error::InvalidCoefficient)}
+    if p <= 0xF {wide[4] |= p; Ok(wide.to_vec())} else {Err(Error::InvalidCoefficient)}
 }

@@ -3,15 +3,13 @@ use futures_util::lock::Mutex;
 use std::{net::SocketAddrV4, sync::Arc};
 
 use crate::{
-    engines::audio_engine::{
+    configs::tcp_comunication_settings, engines::{audio_engine::{
         defs::datas::io::SRC,
         lib::{read_all_states, MatrixCommand},
-    },
-    configs::tcp_comunication_settings,
-    services::{
+    }, video_engine::{camera_presets_lib::call_preset, status_codes_lib::successfull}}, services::{
         private::{
             app::{
-                messages::{CameraReady, DeviceReady, GeneralError, SetCommand, SetHandlerState},
+                messages::{CameraReady, DeviceReady, GeneralError, SetHandlerState, SetMatrixCommand},
                 schemas::{CameraStates, DeviceCommnd, MachineStates, SetAttributes},
                 ws_session::session::WsSession,
             },
@@ -23,9 +21,7 @@ use crate::{
             update_channel_visibility, update_latest_preset_in_sockets_db,
             update_preset_labels_in_db,
         },
-    },
-    engines::video_engine::{camera_presets_lib::call_preset, status_codes_lib::successfull},
-    AppState,
+    }, AppState
 };
 use actix::{Addr, AsyncContext, Context};
 use log::warn;
@@ -205,7 +201,7 @@ impl TcpStreamActor {
                 let lp = 0;
 
                 let written_bytes = {
-                    let cmd = call_preset(lp).unwrap();
+                    let cmd = call_preset(lp.to_string()).unwrap();
                     let mut stream = stream.lock().await;
                     stream.write(&cmd[..]).await
                 };
@@ -288,7 +284,7 @@ impl TcpStreamActor {
        If a matrix command type is recieved it will be pushed inside the commands queue,
        command_polling fn will take care of it.
     */
-    pub fn handle_set_command(&mut self, sc: SetCommand) {
+    pub fn handle_set_command(&mut self, sc: SetMatrixCommand) {
         self.commands_queue
             .push_front(DeviceCommnd::MatrixCommand(sc.command));
     }
