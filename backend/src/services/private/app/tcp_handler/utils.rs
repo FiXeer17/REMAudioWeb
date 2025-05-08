@@ -96,8 +96,23 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
         let cmd = act.commands_queue.pop_back().unwrap();
         match cmd {
             DeviceCommnd::MatrixCommand(mc) => handle_matrix_polling(act, ctx, mc),
+            DeviceCommnd::CameraCommand(cc) => handle_camera_polling(act,ctx,cc)
         }
     }
+}
+pub fn handle_camera_polling(
+    act: &mut TcpStreamActor,
+    ctx: &mut Context<TcpStreamActor>,
+    cmd: Vec<u8>,
+) {
+    let stream = act.stream.as_mut().unwrap().clone();
+    let ctx_addr = ctx.address().clone();
+    let socket = act.stream_socket;
+    let MachineStates::CameraStates(states) = act.machine_states.as_mut().unwrap().clone() else {
+        return;
+    };
+    let pgpool = act.pgpool.clone();
+    let device_type_clone = act.device_type.clone();
 }
 
 pub fn handle_matrix_polling(
