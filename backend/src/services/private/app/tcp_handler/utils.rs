@@ -6,7 +6,10 @@ use crate::{
     audio_engine::{defs::fncodes::FNCODE, lib::MatrixCommand},
     configs::tcp_comunication_settings,
     services::{
-        private::app::{messages::DeviceReady, schemas::{DeviceCommnd, MachineStates}},
+        private::app::{
+            messages::DeviceReady,
+            schemas::{DeviceCommnd, MachineStates},
+        },
         public::{
             interfaces::{self, add_io_channels, retrieve_socketid_from_db},
             utils::{retrieve_all_channels, retrieve_all_presets},
@@ -63,11 +66,12 @@ pub async fn process_response(
                         let message = MatrixReady { socket, states };
                         ctx_addr.do_send(DeviceReady::MatrixReady(message));
                     } else {
-                        TcpStreamActor::read_audio_states(ctx_addr.clone(), socket, stream, pgpool).await; //TODO DELETE .clone()
-                        warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
+                        TcpStreamActor::read_audio_states(ctx_addr, socket, stream, pgpool).await;
+                        //TODO DELETE .clone()
+                        /*                         warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
                         states.set_changes(cmd); //TODO DELETE THIS LINE
                         let message = MatrixReady { socket, states }; //TODO DELETE THIS LINE
-                        ctx_addr.do_send(DeviceReady::MatrixReady(message)); //TODO DELETE THIS LINE
+                        ctx_addr.do_send(DeviceReady::MatrixReady(message)); //TODO DELETE THIS LINE */
                     }
                 }
             }
@@ -104,7 +108,9 @@ pub fn handle_matrix_polling(
     let stream = act.stream.as_mut().unwrap().clone();
     let ctx_addr = ctx.address().clone();
     let socket = act.stream_socket;
-    let MachineStates::MatrixStates(states) = act.machine_states.as_mut().unwrap().clone() else {return;};
+    let MachineStates::MatrixStates(states) = act.machine_states.as_mut().unwrap().clone() else {
+        return;
+    };
     let pgpool = act.pgpool.clone();
     let device_type_clone = act.device_type.clone();
     tokio::spawn(async move {
@@ -116,23 +122,22 @@ pub fn handle_matrix_polling(
         if let Err(_) = written_bytes {
             warn!("closed by remote peer on write");
             ctx_addr.do_send(ClosedByRemotePeer {
-                message: format!("error occurred on {}",device_type_clone.to_string()),
+                message: format!("error occurred on {}", device_type_clone.to_string()),
                 socket,
             });
             return;
         }
 
         let mut buffer = [0; 128];
+        let mut timeout= tcp_comunication_settings::get_read_timeout();
+        if cmd.fcode == FNCODE::SCENE.to_string(){
+            timeout = tcp_comunication_settings::get_preset_read_timeout();
+        }
 
         let read_bytes = {
             let mut stream_guard = stream.lock().await;
-            tokio::time::timeout(
-                tcp_comunication_settings::get_read_timeout(),
-                stream_guard.read(&mut buffer),
-            )
-            .await
+            dbg!(tokio::time::timeout(timeout, stream_guard.read(&mut buffer)).await)
         };
-
         match read_bytes {
             Ok(not_timedout) => {
                 process_response(
@@ -148,7 +153,7 @@ pub fn handle_matrix_polling(
                 .await
             }
             Err(e) => {
-            warn!("closed by remote peer on read: {}",e.to_string());
+                warn!("closed by remote peer on read: {}", e.to_string());
 
                 let message = StreamFailed {
                     error: "error occurred on matrix".to_string(),

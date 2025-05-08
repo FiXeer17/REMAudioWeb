@@ -69,11 +69,11 @@ impl TcpStreamActor {
                 return;
 
             }
-
+            let timeout = tcp_comunication_settings::get_read_timeout();
             let read_bytes = {
                 let mut stream = stream.lock().await;
                 tokio::time::timeout(
-                    tcp_comunication_settings::get_read_timeout(),
+                    timeout,
                     stream.read(&mut buffer),
                 )
                 .await

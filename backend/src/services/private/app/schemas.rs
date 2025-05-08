@@ -64,7 +64,7 @@ pub struct MatrixStates {
     pub o_visibility: HashMap<u32, bool>,
     pub i_labels: HashMap<u32, String>,
     pub o_labels: HashMap<u32, String>,
-    pub mix_map: HashMap<(u32,u32),bool>,
+    pub mix_map: HashMap<String,bool>,
     pub preset_labels:HashMap<u32, String>,
     pub current_preset: u8,
     pub available: Option<bool>,

@@ -52,9 +52,11 @@ pub struct tcp_comunication_settings {
     #[serde(deserialize_with="u64_to_millis")]
     reconnect_delay:Duration,         
     #[serde(deserialize_with="u64_to_millis")]
-    read_timeout:Duration,             
+    read_timeout:Duration,  
     #[serde(deserialize_with="u64_to_millis")]
-    connection_timeout:Duration,      
+    preset_read_timeout: Duration,          
+    #[serde(deserialize_with="u64_to_millis")]
+    connection_timeout:Duration,   
     #[serde(deserialize_with="u64_to_millis")]
     inactivity_timeout:Duration,      
     max_connection_retries:u8    
@@ -228,6 +230,9 @@ impl websocket_settings{
 impl tcp_comunication_settings{
     pub fn get_read_timeout() -> Duration{
         GeneralSettings::get_vars().tcp_comunication_settings.read_timeout
+    }
+    pub fn get_preset_read_timeout() -> Duration{
+        GeneralSettings::get_vars().tcp_comunication_settings.preset_read_timeout
     }
     pub fn get_command_delay()-> Duration{
         GeneralSettings::get_vars().tcp_comunication_settings.command_delay

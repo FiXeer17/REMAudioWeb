@@ -41,7 +41,7 @@ impl MatrixStates {
             HashMap<u32, bool>,
             HashMap<u32, f32>,
             HashMap<u32, f32>,
-            HashMap<(u32,u32),bool>,
+            HashMap<String,bool>,
             u8,
             
         ) = (
@@ -124,11 +124,11 @@ impl MatrixStates {
         let preset = cmd.preset.unwrap();
         *current_preset = preset;
     }
-    fn handle_mix_cmd(mix_map: &mut HashMap<(u32,u32),bool>,cmd:&MatrixCommandDatas){
+    fn handle_mix_cmd(mix_map: &mut HashMap<String,bool>,cmd:&MatrixCommandDatas){
         let indx = cmd.index.unwrap();
         let ch = cmd.channel.unwrap();
         let connected = cmd.connected.unwrap();
-        mix_map.insert((indx,ch),connected);
+        mix_map.insert(format!("({},{})",indx,ch),connected);
     }
 }
 
