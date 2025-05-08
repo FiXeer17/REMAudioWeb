@@ -114,6 +114,7 @@ pub fn handle_matrix_polling(
         };
 
         if let Err(_) = written_bytes {
+            warn!("closed by remote peer on write");
             ctx_addr.do_send(ClosedByRemotePeer {
                 message: format!("error occurred on {}",device_type_clone.to_string()),
                 socket,
@@ -146,7 +147,9 @@ pub fn handle_matrix_polling(
                 )
                 .await
             }
-            Err(_) => {
+            Err(e) => {
+            warn!("closed by remote peer on read: {}",e.to_string());
+
                 let message = StreamFailed {
                     error: "error occurred on matrix".to_string(),
                     socket,
