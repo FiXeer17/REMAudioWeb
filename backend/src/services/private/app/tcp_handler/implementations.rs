@@ -61,11 +61,13 @@ impl TcpStreamActor {
             };
 
             if let Err(_) = written_bytes {
+                warn!("closed by remote peer on write");
                 ctx_addr.do_send(ClosedByRemotePeer {
                     message: "error occurred on matrix".to_string(),
                     socket,
                 });
                 return;
+
             }
 
             let read_bytes = {
@@ -78,6 +80,7 @@ impl TcpStreamActor {
             };
             if let Ok(Ok(n)) = read_bytes {
                 if n == 0 {
+                    warn!("closed by remote peer on read (0 bytes)");
                     ctx_addr.do_send(ClosedByRemotePeer {
                         message: "error occurred on matrix".to_string(),
                         socket,
