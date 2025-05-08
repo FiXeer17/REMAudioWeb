@@ -13,8 +13,7 @@ use services::{
 use sqlx::{Pool, Postgres};
 use utils::auth_middleware::auth_middleware;
 
-pub mod audio_engine;
-pub mod video_engine;
+pub mod engines;
 pub mod services;
 pub mod utils;
 pub mod configs;

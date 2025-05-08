@@ -1,6 +1,6 @@
-use crate::audio_engine::defs;
-use crate::audio_engine::defs::fncodes;
-use crate::audio_engine::lib::MatrixCommand;
+use crate::engines::audio_engine::defs;
+use crate::engines::audio_engine::defs::fncodes;
+use crate::engines::audio_engine::lib::MatrixCommand;
 use crate::services::private::app::schemas::SetState;
 
 use super::defs::errors::Error;

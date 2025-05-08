@@ -1,12 +1,15 @@
 use crate::{
-    audio_engine::{defs::errors::Error, lib::MatrixCommand},
+    engines::audio_engine::lib::MatrixCommand,
     configs::{channels_settings, presets_settings},
     services::private::{app::schemas::SetAttributes, socket::utils::Device},
 };
+use crate::engines::{audio_engine,video_engine};
+
 
 #[derive(Debug, Clone)]
 pub enum HandleText {
-    Command(Result<MatrixCommand, Error>),
+    MatrixCommand(Result<MatrixCommand, audio_engine::defs::errors::Error>),
+    CameraCommand(Result<Vec<u8>,video_engine::defs::errors::Error>),
     SetVisibility(SetAttributes),
     SetChannelLabels(SetAttributes),
     SetPresetLabels(SetAttributes),

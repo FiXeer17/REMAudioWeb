@@ -1,15 +1,12 @@
 use super::utils::HandleText;
 use crate::{
-    audio_engine::{
-        defs::{datas, sections::Sections},
+    configs::websocket_settings, engines::{audio_engine::{
+        defs::datas,
         lib::MatrixCommand,
-    },
-    services::private::app::{
+    }, sections::Sections, video_engine::{camera_presets_lib::call_preset, defs::fncodes::FNCODE, tilt_pan_lib::move_camera, zoom_lib::{zoom_tele, zoom_wide}}}, services::private::app::{
         messages::{self, Disconnect},
         schemas::{SetAttributes, SetState},
-    },
-    configs::websocket_settings,
-    AppState,
+    }, AppState
 };
 use actix::prelude::*;
 use actix_web::web::Data;
@@ -49,8 +46,9 @@ impl WsSession {
         if let Ok(set_state) = serde_json::from_str::<SetState>(&text) {
             match Sections::from_str(&set_state.section) {
                 Ok(section) => match section {
+                    Sections::MatrixCommand(_) => return handle_matrix_command(set_state),
+                    Sections::CameraCommand(_) => return handle_video_command(set_state,&section),
                     Sections::Visibility => return handle_visibility(set_state),
-                    Sections::MatrixCommand(_) => return handle_command(set_state),
                     Sections::ChannelLabels => return handle_channel_label(set_state),
                     Sections::PresetLabels => return handle_preset_label(set_state)
                 },
@@ -95,9 +93,24 @@ fn handle_visibility(set_state: SetState) -> HandleText {
 }
 
 //fn handle_label(set_state: SetState) -> HandleText{}
-fn handle_command(set_state: SetState) -> HandleText {
+fn handle_matrix_command(set_state: SetState) -> HandleText {
     let rw = datas::rw::WRITE.to_string();
-    HandleText::Command(MatrixCommand::new_from_client(rw, set_state))
+    HandleText::MatrixCommand(MatrixCommand::new_from_client(rw, set_state))
+}
+fn handle_video_command(set_state: SetState,section:&Sections) -> HandleText{
+    match section{
+        Sections::CameraCommand(sc) =>match sc{
+            FNCODE::Preset => HandleText::CameraCommand(call_preset(set_state.value.unwrap())),
+            FNCODE::ZoomTele => HandleText::CameraCommand(zoom_tele(set_state.value.unwrap())),
+            FNCODE::ZoomWide => HandleText::CameraCommand(zoom_wide(set_state.value.unwrap())),
+            FNCODE::MoveCamera =>{
+                let Some(velocity) = set_state.velocity else {return HandleText::Error("Velocity not found".to_string())};
+                let Some(direction) = set_state.direction else {return HandleText::Error("Direction not found".to_string())};
+                HandleText::CameraCommand(move_camera(velocity,direction))
+            }
+        },
+        _ => HandleText::Error("Invalid video command".to_string())
+    }
 }
 
 fn handle_channel_label(set_state: SetState) -> HandleText{

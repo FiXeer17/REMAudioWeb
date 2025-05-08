@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::audio_engine::lib::MatrixCommand;
+use crate::engines::audio_engine::lib::MatrixCommand;
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -10,7 +10,9 @@ pub struct SetState {
     pub io: Option<String>,
     pub channel: Option<String>,
     pub value: Option<String>,
-    pub index: Option<String>
+    pub index: Option<String>,
+    pub velocity: Option<String>,
+    pub direction: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

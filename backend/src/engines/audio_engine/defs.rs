@@ -17,12 +17,12 @@ pub mod fncodes {
     pub const MIC_SENSITIVITY: &str = "06";
     pub const MATRIX_MIXING:&str = "09";
 
-    pub const SCENE_LABEL: &str = "preset";
+    pub const SCENE_LABEL: &str = "matrix_preset";
     pub const MUTE_LABEL: &str = "mute";
     pub const VOLUME_LABEL: &str = "volume";
     pub const GAIN_IN_STEP_LABEL: &str = "gain_in_step";
     pub const MIC_SENSITIVITY_LABEL: &str = "mic_sensitivity";
-    pub const MATRIX_MIXING_LABEL: &str = "matrix_mixing";
+    pub const MATRIX_MIXING_LABEL: &str = "mix_map";
     pub enum FNCODE {
         SCENE,
         MUTE,
@@ -79,47 +79,6 @@ pub mod fncodes {
     }
 }
 
-pub mod sections{
-    use std::str::FromStr;
-
-    use super::{errors, fncodes::*};
-
-    pub const VISIBILITY_LABEL :&str = "visibility";
-    pub const CHANNEL_LABELS_LABEL : &str = "channel_labels";
-    pub const PRESET_LABELS_LABEL : &str = "preset_labels";
-
-    pub enum Sections{
-        Visibility,
-        ChannelLabels,
-        PresetLabels,
-        MatrixCommand(FNCODE),
-    }
-
-    impl ToString for Sections{
-        fn to_string(&self) -> String {
-            match self{
-                Sections::ChannelLabels => String::from(CHANNEL_LABELS_LABEL),
-                Sections::PresetLabels => String::from(PRESET_LABELS_LABEL),
-                Sections::Visibility => String::from(VISIBILITY_LABEL),
-                Sections::MatrixCommand(cmd) => cmd.to_label(),
-            }
-        }
-    }
-    impl FromStr for Sections {
-        type Err = errors::Error;
-        fn from_str(s: &str) -> Result<Self, Self::Err> {
-            match s {
-                VISIBILITY_LABEL => Ok(Sections::Visibility),
-                CHANNEL_LABELS_LABEL => Ok(Sections::ChannelLabels),
-                PRESET_LABELS_LABEL => Ok(Sections::PresetLabels),
-                VOLUME_LABEL => Ok(Sections::MatrixCommand(FNCODE::VOLUME)),
-                MUTE_LABEL => Ok(Sections::MatrixCommand(FNCODE::MUTE)),
-                SCENE_LABEL => Ok(Sections::MatrixCommand(FNCODE::SCENE)),
-                _ => Err(errors::Error::InvalidSection)
-            }
-        }
-    }
-}
 
 // DATA FOUNDAMENTALS:
 pub mod datas {
@@ -128,7 +87,7 @@ pub mod datas {
         use core::fmt;
         use std::str::FromStr;
 
-        use crate::audio_engine::defs::errors::Error;
+        use crate::engines::audio_engine::defs::errors::Error;
 
         pub const GENERAL: &str = "00";
         pub const INPUT: &str = "01";
@@ -196,7 +155,7 @@ pub mod datas {
     pub mod mute_status{
         use std::str::FromStr;
 
-        use crate::audio_engine::defs::errors::Error;
+        use crate::engines::audio_engine::defs::errors::Error;
 
         pub const NOTMUTED: &str = "00";
         pub const MUTED: &str = "01";
@@ -242,12 +201,12 @@ pub mod datas {
     pub mod matrix_mixing_status{
         use std::str::FromStr;
 
-        use crate::audio_engine::defs::errors::Error;
+        use crate::engines::audio_engine::defs::errors::Error;
 
         pub const CONNECTED:&str = "01";
         pub const DISCONNECTED: &str = "00";
-        pub const CONNECTED_LABEL:&str = "connected";
-        pub const DISCONNECTED_LABEL:&str = "disconnected";
+        pub const CONNECTED_LABEL:&str = "true";
+        pub const DISCONNECTED_LABEL:&str= "false";
 
         #[derive(Debug,Clone)]
         pub enum MatrixMixingStatus{
