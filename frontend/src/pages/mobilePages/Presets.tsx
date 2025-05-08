@@ -19,13 +19,12 @@ export const Presets = () => {
 
 
     useEffect(()=>{
-
-      const { currentPresets,labelPresets }=GetData(message)      
-
-      setCurrentPresets(currentPresets)
-      setlabelPresets(labelPresets)
- 
-    },[message])
+      const { currentPresets,labelPresets,device_type } = GetData(message);
+      if(device_type==="matrix"){
+        setCurrentPresets(currentPresets)
+        setlabelPresets(labelPresets)
+      }
+      },[message])
 
     useEffect(()=>{
       if (isLoading===true){

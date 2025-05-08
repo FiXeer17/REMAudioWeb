@@ -18,8 +18,10 @@ export const PreferenciesPresets = ()=>{
     const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
 
     useEffect(()=>{
-        const { labelPresets } = GetData(message);
+      const { labelPresets,device_type } = GetData(message);
+      if(device_type==="matrix"){
         setlabelPresets(labelPresets)
+      }
       },[message])
 
       const handleSetNamePreset=(value:string,Preset:number)=>{

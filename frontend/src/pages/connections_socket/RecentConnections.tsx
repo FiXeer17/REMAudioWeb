@@ -54,7 +54,10 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                 }
                 const value = await setSocket(headers);
                 if (value.status===200){
-                    return navigate("/homeAudio")
+                    if (element.device_type==="matrix")
+                        return navigate("/homeAudio")
+                    else
+                        return navigate("/video")
                 }
             } catch (error) {
                 console.error("Error setting Socket:", error);

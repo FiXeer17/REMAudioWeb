@@ -28,8 +28,10 @@ const UUIDLayout = () => {
       } else {
         
         if (sockets !== null) {
-          
-          navigate("/homeAudio");
+          if(sockets.some(socket => socket.isLatestVideo) && !sockets.some(socket => socket.isLatestAudio))
+            navigate("/video");
+          else
+            navigate("/homeAudio");
         } else {
           if (location.state?.show === true) {
             navigate("/callAdministrator", { state: { show: true } });

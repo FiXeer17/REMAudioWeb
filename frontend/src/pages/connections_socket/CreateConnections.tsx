@@ -31,7 +31,10 @@ export const CreateConnections=()=>{
                 device_type: data.device_type
               }
             await setSocket(values)
-            navigate("/homeAudio")
+            if (data.device_type==="matrix")
+                return navigate("/homeAudio")
+            else
+                return navigate("/video")
         }catch(error){
             toast.error("Error creating new connections",{duration:1000})
         }

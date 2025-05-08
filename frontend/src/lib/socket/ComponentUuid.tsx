@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 
 interface ConnectionsContextType {
   uuid: string | undefined;
-  sockets: { name: string; ip: string; port: number; device_type:string }[] | null;
+  sockets: { name: string; ip: string; port: number; device_type:string; isLatestAudio?: boolean; isLatestVideo?: boolean;}[] | null;
   isAdmin:boolean;
   triggerRedirect: () => void;
 }
@@ -36,7 +36,7 @@ export const ConnectionsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchSocket = async () => {
     if (!prevUuid) return;
-    
+
     try {
       const value = await getSocket();
       const latest_audio = value.data.latest_audio_socket;
@@ -50,8 +50,9 @@ export const ConnectionsProvider: React.FC<{ children: React.ReactNode }> = ({
           ...(latest_audio ? [{ ...latest_audio, isLatestAudio: true }] : []),
           ...(latest_video ? [{ ...latest_video, isLatestVideo: true }] : []),
         ]:null
-            
+        
         setSockets(updatedSockets)
+
       } else {
         if (latest_audio || latest_video) {
           const updatedSockets = [

@@ -49,8 +49,12 @@ export const RecentConnections=()=>{
                             
                         }
                         const value = await setSocket(headers);
+                        console.log(value)
                         if (value.status===200){
-                            return navigate("/homeAudio")
+                            if (element.device_type==="matrix")
+                                return navigate("/homeAudio")
+                            else
+                                return navigate("/video")
                         }
                     } catch (error) {
                         console.error("Error setting Socket:", error);
@@ -117,7 +121,7 @@ export const RecentConnections=()=>{
                         <div className={`flex flex-col items-start justify-center text-white w-fit px-6 py-3 text-sm border-2 rounded-2xl ${
                             element.isLatestAudio
                             ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text"
-                            : "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
+                            : element.isLatestVideo ?"bg-home_colors-Navbar/Selection_Bg border-home_colors-Enabled_Channels":"bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
                         }`} key={element.ip}>
                             <div className="flex justify-between w-full items-center ">
                                 <div className="flex items-center gap-3">

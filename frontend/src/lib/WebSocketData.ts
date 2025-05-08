@@ -11,6 +11,7 @@ export function GetData(data:string){
     const labelPresets=dataJson.preset_labels
     const labelChannelsOutput=dataJson.o_labels
     const labelChannelsInput=dataJson.i_labels
+    const device_type=dataJson.device_type
 
-    return { inputChannelStates,outputChannelStates,inputVolumesStates,outputVolumesStates,isAvailable,outputVisibility,inputVisibility,currentPresets,labelPresets,labelChannelsInput,labelChannelsOutput }   
+    return { inputChannelStates,outputChannelStates,inputVolumesStates,outputVolumesStates,isAvailable,outputVisibility,inputVisibility,currentPresets,labelPresets,labelChannelsInput,labelChannelsOutput,device_type }   
 }

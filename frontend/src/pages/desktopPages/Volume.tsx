@@ -28,7 +28,8 @@ export const Volume=()=>{
 
     
     useEffect(()=>{
-    const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility, currentPresets, labelPresets, labelChannelsInput, labelChannelsOutput } = GetData(message);
+      const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility, currentPresets, labelPresets, labelChannelsInput, labelChannelsOutput, device_type } = GetData(message);
+      if(device_type==="matrix"){    
         setInputChannelStates(inputChannelStates);
         setOutputChannelStates(outputChannelStates);
         setInputVolumesStates(inputVolumesStates);
@@ -40,6 +41,7 @@ export const Volume=()=>{
         setlabelPresets(labelPresets)
         setlabelChannelInput(labelChannelsInput)
         setlabelChannelOutput(labelChannelsOutput)
+      }
       },[message])
     const navigate = useNavigate()
 

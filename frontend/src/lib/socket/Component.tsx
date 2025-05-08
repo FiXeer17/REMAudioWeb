@@ -14,9 +14,9 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const { children } = props
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
     const [loading, setLoading]= useState(true)
-    const { triggerRedirect } = useConnections();
-
-    const {uuid,isAdmin}=useConnections()
+    const {uuid,sockets,isAdmin,triggerRedirect}=useConnections()
+    const [ latest_matrix,setLatest_Matrix ]= useState(false)
+    const [ latest_camera,setLatest_Camera ]= useState(false)
 
     useEffect(()=>{
       
@@ -25,6 +25,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       const socketServerUrl = `ws://localhost:8000/ws/app?uuid=${uuid}`;  
 
       const socket = new WebSocket(socketServerUrl)
+
       let closedByServer = false
       let manuallyClosed = false;
 
@@ -33,27 +34,20 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       socket.onmessage=(event)=>{
         
         const datajson=JSON.parse(event.data)
-        console.log(datajson)
         if (!datajson.hasOwnProperty('reason')){
           socketDispatch({ type: 'new_message', payload: event.data })
           setLoading(false)
         }else{
-          closedByServer=true
-          
-          if (isAdmin){
-            const handleRedirect = async () => {
+          const handleRedirect = async () => {
             await triggerRedirect()
-            navigate("/uuidprovider",{state:{show:true}})
-            }
-            handleRedirect()
           }
-          else
-            navigate("/callAdministrator")
+          handleRedirect()
         }
+        
       }
       socket.onclose=()=>{
-        if (!closedByServer && !manuallyClosed) {
-          
+
+        if (!manuallyClosed && !closedByServer) {
           localStorage.removeItem("accessToken");
           navigate("/login");
         }
@@ -64,6 +58,26 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         socket.close();
       };
     },[uuid])
+
+    useEffect(()=>{
+      if (!sockets) return;
+ 
+      const hasLatestMatrix = sockets.some(socket => socket.isLatestAudio);
+      const hasLatestCamera = sockets.some(socket => socket.isLatestVideo);
+
+      setLatest_Matrix(hasLatestMatrix);
+      setLatest_Camera(hasLatestCamera);
+
+
+      if (!hasLatestCamera && !hasLatestMatrix) {
+        if (isAdmin) {
+          navigate("/uuidprovider", { state: { show: true } });
+        } else {
+          navigate("/callAdministrator");
+        }
+      }
+
+    },[sockets])
 
     
     if(loading) return <RecentConnections isLoading={true}/>

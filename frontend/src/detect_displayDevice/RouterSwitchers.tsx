@@ -31,6 +31,9 @@ import { PreferenciesPresets as PreferenciesPresetsMobile } from "@/pages/mobile
 import { PreferenciesChannels as PreferenciesChannelsDesktop } from "@/pages/desktopPages/PreferenciesChannels"
 import { PreferenciesChannels as PreferenciesChannelsMobile } from "@/pages/mobilePages/PreferenciesChannels"
 
+import { Video as VideoDesktop} from "@/pages/desktopPages/Video"
+import { Video as VideoMobile } from "@/pages/mobilePages/Video"
+
 import { useIsDesktop } from "./useDeviceType"
 
 
@@ -87,6 +90,11 @@ export const PreferenciesPresets = () => {
 export const PreferenciesChannels = () => {
     const isDesktop = useIsDesktop();
     return isDesktop ? <PreferenciesChannelsDesktop /> : <PreferenciesChannelsMobile />;
+};
+
+export const Video = () => {
+    const isDesktop = useIsDesktop();
+    return isDesktop ? <VideoDesktop /> : <VideoMobile />;
 };
 
 

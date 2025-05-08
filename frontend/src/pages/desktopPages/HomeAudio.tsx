@@ -25,7 +25,8 @@ export const HomeAudio=()=> {
     const Channels = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16",];
 
     useEffect(()=>{
-        const { inputChannelStates, outputChannelStates,isAvailable,outputVisibility, inputVisibility, currentPresets, labelPresets } = GetData(message);
+      const { inputChannelStates, outputChannelStates, isAvailable, outputVisibility, inputVisibility, currentPresets, labelPresets, device_type } = GetData(message);
+      if(device_type==="matrix"){
         setInputChannelStates(inputChannelStates);
         setOutputChannelStates(outputChannelStates);
         setInputVisibility(inputVisibility)
@@ -33,7 +34,8 @@ export const HomeAudio=()=> {
         setIsAvailable(isAvailable)
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
-    },[message])
+      }
+      },[message])
 
     const handleState = (channel: string, type: string) => {
         if (type === "I") {
