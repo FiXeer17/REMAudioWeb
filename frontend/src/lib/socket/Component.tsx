@@ -21,7 +21,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       
       if (!uuid) return
 
-      const socketServerUrl = `ws://localhost:8000/ws/app?uuid=${uuid}`;  
+      const socketServerUrl = `ws://192.168.88.252/ws/app?uuid=${uuid}`;  
 
       const socket = new WebSocket(socketServerUrl)
       
