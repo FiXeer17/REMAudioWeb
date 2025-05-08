@@ -42,6 +42,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
             latest_matrix=true
           }
           if (datajson.device_type==="camera"){
+            console.log(datajson)
             socketDispatch({ type: 'new_message_camera', payload: event.data })
             latest_camera = true
           }
