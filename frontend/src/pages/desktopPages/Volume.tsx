@@ -85,7 +85,7 @@ export const Volume=()=>{
 
                             return(
                               
-                              <div className="flex flex-col items-center justify-center gap-3">
+                              <div className="flex flex-col items-center justify-center gap-3" key={key}>
                                 <p className="text-home_colors-Similar_White text-sm font-bold">{ inputVolumesStates[key] } db </p>
                                 <Slider orientation="vertical" className="h-full" 
                                         disabled={inputVisibility[key] ? inputChannelStates[key] : false} min={-60} max={15} 
