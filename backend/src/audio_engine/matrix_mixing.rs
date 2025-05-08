@@ -73,8 +73,8 @@ pub fn generate_cmds() -> Vec<String> {
             // Replace 8th and 9th bytes (indices 6 and 7)
             let a = format!("{:02X}", index);
             let b = format!("{:02X}", channel);
-            parts[6] = &a;    // index
-            parts[7] = &b;  // channel
+            parts[8] = &a;    // index
+            parts[9] = &b;  // channel
 
             let message = parts.join(" ");
             messages.push(message);

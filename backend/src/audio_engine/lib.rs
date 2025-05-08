@@ -148,7 +148,7 @@ impl MatrixCommandDatas {
 
 impl From<MatrixCommand> for MatrixCommandDatas {
     fn from(value: MatrixCommand) -> Self {
-        let fncode = fncodes::FNCODE::from_str(&value.fcode).expect("Cannot retrieve fcode");
+        let fncode = fncodes::FNCODE::from_str(&value.fcode).expect(&format!("Cannot retrieve fcode on value {:?}",value));
         let function = fncode.to_label();
         let data_length =
             u32::from_str_radix(&value.data_length.unwrap_or("00".to_string()), 16).unwrap();
@@ -194,7 +194,6 @@ impl TryFrom<&[u8]> for MatrixCommand {
             .map(|byte| format!("{:02X}", byte))
             .collect::<Vec<String>>()
             .join(" ");
-
         MatrixCommand::from_str(&raw_cmd)
     }
 }
