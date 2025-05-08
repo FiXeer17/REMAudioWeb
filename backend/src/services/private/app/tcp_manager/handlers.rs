@@ -130,14 +130,14 @@ impl Handler<SetSocket> for TcpStreamsManager {
 
                     let pool = self.pgpool.clone();
                     tokio::spawn(async move {
-                        info!("Setting the new socket...");
+                        info!("Setting the new socket... ({})",sockv4.to_string());
                         let result =
                             insert_socket_in_db(&pool, msg.socket_name, sockv4.clone(), msg.device)
                                 .await;
                         if result.is_err() {
                             warn!("Couldn't save socket in database");
                         }
-                        info!("Socket set succesfully.");
+                        info!("Socket set succesfully. ({})",sockv4.to_string());
                     });
                 }
                 return true;
