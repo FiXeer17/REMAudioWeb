@@ -27,6 +27,7 @@ export const HomeAudio=()=> {
 
     useEffect(()=>{
       if(!message_matrix) return 
+      
       const { inputChannelStates,outputChannelStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message_matrix);
         setInputChannelStates(inputChannelStates);
         setOutputChannelStates(outputChannelStates);
