@@ -60,8 +60,8 @@ pub fn into_deserialized(mut data: Vec<String>) -> (Option<u32>, Option<u32>, Op
 
 pub fn generate_cmds() -> Vec<String> {
     let mut messages = Vec::new();
-    for index in 1..=16 {
-        for channel in 1..=16 {
+    for index in 1..=8 {
+        for channel in 1..=8 {
             let mut parts = if index == channel {
                 // String (a)
                 vec!["A5", "C3", "3C", "5A", "FF", "63", "09", "03", "00", "00", "01", "EE"]

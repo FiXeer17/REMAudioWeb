@@ -173,7 +173,8 @@ To do so you have to send a json formatted WebSocket message with this body:
 | change channel visibility | yes | yes | yes | no | yes |
 | change the current preset | yes | no | no | no | yes |
 | mute channel | yes | yes | yes | no | yes |
-| change the volume of the channel | yes | yes | yes | no | yes
+| change the volume of the channel | yes | yes | yes | no | yes |
+|change matrix mixer map | yes | no | yes | yes | yes
 
 
 ### POSSIBLE DEVICE TYPES
@@ -194,6 +195,7 @@ sections are specific keywords, here is a list of sections that the engine curre
 | change the current preset | "preset" |
 | mute channel | "mute" |
 | change the volume of the channel | "volume" |
+| map input to output | "mix_map" |
 
 
 ### POSSIBLE IO:
@@ -214,6 +216,7 @@ values can be used in different context, because of that it can assume different
 | preset | n positive integer: 1<=n<=16 |
 | mute | boolean |
 | volume | integer |
+| mix_map | boolean |
 
 
 
