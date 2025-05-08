@@ -40,7 +40,7 @@ pub fn read_volume_all(src: io::SRC) -> Result<Vec<MatrixCommand>, Error> {
 pub fn into_data(data: SetState) -> Result<Vec<String>, Error> {
     let io = SRC::from_str(data.io.unwrap().as_str())?;
     let channel = format!("{:02X}",data.channel.unwrap().trim().parse::<u8>().unwrap());
-    MatrixCommand::check_channel(channel.clone())?;
+    MatrixCommand::check_channel(&channel)?;
     let value = data.value.unwrap();
     match value.parse::<f32>() {
         Ok(v) => {

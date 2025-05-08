@@ -61,23 +61,26 @@ impl TcpStreamActor {
             };
 
             if let Err(_) = written_bytes {
+                warn!("closed by remote peer on write");
                 ctx_addr.do_send(ClosedByRemotePeer {
                     message: "error occurred on matrix".to_string(),
                     socket,
                 });
                 return;
-            }
 
+            }
+            let timeout = tcp_comunication_settings::get_read_timeout();
             let read_bytes = {
                 let mut stream = stream.lock().await;
                 tokio::time::timeout(
-                    tcp_comunication_settings::get_read_timeout(),
+                    timeout,
                     stream.read(&mut buffer),
                 )
                 .await
             };
             if let Ok(Ok(n)) = read_bytes {
                 if n == 0 {
+                    warn!("closed by remote peer on read (0 bytes)");
                     ctx_addr.do_send(ClosedByRemotePeer {
                         message: "error occurred on matrix".to_string(),
                         socket,
