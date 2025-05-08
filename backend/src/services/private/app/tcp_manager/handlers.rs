@@ -3,18 +3,12 @@ use std::{collections::HashSet, net::SocketAddrV4, str::FromStr};
 use crate::{
     services::{
         private::{
-            app::{
-                tcp_handler::{
-                    tcp_handler::TcpStreamActor,
-                    utils::{add_channels, add_presets},
-                },
-                utils::HasStatesMessage,
-            },
+            app::{tcp_handler::tcp_handler::TcpStreamActor, utils::HasStatesMessage},
             socket::utils::Device,
         },
         public::{
             interfaces::{insert_socket_in_db, retrieve_socket_from_db},
-            schemas::{IsContainedExt, Socket},
+            schemas::Socket,
         },
     },
     utils::common::check_socket,
@@ -51,13 +45,10 @@ impl Handler<Connect> for TcpStreamsManager {
         let to_connect_clone = to_connect.clone();
         tokio::spawn(async move {
             for socket in to_connect_clone {
-                let Ok(dbsock) = retrieve_socket_from_db(&pool_cloned, socket).await else {
+                if retrieve_socket_from_db(&pool_cloned, socket).await.is_err() {
                     warn!("Couldn't retrieve socket from database.");
-                    return;
+                    continue;
                 };
-                let pool_for_presets = pool_cloned.clone();
-                add_presets(pool_for_presets.clone(), socket, dbsock.device).await;
-                add_channels(pool_for_presets, socket).await;
             }
         });
         for socket in to_connect {
@@ -139,14 +130,14 @@ impl Handler<SetSocket> for TcpStreamsManager {
 
                     let pool = self.pgpool.clone();
                     tokio::spawn(async move {
-                        info!("Setting the new socket...");
+                        info!("Setting the new socket... ({})",sockv4.to_string());
                         let result =
                             insert_socket_in_db(&pool, msg.socket_name, sockv4.clone(), msg.device)
                                 .await;
                         if result.is_err() {
                             warn!("Couldn't save socket in database");
                         }
-                        info!("Socket set succesfully.");
+                        info!("Socket set succesfully. ({})",sockv4.to_string());
                     });
                 }
                 return true;
@@ -160,11 +151,7 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: RemoveSocket, _ctx: &mut Self::Context) -> Self::Result {
         let sessions = self.streams.remove(&msg.socket);
-        if msg.forced {
-            let message = ClosedByAdmin {device:None,sessions};
-            let stream_actor= self.streams_actors.get(&msg.socket).unwrap();
-            stream_actor.do_send(message.clone());  
-        }
+
         let index = self
             .inactive_sockets
             .iter()
@@ -185,7 +172,13 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
             }
         }
 
-        self.streams_actors.remove(&msg.socket);
+        if let Some(actor) = self.streams_actors.remove(&msg.socket) {
+            let message = ClosedByAdmin {
+                device: None,
+                sessions,
+            };
+            actor.do_send(message);
+        }
 
         self.avail_map.remove(&msg.socket);
         let to_remove: Vec<Uuid> = self
@@ -207,11 +200,6 @@ impl Handler<RemoveSocket> for TcpStreamsManager {
         });
         self.sockets
             .retain(|s| SocketAddrV4::from_str(&s.socket).unwrap() != msg.socket);
-        if !msg.forced {
-            if let Some(socket) = self.sockets.socket_is_contained(&msg.socket.to_string()) {
-                self.inactive_sockets.push_back(socket);
-            }
-        }
     }
 }
 
@@ -254,14 +242,10 @@ impl Handler<SessionOpened> for TcpStreamsManager {
 
 impl Handler<GeneralError> for TcpStreamsManager {
     type Result = ();
-    fn handle(&mut self, msg: GeneralError, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: GeneralError, _ctx: &mut Self::Context) -> Self::Result {
         if let Some(sock) = msg.socket {
-            self.streams.get(&sock).unwrap().iter().for_each(|addr| {
+            self.streams.remove(&sock).unwrap().iter().for_each(|addr| {
                 addr.do_send(msg.clone());
-            });
-            ctx.address().do_send(RemoveSocket {
-                socket: sock,
-                forced: false,
             });
         }
     }
@@ -312,29 +296,21 @@ impl Handler<Disconnect> for TcpStreamsManager {
 
 impl Handler<StreamFailed> for TcpStreamsManager {
     type Result = ();
-    fn handle(&mut self, msg: StreamFailed, ctx: &mut Self::Context) -> Self::Result {
-        for session in self.streams.get(&msg.socket).unwrap() {
+    fn handle(&mut self, msg: StreamFailed, _ctx: &mut Self::Context) -> Self::Result {
+        for session in self.streams.remove(&msg.socket).unwrap() {
             session.do_send(msg.clone())
         }
-        ctx.address().do_send(RemoveSocket {
-            socket: msg.socket,
-            forced: false,
-        });
     }
 }
 
 impl Handler<ClosedByRemotePeer> for TcpStreamsManager {
     type Result = ();
-    fn handle(&mut self, msg: ClosedByRemotePeer, ctx: &mut Self::Context) -> Self::Result {
-        if let Some(removed) = self.streams.get(&msg.socket) {
+    fn handle(&mut self, msg: ClosedByRemotePeer, _ctx: &mut Self::Context) -> Self::Result {
+        if let Some(removed) = self.streams.remove(&msg.socket) {
             for session in removed {
                 session.do_send(msg.clone());
             }
         }
-        ctx.address().do_send(RemoveSocket {
-            socket: msg.socket,
-            forced: false,
-        });
     }
 }
 

@@ -1,4 +1,4 @@
-use super::super::messages::{StreamFailed, StreamStarted};
+use super::{super::messages::{StreamFailed, StreamStarted}, utils::{add_channels, add_presets}};
 
 use crate::{
     configs::tcp_comunication_settings,
@@ -57,6 +57,8 @@ impl Actor for TcpStreamActor {
     fn started(&mut self, ctx: &mut Self::Context) {
         let socket = self.stream_socket.clone();
         let ctx_address = ctx.address().clone();
+        let device_cloned = self.device_type.clone();
+        let pool_clone = self.pgpool.clone();
         tokio::spawn(async move {
             let mut retries: u8 = 0;
             while retries <= tcp_comunication_settings::get_max_connection_retries() {
@@ -69,15 +71,17 @@ impl Actor for TcpStreamActor {
                     Ok(not_timedout) => match not_timedout {
                         Ok(tcp_stream) => {
                             tcp_stream.set_nodelay(false).unwrap();
+                            add_presets(pool_clone.clone(), socket, device_cloned.to_string()).await;
+                            if device_cloned == Device::Audio{add_channels(pool_clone, socket).await;}
                             let message = StreamStarted { tcp_stream };
                             ctx_address.do_send(message);
                             break;
                         }
-                        Err(e) => {
+                        Err(_) => {
                             if retries == tcp_comunication_settings::get_max_connection_retries() {
                                 let message = StreamFailed {
                                     socket,
-                                    error: e.to_string(),
+                                    error: format!("error occurred on {}",device_cloned.to_string()),
                                 };
                                 ctx_address.do_send(message);
                                 println!("cannot create tcp stream, closing...");
@@ -88,11 +92,11 @@ impl Actor for TcpStreamActor {
                             }
                         }
                     },
-                    Err(t) => {
+                    Err(_) => {
                         if retries == tcp_comunication_settings::get_max_connection_retries() {
                             let message = StreamFailed {
                                 socket,
-                                error: t.to_string(),
+                                error: format!("error occurred on {}",device_cloned.to_string()),
                             };
                             ctx_address.do_send(message);
                             warn!("Cannot create tcp stream (time elapsed), closing...");

@@ -25,3 +25,9 @@ pub fn into_data(data: SetState) ->Result<Vec<String>,Error>{
                     Err(e) => return Err(Error::ConversionError(e.to_string())),
                 }
 }
+
+
+pub fn into_deserialized(mut data:Vec<String>) -> Option<u8>{
+    let value = data.remove(0);
+    Some(u8::from_str_radix(&value, 16).unwrap())
+}

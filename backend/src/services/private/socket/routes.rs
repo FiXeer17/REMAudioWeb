@@ -142,7 +142,6 @@ pub async fn remove_socket(
             }
             
             let message = RemoveSocket {
-                forced: true,
                 socket:s.unwrap(),
             };
             srv.do_send(message);

@@ -106,7 +106,13 @@ impl Handler<Connect> for TcpStreamActor {
                 };
                 self.tcp_manager.do_send(DeviceReady::MatrixReady(message));
             }
-            MachineStates::CameraStates(_) => (),
+            MachineStates::CameraStates(states) => {
+                let message = CameraReady {
+                    socket: msg.socket.unwrap(),
+                    states,
+                };
+                self.tcp_manager.do_send(DeviceReady::CameraReady(message));
+            },
         }
     }
 }
