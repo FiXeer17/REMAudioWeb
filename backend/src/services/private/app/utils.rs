@@ -1,5 +1,5 @@
 
-use std::{collections::HashMap, net::SocketAddrV4};
+use std::{collections::HashMap, net::SocketAddrV4, str::FromStr};
 
 
 use crate::{audio_engine::{defs::{datas::io::SRC, fncodes::FNCODE}, lib::{MatrixCommand, MatrixCommandDatas}}, services::private::socket::utils::Device};
@@ -36,13 +36,16 @@ impl MatrixStates {
         input_visibility: Vec<bool>,
         output_visibility: Vec<bool>,
     ) -> Self {
-        let (mut i_mute, mut o_mute, mut i_volumes, mut o_volumes, mut current_preset): (
+        let (mut i_mute, mut o_mute, mut i_volumes, mut o_volumes,mut mix_map, mut current_preset): (
             HashMap<u32, bool>,
             HashMap<u32, bool>,
             HashMap<u32, f32>,
             HashMap<u32, f32>,
+            HashMap<String,bool>,
             u8,
+            
         ) = (
+            HashMap::new(),
             HashMap::new(),
             HashMap::new(),
             HashMap::new(),
@@ -50,7 +53,6 @@ impl MatrixStates {
             0,
         );
 
-        let input_from_def = SRC::INPUT.to_label();
         let i_labels: HashMap<u32, String> = index_values(input_channel_labels);
         let o_labels: HashMap<u32, String> = index_values(output_channel_labels);
         let preset_labels: HashMap<u32,String> = index_values(preset_labels);
@@ -60,25 +62,13 @@ impl MatrixStates {
 
         for command in cmds {
             let cmd = MatrixCommandDatas::from(command);
-            let io = cmd.io;
-            let function = cmd.function;
-
-            if function == FNCODE::MUTE.to_label() {
-                let (muted, io, channel) = (cmd.muted.unwrap(), io.unwrap(), cmd.channel.unwrap());
-                if io == input_from_def {
-                    i_mute.entry(channel).or_insert(muted);
-                    continue;
-                }
-                o_mute.entry(channel).or_insert(muted);
-            } else if function == FNCODE::VOLUME.to_label() {
-                let (value, io, channel) = (cmd.value.unwrap(), io.unwrap(), cmd.channel.unwrap());
-                if io == input_from_def {
-                    i_volumes.entry(channel).or_insert(value);
-                    continue;
-                }
-                o_volumes.entry(channel).or_insert(value);
-            } else {
-                current_preset = cmd.preset.unwrap();
+            let function = cmd.function.clone();
+            match FNCODE::from_str(&function){
+                Ok(FNCODE::MUTE) => Self::handle_mute_cmd(&mut i_mute, &mut o_mute, &cmd),
+                Ok(FNCODE::VOLUME) => Self::handle_volume_cmd(&mut i_volumes, &mut o_volumes, &cmd),
+                Ok(FNCODE::SCENE) => Self::handle_preset_cmd(&mut current_preset, &cmd),
+                Ok(FNCODE::MATRIXMIXING) => Self::handle_mix_cmd(&mut mix_map,&cmd),
+                _ => panic!("invalid cmd")
             }
         }
 
@@ -95,35 +85,54 @@ impl MatrixStates {
             current_preset,
             available: None,
             matrix_socket,
+            mix_map,
             device_type: Device::Audio.to_string()
         }
     }
 
     pub fn set_changes(&mut self, command: MatrixCommand) {
         let cmd = MatrixCommandDatas::from(command);
-        let io = cmd.io;
-        let function = cmd.function;
-        let input_from_def = SRC::INPUT.to_label();
-
-        if function == FNCODE::MUTE.to_label() {
-            let (muted, io, channel) = (cmd.muted.unwrap(), io.unwrap(), cmd.channel.unwrap());
-            if io == input_from_def {
-                self.i_mute.insert(channel, muted);
-                return;
-            }
-            self.o_mute.insert(channel, muted);
-        } else if function == FNCODE::VOLUME.to_label() {
-            let (value, io, channel) = (cmd.value.unwrap(), io.unwrap(), cmd.channel.unwrap());
-            if io == input_from_def {
-                self.i_volumes.insert(channel, value);
-                return;
-            }
-            self.o_volumes.insert(channel, value);
-        } else {
-            self.current_preset = cmd.preset.unwrap();
+        let function = cmd.function.clone();
+        match FNCODE::from_str(&function){
+            Ok(FNCODE::MUTE) => Self::handle_mute_cmd(&mut self.i_mute, &mut self.o_mute, &cmd),
+            Ok(FNCODE::VOLUME) => Self::handle_volume_cmd(&mut self.i_volumes, &mut self.o_volumes, &cmd),
+            Ok(FNCODE::SCENE) => Self::handle_preset_cmd(&mut self.current_preset, &cmd),
+            Ok(FNCODE::MATRIXMIXING) => Self::handle_mix_cmd(&mut self.mix_map,&cmd),
+            _ => panic!("invalid cmd")
         }
     }
+
+    fn handle_mute_cmd(i_mute:&mut HashMap<u32, bool>, o_mute:&mut HashMap<u32, bool>,cmd:&MatrixCommandDatas){
+        let (muted, io, channel) = (cmd.muted.unwrap(), cmd.io.clone().unwrap(), cmd.channel.unwrap());
+
+        if io == SRC::INPUT.to_label() {
+            i_mute.entry(channel).or_insert(muted);
+            return;
+        }
+        o_mute.entry(channel).or_insert(muted);
+    }
+
+    fn handle_volume_cmd(i_volumes: &mut HashMap<u32, f32>,o_volumes: &mut HashMap<u32, f32>, cmd:&MatrixCommandDatas ){
+        let (value, io, channel) = (cmd.value.unwrap(), cmd.io.clone().unwrap(), cmd.channel.unwrap());
+        if io == SRC::INPUT.to_label() {
+            i_volumes.insert(channel, value);
+            return;
+        }
+        o_volumes.insert(channel, value);
+    }
+    fn handle_preset_cmd(current_preset:&mut u8, cmd:&MatrixCommandDatas){
+        let preset = cmd.preset.unwrap();
+        *current_preset = preset;
+    }
+    fn handle_mix_cmd(mix_map: &mut HashMap<String,bool>,cmd:&MatrixCommandDatas){
+        let indx = cmd.index.unwrap();
+        let ch = cmd.channel.unwrap();
+        let connected = cmd.connected.unwrap();
+        mix_map.insert(format!("({},{})",indx,ch),connected);
+    }
 }
+
+
 
 pub trait HasPresetLabels: Send + 'static {
     fn preset_labels_mut(&mut self) -> &mut HashMap<u32,String>;

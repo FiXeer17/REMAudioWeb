@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use backend::audio_engine::defs::{errors::Error,datas::{io::*, rw}};
+use backend::audio_engine::{defs::{datas::{io::*, rw}, errors::Error}, matrix_mixing::generate_cmds};
 use backend::audio_engine::{mute::*, presets::read_current_preset, volume::*};
 use backend::audio_engine::lib::*;
 use backend::services::private::app::schemas::SetState;
@@ -284,7 +284,6 @@ fn ok_cmd_from_wsclient_simulation(){
 
 #[test]
 fn ok_cmd_deserialized(){
-    let cmd = MatrixCommand::from_str("A5 C3 3C 5A FF 63 02 00 EE").unwrap();
-    dbg!(MatrixCommandDatas::from(cmd));
+    println!("{:?}",generate_cmds());
     
 }

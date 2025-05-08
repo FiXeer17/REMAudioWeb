@@ -14,7 +14,7 @@ pub fn read_mute_ch(src: io::SRC, ch: u32) -> Result<MatrixCommand, Error> {
     let rw = defs::datas::rw::READ.to_string();
     let io = src.to_string();
     let ch = format!("{:02X}", ch);
-    MatrixCommand::check_channel(ch.clone())?;
+    MatrixCommand::check_channel(&ch)?;
 
     let data = Some(vec![io, ch]);
 
@@ -37,7 +37,7 @@ pub fn read_mute_all(src: io::SRC) -> Result<Vec<MatrixCommand>, Error> {
 pub fn into_data(data: SetState) ->Result<Vec<String>,Error> {
     let io = SRC::from_str(data.io.unwrap().as_str())?;
     let channel = format!("{:02X}", data.channel.unwrap().trim().parse::<u8>().unwrap());
-    MatrixCommand::check_channel(channel.clone())?;
+    MatrixCommand::check_channel(&channel)?;
     let value = MuteStatus::from_str(data.value.unwrap().as_str())?;
     Ok(vec![io.to_string(), channel, value.to_string()])
 }

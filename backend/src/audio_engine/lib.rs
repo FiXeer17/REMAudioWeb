@@ -1,6 +1,6 @@
 use super::{
     defs::status_codes::StatusCodes,
-    matrix_mixing::{self},
+    matrix_mixing::{self, read_mix_all},
     mute, presets, volume,
 };
 use errors::Error;
@@ -95,7 +95,7 @@ impl MatrixCommand {
             end: END_CODE.to_string(),
         })
     }
-    pub fn check_channel(ch: String) -> Result<u8, Error> {
+    pub fn check_channel(ch: &String) -> Result<u8, Error> {
         match u8::from_str_radix(&ch, 16) {
             Ok(v) => {
                 if v > channels_settings::get_channels_number() || v < 1 {
@@ -148,7 +148,7 @@ impl MatrixCommandDatas {
 
 impl From<MatrixCommand> for MatrixCommandDatas {
     fn from(value: MatrixCommand) -> Self {
-        let fncode = fncodes::FNCODE::from_str(&value.fcode).expect("Cannot retrieve fcode");
+        let fncode = fncodes::FNCODE::from_str(&value.fcode).expect(&format!("Cannot retrieve fcode on value {:?}",value));
         let function = fncode.to_label();
         let data_length =
             u32::from_str_radix(&value.data_length.unwrap_or("00".to_string()), 16).unwrap();
@@ -194,7 +194,6 @@ impl TryFrom<&[u8]> for MatrixCommand {
             .map(|byte| format!("{:02X}", byte))
             .collect::<Vec<String>>()
             .join(" ");
-
         MatrixCommand::from_str(&raw_cmd)
     }
 }
@@ -309,17 +308,20 @@ pub fn read_all_states() -> Result<Vec<MatrixCommand>, Error> {
     let (in_mute_states, out_mute_states) =
         (read_mute_all(SRC::INPUT)?, read_mute_all(SRC::OUTPUT)?);
     let current_preset = read_current_preset()?;
+    let mix = read_mix_all()?;
     let mut commands: Vec<MatrixCommand> = Vec::with_capacity(
         in_volume_states.len()
             + out_volume_sates.len()
             + in_mute_states.len()
             + out_mute_states.len()
+            + mix.len()
             + 1,
     );
     commands.extend_from_slice(&in_mute_states[..]);
     commands.extend_from_slice(&out_mute_states[..]);
     commands.extend_from_slice(&in_volume_states[..]);
     commands.extend_from_slice(&out_volume_sates[..]);
+    commands.extend_from_slice(&mix[..]);
     commands.push(current_preset);
 
     Ok(commands)

@@ -110,8 +110,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                     HandleText::SetVisibility(sv) => {
                         let sv_clone = sv.clone();
                         let channel = sv_clone.channel.unwrap().parse::<u8>().unwrap();
-                        let io = sv_clone.io.unwrap();
-                        if check_channel(io, channel) {
+                        if check_channel(channel) {
                             self.srv.do_send(SetMessage {
                                 addr,
                                 command: Commands::SetVisibility(sv),
@@ -121,8 +120,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                     HandleText::SetChannelLabels(sl) => {
                         let sl_clone = sl.clone();
                         let channel = sl_clone.channel.unwrap().parse::<u8>().unwrap();
-                        let io = sl_clone.io.unwrap();
-                        if check_channel(io, channel) {
+                        if check_channel(channel) {
                             self.srv.do_send(SetMessage {
                                 addr,
                                 command: Commands::SetChannelLabel(sl),
