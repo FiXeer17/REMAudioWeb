@@ -21,7 +21,7 @@ export default function Navbar({selectedColor}:NavbarColor){
             {selectedColor==="speaker" ? <SpeakerHigh size={28} color="#007AFF" />
             : <SpeakerHigh size={28} color="#FAFAFA" />}
             </div>
-            <div className="cursor-pointer">
+            <div onClick={()=>navigate("/video")} className="cursor-pointer">
             {selectedColor==="video" ? <VideoCamera size={28} color="#007AFF" />
             : <VideoCamera size={28} color="#FAFAFA" />}
             </div>

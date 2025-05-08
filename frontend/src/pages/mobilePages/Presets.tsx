@@ -11,7 +11,7 @@ export const Presets = () => {
     const navigate=useNavigate()
     const location=useLocation()
     const [isLoading,setIsLoading] = useState(false)
-    const {socket,message} = useContext(SocketContext).socketState
+    const {socket,message_matrix} = useContext(SocketContext).socketState
     const [currentPresets,setCurrentPresets]=useState(0)
     const [colorNav] = useState<string>(() => location.state);
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
@@ -19,12 +19,10 @@ export const Presets = () => {
 
 
     useEffect(()=>{
-      const { currentPresets,labelPresets,device_type } = GetData(message);
-      if(device_type==="matrix"){
+      const { currentPresets,labelPresets } = GetData(message_matrix);
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
-      }
-      },[message])
+      },[message_matrix])
 
     useEffect(()=>{
       if (isLoading===true){

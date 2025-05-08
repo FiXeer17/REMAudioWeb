@@ -3,18 +3,20 @@ import {createContext} from "react";
 
 export interface ISocketContextState {
   socket: WebSocket | undefined;
-  message: string
+  message_matrix: string,
+  message_camera: string
  
 }
 
 export const defaultSocketContextState: ISocketContextState = {
   socket: undefined,
-  message: ""
-  
+  message_matrix: "",
+  message_camera: ""
+
 };
 
 
-export type TSocketContextActions = "update_socket"|"new_message";
+export type TSocketContextActions = "update_socket"|"new_message_matrix"|"new_message_camera";
 
 export type TSocketContextPayload= WebSocket|string
 
@@ -28,8 +30,10 @@ export const SocketReducer = (state: ISocketContextState, action: ISocketContext
   switch (action.type) {
     case "update_socket":
       return { ...state, socket: action.payload as WebSocket };
-    case "new_message":
-      return { ...state, message: action.payload as string };
+    case "new_message_matrix":
+      return { ...state, message_matrix: action.payload as string };
+    case "new_message_camera":
+      return { ...state, message_camera: action.payload as string };
     default:
       return state;
   }

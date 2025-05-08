@@ -14,10 +14,8 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const { children } = props
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
     const [loading, setLoading]= useState(true)
-    const {uuid,sockets,isAdmin,triggerRedirect}=useConnections()
-    const [ socketOpen, setSocketOpen ] = useState(false)
-    const [ latest_matrix,setLatest_Matrix ]= useState(false)
-    const [ latest_camera,setLatest_Camera ]= useState(false)
+    const {uuid,isAdmin}=useConnections()
+    
 
     useEffect(()=>{
       
@@ -29,23 +27,41 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       
       let closedByServer = false
       let manuallyClosed = false;
+      let latest_matrix = false
+      let latest_camera = false
 
-      socket.onopen=()=>{setSocketOpen(true)};
+      socket.onopen=()=>{};
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
         
         const datajson=JSON.parse(event.data)
-        console.log(datajson)
         if (!datajson.hasOwnProperty('reason')){
-          socketDispatch({ type: 'new_message', payload: event.data })
           
+          if(datajson.device_type==="matrix"){
+            socketDispatch({ type: 'new_message_matrix', payload: event.data })
+            latest_matrix=true
+          }
+          if (datajson.device_type==="camera"){
+            socketDispatch({ type: 'new_message_camera', payload: event.data })
+            latest_camera = true
+          }
           setLoading(false)
           
+          
         }else{
-          const handleRedirect = async () => {
-            await triggerRedirect()
+          const reason=datajson.reason
+          if(reason.includes("camera")){
+            latest_camera=false
+          }else if(reason.includes("matrix")){
+            latest_matrix=false
           }
-          handleRedirect()
+          if(!latest_camera && !latest_matrix){
+            if (isAdmin) {
+              navigate("/uuidprovider", { state: { show: true } });
+            } else {
+              navigate("/callAdministrator");
+            }
+          }
         }
         
       }
@@ -58,43 +74,16 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         }
 
       return () => {
-
         manuallyClosed = true;
         socket.close();
       };
     },[uuid])
 
-    useEffect(() => {
-      if (!sockets || !socketOpen) {
-        if (socketOpen) {
-          if (isAdmin) {
-            navigate("/uuidprovider", { state: { show: true } });
-          } else {
-            navigate("/callAdministrator");
-          }
-        }
-        return;
-      }
-    
-      const hasLatestMatrix = sockets.some(socket => socket.isLatestAudio);
-      const hasLatestCamera = sockets.some(socket => socket.isLatestVideo);
-    
-      setLatest_Matrix(hasLatestMatrix);
-      setLatest_Camera(hasLatestCamera);
-    
-      if (!hasLatestMatrix && !hasLatestCamera) {
-        if (isAdmin) {
-          navigate("/uuidprovider", { state: { show: true } });
-        } else {
-          navigate("/callAdministrator");
-        }
-      }
-    
-    }, [sockets]);
+
     
 
     
-    if(loading) return <RecentConnections isLoading={true}/>
+    //if(loading) return <RecentConnections isLoading={true}/>
 
     return <SocketContextProvider value={{ socketState,socketDispatch }}>
         {children}

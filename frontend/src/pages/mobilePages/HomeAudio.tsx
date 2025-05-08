@@ -10,20 +10,21 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { Circle, Clock } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
+import { RecentConnections } from "../connections_socket/RecentConnections";
 
 export const HomeAudio=() => {
   const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
   const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
   const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
   const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
-  const {socket,message} = useContext(SocketContext).socketState
+  const {socket,message_matrix} = useContext(SocketContext).socketState
   const [isAvailable, setIsAvailable] = useState(true)
   const [currentPresets,setCurrentPresets]=useState(0)
   const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
 
   useEffect(()=>{
-    const { inputChannelStates,outputChannelStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets,device_type } = GetData(message);
-    if(device_type==="matrix"){
+    if (!message_matrix) return
+      const { inputChannelStates,outputChannelStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message_matrix);
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
       setInputVisibility(inputVisibility)
@@ -31,8 +32,7 @@ export const HomeAudio=() => {
       setIsAvailable(isAvailable)
       setCurrentPresets(currentPresets)
       setlabelPresets(labelPresets)
-    }
-    },[message])
+    },[message_matrix])
   const navigate = useNavigate();
 
   const inputChannels1 = ["1", "2", "3", "4", "5", "6", "7", "8"];
@@ -78,7 +78,8 @@ export const HomeAudio=() => {
 
   return (
     <>
-    {isAvailable ? <div className="absolute inset-0 z-10"></div>:
+    {isAvailable ? ( message_matrix ?
+            <div className="absolute inset-0 z-10"></div>:<RecentConnections isLoading={true}/> ) :
       <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
         <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
           <div className="mt-1">

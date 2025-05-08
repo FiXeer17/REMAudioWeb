@@ -37,5 +37,5 @@ class AxiosInterceptor {
   
 
   export const client = new AxiosInterceptor({
-    baseURL: "http://192.168.114.161/",
+    baseURL: "http://172.25.0.136/",
   });

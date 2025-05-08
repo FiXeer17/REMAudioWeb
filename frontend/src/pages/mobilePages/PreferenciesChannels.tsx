@@ -11,7 +11,7 @@ import InOutButton from "@/components/ui/in_out";
 
 
 export const PreferenciesChannels=()=>{
-    const { socket,message } = useContext(SocketContext).socketState
+    const { socket,message_matrix } = useContext(SocketContext).socketState
     const navigate=useNavigate()
     const [InOut,setInOut]=useState<"IN"|"OUT">("IN")
     const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
@@ -23,12 +23,10 @@ export const PreferenciesChannels=()=>{
 
 
     useEffect(()=>{
-      const { outputVisibility, inputVisibility,device_type } = GetData(message);
-      if(device_type==="matrix"){
+      const { outputVisibility, inputVisibility } = GetData(message_matrix);
         setInputVisibility(inputVisibility)
         setOutputVisibility(outputVisibility)
-      }
-      },[message])
+      },[message_matrix])
 
     const handleSetNameChannel=(value:string,channel:number)=>{
       if (InOut === "IN") {

@@ -18,7 +18,7 @@ export const Volume=()=>{
     const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
     const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
 
-    const {socket,message} = useContext(SocketContext).socketState
+    const {socket,message_matrix} = useContext(SocketContext).socketState
     const [isAvailable, setIsAvailable] = useState(true)
 
     const [labelChannelsInput,setlabelChannelInput]=useState<{[key: string]: string;}>({})
@@ -28,21 +28,19 @@ export const Volume=()=>{
 
     
     useEffect(()=>{
-      const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility, currentPresets, labelPresets, labelChannelsInput, labelChannelsOutput, device_type } = GetData(message);
-      if(device_type==="matrix"){    
-        setInputChannelStates(inputChannelStates);
-        setOutputChannelStates(outputChannelStates);
-        setInputVolumesStates(inputVolumesStates);
-        setOutputVolumesStates(outputVolumesStates);
-        setInputVisibility(inputVisibility)
-        setOutputVisibility(outputVisibility)
-        setIsAvailable(isAvailable)
-        setCurrentPresets(currentPresets)
-        setlabelPresets(labelPresets)
-        setlabelChannelInput(labelChannelsInput)
-        setlabelChannelOutput(labelChannelsOutput)
-      }
-      },[message])
+      const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message_matrix);
+
+      setInputChannelStates(inputChannelStates);
+      setOutputChannelStates(outputChannelStates);
+      setInputVolumesStates(inputVolumesStates);
+      setOutputVolumesStates(outputVolumesStates);
+      setInputVisibility(inputVisibility)
+      setOutputVisibility(outputVisibility)
+      setIsAvailable(isAvailable)
+      setCurrentPresets(currentPresets)
+      setlabelPresets(labelPresets)
+      
+      },[message_matrix])
     const navigate = useNavigate()
 
     const handleMute=(channel: string, type: string)=>{

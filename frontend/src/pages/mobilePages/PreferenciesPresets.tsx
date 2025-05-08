@@ -13,16 +13,14 @@ import { useContext, useEffect, useState } from "react";
 
 export const PreferenciesPresets = ()=>{
     const navigate=useNavigate()
-    const {socket,message} = useContext(SocketContext).socketState
+    const {socket,message_matrix} = useContext(SocketContext).socketState
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
 
     useEffect(()=>{
-      const { labelPresets,device_type } = GetData(message);
-      if(device_type==="matrix"){
+      const { labelPresets} = GetData(message_matrix);
         setlabelPresets(labelPresets)
-      }
-      },[message])
+      },[message_matrix])
 
       const handleSetNamePreset=(value:string,Preset:number)=>{
         const dataoutput={"section":"preset_labels","index":Preset.toString(),"value":value}
