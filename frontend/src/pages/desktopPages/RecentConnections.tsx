@@ -49,7 +49,7 @@ export const RecentConnections=()=>{
                             
                         }
                         const value = await setSocket(headers);
-                        console.log(value)
+                        console.log(value.status,value.request)
                         if (value.status===200){
                             if (element.device_type==="matrix")
                                 return navigate("/homeAudio")

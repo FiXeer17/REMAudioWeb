@@ -15,6 +15,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
     const [loading, setLoading]= useState(true)
     const {uuid,sockets,isAdmin,triggerRedirect}=useConnections()
+    const [ socketOpen, setSocketOpen ] = useState(false)
     const [ latest_matrix,setLatest_Matrix ]= useState(false)
     const [ latest_camera,setLatest_Camera ]= useState(false)
 
@@ -25,18 +26,21 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       const socketServerUrl = `ws://localhost:8000/ws/app?uuid=${uuid}`;  
 
       const socket = new WebSocket(socketServerUrl)
-
+      
       let closedByServer = false
       let manuallyClosed = false;
 
-      socket.onopen=()=>{};
+      socket.onopen=()=>{setSocketOpen(true)};
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
         
         const datajson=JSON.parse(event.data)
+        console.log(datajson)
         if (!datajson.hasOwnProperty('reason')){
           socketDispatch({ type: 'new_message', payload: event.data })
+          
           setLoading(false)
+          
         }else{
           const handleRedirect = async () => {
             await triggerRedirect()
@@ -54,30 +58,40 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         }
 
       return () => {
+
         manuallyClosed = true;
         socket.close();
       };
     },[uuid])
 
-    useEffect(()=>{
-      if (!sockets) return;
- 
+    useEffect(() => {
+      if (!sockets || !socketOpen) {
+        if (socketOpen) {
+          if (isAdmin) {
+            navigate("/uuidprovider", { state: { show: true } });
+          } else {
+            navigate("/callAdministrator");
+          }
+        }
+        return;
+      }
+    
       const hasLatestMatrix = sockets.some(socket => socket.isLatestAudio);
       const hasLatestCamera = sockets.some(socket => socket.isLatestVideo);
-
+    
       setLatest_Matrix(hasLatestMatrix);
       setLatest_Camera(hasLatestCamera);
-
-
-      if (!hasLatestCamera && !hasLatestMatrix) {
+    
+      if (!hasLatestMatrix && !hasLatestCamera) {
         if (isAdmin) {
           navigate("/uuidprovider", { state: { show: true } });
         } else {
           navigate("/callAdministrator");
         }
       }
-
-    },[sockets])
+    
+    }, [sockets]);
+    
 
     
     if(loading) return <RecentConnections isLoading={true}/>

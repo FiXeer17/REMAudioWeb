@@ -21,7 +21,7 @@ export default function NavbarDesktop({selectedColor}:NavbarColor){
             {selectedColor==="speaker" ?<p className="text-home_colors-Selected_Borders/text text-sm">Audio</p>
             :<p className="text-home_colors-Similar_White text-sm">Audio</p>}
             </div>
-            <div className="flex flex-col items-center cursor-pointer">
+            <div onClick={()=>navigate("/video")} className="flex flex-col items-center cursor-pointer">
             {selectedColor==="video" ? <VideoCamera size={40} weight="thin" color="#007AFF" />
             : <VideoCamera size={40} weight="thin" color="#FAFAFA" />}
             {selectedColor==="video" ?<p className="text-home_colors-Selected_Borders/text text-sm">Audio</p>
