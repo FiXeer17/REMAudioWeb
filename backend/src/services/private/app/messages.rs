@@ -151,7 +151,8 @@ pub struct ClosedByAdmin{
 
 #[derive(Clone)]
 pub enum Commands{
-    SetMatrixCommand(SetCommand),
+    SetMatrixCommand(SetMatrixCommand),
+    SetCameraCommand(SetCameraCommand),
     SetVisibility(SetAttributes),
     SetChannelLabel(SetAttributes),
     SetPresetLabel(SetAttributes),
@@ -159,9 +160,14 @@ pub enum Commands{
 }
 
 #[derive(Debug,Clone)]
-pub struct SetCommand{
+pub struct SetMatrixCommand{
     pub command: MatrixCommand,
 }
+#[derive(Debug,Clone)]
+pub struct SetCameraCommand{
+    pub command: Vec<u8>
+}
+
 #[derive(Message,Clone)]
 #[rtype(result="()")]
 pub struct SetCommandOk{

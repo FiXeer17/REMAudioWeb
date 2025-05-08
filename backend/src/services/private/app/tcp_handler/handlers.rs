@@ -164,6 +164,7 @@ impl Handler<SetMessage> for TcpStreamActor {
                 }
             }
             Commands::ReCache => self.handle_recache(ctx),
+            _ => ()
         }
     }
 }

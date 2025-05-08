@@ -290,6 +290,8 @@ fn ok_cmd_deserialized(){
         channel:Some("5".to_string()),
         value:Some("true".to_string()),
         index:Some("4".to_string()),
+        velocity:None,
+        direction:None,
     };
     let cmd = dbg!(MatrixCommand::new_from_client(rw::WRITE.to_string(), set_state).unwrap());
     assert_eq!(cmd.to_string(),"A5 C3 3C 5A FF 36 09 03 04 05 01 EE".to_string());

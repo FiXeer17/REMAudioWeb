@@ -1,9 +1,9 @@
 
-use backend::video_engine::defs;
-use backend::video_engine::defs::pan_tilt::Direction;
-use backend::video_engine::zoom_lib;
-use backend::video_engine::camera_presets_lib;
-use backend::video_engine::tilt_pan_lib;
+use backend::engines::video_engine::defs;
+use backend::engines::video_engine::defs::pan_tilt::Direction;
+use backend::engines::video_engine::zoom_lib;
+use backend::engines::video_engine::camera_presets_lib;
+use backend::engines::video_engine::tilt_pan_lib;
 
 #[test]
 fn zoom_tele_ok(){
