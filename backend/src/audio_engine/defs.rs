@@ -22,7 +22,7 @@ pub mod fncodes {
     pub const VOLUME_LABEL: &str = "volume";
     pub const GAIN_IN_STEP_LABEL: &str = "gain_in_step";
     pub const MIC_SENSITIVITY_LABEL: &str = "mic_sensitivity";
-    pub const MATRIX_MIXING_LABEL: &str = "matrix_mixing";
+    pub const MATRIX_MIXING_LABEL: &str = "mix_map";
     pub enum FNCODE {
         SCENE,
         MUTE,
@@ -115,6 +115,7 @@ pub mod sections{
                 VOLUME_LABEL => Ok(Sections::MatrixCommand(FNCODE::VOLUME)),
                 MUTE_LABEL => Ok(Sections::MatrixCommand(FNCODE::MUTE)),
                 SCENE_LABEL => Ok(Sections::MatrixCommand(FNCODE::SCENE)),
+                MATRIX_MIXING_LABEL => Ok(Sections::MatrixCommand(FNCODE::MATRIXMIXING)),
                 _ => Err(errors::Error::InvalidSection)
             }
         }
@@ -246,8 +247,8 @@ pub mod datas {
 
         pub const CONNECTED:&str = "01";
         pub const DISCONNECTED: &str = "00";
-        pub const CONNECTED_LABEL:&str = "connected";
-        pub const DISCONNECTED_LABEL:&str = "disconnected";
+        pub const CONNECTED_LABEL:&str = "true";
+        pub const DISCONNECTED_LABEL:&str= "false";
 
         #[derive(Debug,Clone)]
         pub enum MatrixMixingStatus{

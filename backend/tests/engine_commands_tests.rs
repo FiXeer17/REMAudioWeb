@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use backend::audio_engine::{defs::{datas::{io::*, rw}, errors::Error}, matrix_mixing::generate_cmds};
+use backend::audio_engine::defs::{datas::{io::*, rw}, errors::Error} ;
 use backend::audio_engine::{mute::*, presets::read_current_preset, volume::*};
 use backend::audio_engine::lib::*;
 use backend::services::private::app::schemas::SetState;
@@ -284,6 +284,13 @@ fn ok_cmd_from_wsclient_simulation(){
 
 #[test]
 fn ok_cmd_deserialized(){
-    println!("{:?}",generate_cmds());
-    
+    let set_state = SetState{
+        section:"mix_map".to_string(),
+        io:None,
+        channel:Some("5".to_string()),
+        value:Some("true".to_string()),
+        index:Some("4".to_string()),
+    };
+    let cmd = dbg!(MatrixCommand::new_from_client(rw::WRITE.to_string(), set_state).unwrap());
+    assert_eq!(cmd.to_string(),"A5 C3 3C 5A FF 36 09 03 04 05 01 EE".to_string());
 }
