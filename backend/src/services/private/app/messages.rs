@@ -1,6 +1,8 @@
-use crate::engine::lib::MatrixCommand;
+use crate::engines::audio_engine::lib::MatrixCommand;
+use crate::services::private::socket::utils::Device;
 use crate::services::public::schemas::Socket;
 
+use super::schemas::CameraStates;
 use super::schemas::MatrixStates;
 use super::schemas::SetAttributes;
 use super::ws_session::session::WsSession;
@@ -10,7 +12,7 @@ use serde::Serialize;
 use tokio::net::TcpStream;
 use uuid::Uuid;
 use std::collections::VecDeque;
-use std::{net::SocketAddrV4,collections::HashMap};
+use std::{net::SocketAddrV4,collections::HashSet};
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
@@ -56,6 +58,7 @@ pub struct SetHandlerState {
 pub struct StartStream {
     pub socket: Option<SocketAddrV4>,
     pub client: Addr<WsSession>,
+    pub device_type: Device,
 }
 
 
@@ -87,6 +90,20 @@ pub struct MatrixReady{
     pub socket: SocketAddrV4,
     pub states: MatrixStates
 }
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub struct CameraReady{
+    pub socket: SocketAddrV4,
+    pub states: CameraStates
+}
+#[derive(Message,Clone)]
+#[rtype(result="()")]
+pub enum DeviceReady{
+    MatrixReady(MatrixReady),
+    CameraReady(CameraReady)
+}
+
+
 #[derive(Message,Clone,Serialize)]
 #[rtype(result="()")]
 pub struct GeneralConnectionError{
@@ -110,13 +127,13 @@ pub struct CommandError{
 pub struct SetSocket{
     pub socket_name: String,
     pub socket: String,
+    pub device: String,
     pub uuid: String
 }
 #[derive(Message,Clone)]
 #[rtype(result="()")]
 pub struct RemoveSocket{
     pub socket:SocketAddrV4,
-    pub uuid: String
 }
 #[derive(Message,Clone)]
 #[rtype(result="()")]
@@ -127,20 +144,30 @@ pub struct SetMessage{
 
 #[derive(Message,Clone,Debug)]
 #[rtype(result="()")]
-pub struct ClosedByAdmin{}
+pub struct ClosedByAdmin{
+    pub sessions: Option<HashSet<Addr<WsSession>>>,
+    pub device: Option<Device>,
+}
 
 #[derive(Clone)]
 pub enum Commands{
-    SetCommand(SetCommand),
+    SetMatrixCommand(SetMatrixCommand),
+    SetCameraCommand(SetCameraCommand),
     SetVisibility(SetAttributes),
-    SetLabel(SetAttributes),
+    SetChannelLabel(SetAttributes),
+    SetPresetLabel(SetAttributes),
     ReCache
 }
 
 #[derive(Debug,Clone)]
-pub struct SetCommand{
+pub struct SetMatrixCommand{
     pub command: MatrixCommand,
 }
+#[derive(Debug,Clone)]
+pub struct SetCameraCommand{
+    pub command: Vec<u8>
+}
+
 #[derive(Message,Clone)]
 #[rtype(result="()")]
 pub struct SetCommandOk{
@@ -148,13 +175,8 @@ pub struct SetCommandOk{
 }
 
 #[derive(Message,Clone)]
-#[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
+#[rtype(result="Option<HashSet<Socket>>")]
 pub struct GetConnections{}
-
-#[derive(Message,Clone)]
-#[rtype(result="Option<HashMap<SocketAddrV4,String>>")]
-pub struct GetLatestConnection{}
-
 
 #[derive(Message,Clone)]
 #[rtype(result="Option<i32>")]

@@ -1,6 +1,6 @@
 use crate::{utils::hasher_utils::argon2_enc, AppState};
 
-use super::{interfaces::{check_username, retrieve_channels}, schemas::Channel};
+use super::{interfaces::{check_username, retrieve_channels, retrieve_presets}, schemas::{Channel, Preset}};
 
 
 pub async fn insert_user(
@@ -58,4 +58,12 @@ pub async fn retrieve_all_channels(
     results.extend(i_channels.unwrap().into_iter());
     results.extend(o_channels.unwrap().into_iter());
     Ok(Some(results))
+}
+
+pub async fn retrieve_all_presets(
+    pgpool: &AppState,
+    socket_id:i32
+) -> Result<Option<Vec<Preset>>, sqlx::Error>{
+    let presets = retrieve_presets(pgpool, socket_id).await?;
+    Ok(presets)
 }

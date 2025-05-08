@@ -41,8 +41,7 @@ pub struct DatabaseEnv {
 #[derive(Serialize,Deserialize,Clone)]
 pub struct channels_settings {
     channel_label_prefix:String,   
-    i_channels_number:u8,
-    o_channels_number:u8,         
+    channels_number:u8,        
     default_visibility:bool 
 }
 #[allow(non_camel_case_types,dead_code)]
@@ -53,9 +52,11 @@ pub struct tcp_comunication_settings {
     #[serde(deserialize_with="u64_to_millis")]
     reconnect_delay:Duration,         
     #[serde(deserialize_with="u64_to_millis")]
-    read_timeout:Duration,             
+    read_timeout:Duration,  
     #[serde(deserialize_with="u64_to_millis")]
-    connection_timeout:Duration,      
+    preset_read_timeout: Duration,          
+    #[serde(deserialize_with="u64_to_millis")]
+    connection_timeout:Duration,   
     #[serde(deserialize_with="u64_to_millis")]
     inactivity_timeout:Duration,      
     max_connection_retries:u8    
@@ -78,6 +79,14 @@ pub struct ping_socket_settings {
     ping_socket_max_retries:u8,
     
 }
+#[allow(non_camel_case_types,dead_code)]
+#[derive(Serialize,Deserialize,Clone)]
+pub struct presets_settings {
+    audio_preset_label_prefix : String,
+    video_preset_label_prefix : String,
+    audio_presets_number : u8,
+    video_presets_number:u8,
+}
 
 #[allow(non_camel_case_types,dead_code)]
 #[derive(Serialize,Deserialize,Clone)]
@@ -85,9 +94,11 @@ pub struct GeneralSettings{
     pub channels_settings:channels_settings,
     pub tcp_comunication_settings:tcp_comunication_settings,
     pub websocket_settings:websocket_settings,
-    pub ping_socket_settings:ping_socket_settings
-
+    pub ping_socket_settings:ping_socket_settings,
+    pub presets_settings: presets_settings,
 }
+
+
 
 #[allow(dead_code, unused_variables)]
 #[derive(Serialize,Deserialize,Clone)]
@@ -186,11 +197,8 @@ impl GeneralSettings{
 }
 
 impl channels_settings {
-    pub fn get_i_channel_number() -> u8{
-        GeneralSettings::get_vars().channels_settings.i_channels_number
-    }
-    pub fn get_o_channel_number() -> u8{
-        GeneralSettings::get_vars().channels_settings.o_channels_number
+    pub fn get_channels_number() -> u8{
+        GeneralSettings::get_vars().channels_settings.channels_number
     }
     pub fn get_default_visibility() -> bool{
         GeneralSettings::get_vars().channels_settings.default_visibility
@@ -223,6 +231,9 @@ impl tcp_comunication_settings{
     pub fn get_read_timeout() -> Duration{
         GeneralSettings::get_vars().tcp_comunication_settings.read_timeout
     }
+    pub fn get_preset_read_timeout() -> Duration{
+        GeneralSettings::get_vars().tcp_comunication_settings.preset_read_timeout
+    }
     pub fn get_command_delay()-> Duration{
         GeneralSettings::get_vars().tcp_comunication_settings.command_delay
     }
@@ -237,6 +248,20 @@ impl tcp_comunication_settings{
     }
     pub fn get_max_connection_retries()-> u8{
         GeneralSettings::get_vars().tcp_comunication_settings.max_connection_retries
+    }
+}
+impl presets_settings{
+    pub fn get_audio_preset_label_prefix() -> String{
+        GeneralSettings::get_vars().presets_settings.audio_preset_label_prefix
+    }
+    pub fn get_video_preset_label_prefix() -> String{
+        GeneralSettings::get_vars().presets_settings.video_preset_label_prefix
+    }
+    pub fn get_audio_presets_number() -> u8{
+        GeneralSettings::get_vars().presets_settings.audio_presets_number
+    }
+    pub fn get_video_presets_number()->u8{
+        GeneralSettings::get_vars().presets_settings.video_presets_number
     }
 }
 

@@ -6,6 +6,7 @@
 
 - [POST] sign-in: `/api/auth/signin`
 - [GET] get connections: `/api`
+- [GET] all saved connections `/api/get_all`
 
 ## Json body:
 
@@ -27,18 +28,55 @@
 		{
             "name":"socket name"
 			"ip": "172.18.0.2",
-			"port": "2000"
+			"port": "2000",
+            "device_type":"matrix"
 		},
         ...
         ...
 	]
-    "latest_socket": {
+    "latest_audio_socket": {
         "name":"socket name",
-        "ip":"172.18.0.2",
-        "port":"2000"
+        "ip":"172.18.0.5",
+        "port":"2001",
+        "device_type":matrix
+    },
+    "latest_video_socket": {
+        "name":"socket name",
+        "ip":"172.18.0.1",
+        "port":"2003",
+        "device_type":"camera"
     }
 }
 ```
+
+`/api/get_all`:
+```
+{
+	"sockets": [
+		{
+            "name":"socket name"
+			"ip": "172.18.0.2",
+			"port": "2000",
+            "device_type":"matrix"
+		},
+        ...
+        ...
+	]
+    "latest_audio_socket": {
+        "name":"socket name",
+        "ip":"172.18.0.5",
+        "port":"2001",
+        "device_type":matrix
+    },
+    "latest_video_socket": {
+        "name":"socket name",
+        "ip":"172.18.0.1",
+        "port":"2003",
+        "device_type":"camera"
+    }
+}
+```
+
 `/api/auth/signin`:
 ```
 {
@@ -68,7 +106,8 @@ To start a comunication with WebSocket protocol you'll need a UUID that certify 
 ```
 {
     "socket_name":"socket name",
-	"socket":"matrix-simulator:2000"
+	"socket":"matrix-simulator:2000",
+    "device_type":[POSSIBLE DEVICE_TYPE]
 } 
 ```
 ### remove socket:
@@ -120,29 +159,56 @@ To do so you have to send a json formatted WebSocket message with this body:
 {
     "section": "[POSSIBLE SECTIONS]",
     "io": "[POSSIBLE IO]", -> OPTIONAL                   
-    "channel": String,  -> OPTIONAL
+    "channel": String,  -> OPTIONAL,
+    "index": String -> OPTIONAL,
     "value" : "[POSSIBLE VALUES]", 
 }
 ```
 
+### SET COMMANDS FIELDS
+| | section | io | channnel | index | value |
+|-|---------|----|----------|-------|-------|
+| change channel labels | yes | yes | yes | no | yes |
+| change preset labels | yes | no | no | yes | yes |
+| change channel visibility | yes | yes | yes | no | yes |
+| change the current preset | yes | no | no | no | yes |
+| mute channel | yes | yes | yes | no | yes |
+| change the volume of the channel | yes | yes | yes | no | yes |
+|change matrix mixer map | yes | no | yes | yes | yes
+
+
+### POSSIBLE DEVICE TYPES
+currently you can control audio and video devices setting sockets with these keywords:
+| device type | keyword |
+|-------------|---------|
+| audio | "matrix" |
+| video | "camera" |
+
+
 #### POSSIBLE SECTIONS:
-sections are specific keywords, here is a list of sections that the engine actually support:
-```
-    labels -> "labels"
-    visibility -> "visibility"
-    preset -> "preset"
-    mute -> "mute"
-    volume ->"volume"
-```
+sections are specific keywords, here is a list of sections that the engine currently support:
+| function | keyword |
+|---------|---------|
+| change channel labels | "channel_labels" |
+| change preset labels | "preset_labels" |
+| change channel visibility | "visibility" |
+| change the current preset | "preset" |
+| mute channel | "mute" |
+| change the volume of the channel | "volume" |
+| map input to output | "mix_map" |
+
 
 ### POSSIBLE IO:
-input/output sources are specific keywords, here is a list of ios that the engine actually support:
-```
-   general audio -> "both"
-   input ->"input"
-   output -> "output"
-```
+input/output sources are specific keywords, here is a list of ios that the engine currently support:
+| source | value |
+|--------------|-------|
+| input | "input" |
+| output | "output" |
+
+
 ### POSSIBLE VALUES:
+values can be used in different context, because of that it can assume different type:
+
 | section | value type |
 |-------|----------|
 | labels | string |
@@ -150,6 +216,7 @@ input/output sources are specific keywords, here is a list of ios that the engin
 | preset | n positive integer: 1<=n<=16 |
 | mute | boolean |
 | volume | integer |
+| mix_map | boolean |
 
 
 

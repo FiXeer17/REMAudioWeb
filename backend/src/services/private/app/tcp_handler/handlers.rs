@@ -2,8 +2,12 @@ use std::sync::Arc;
 
 use actix::{ActorContext, AsyncContext, Handler};
 use futures_util::lock::Mutex;
+use log::info;
 
 use crate::configs::tcp_comunication_settings;
+use crate::services::private::app::schemas::MachineStates;
+use crate::services::private::app::utils::HasStatesMessage;
+use crate::services::private::socket::utils::Device;
 
 use super::super::messages::*;
 use super::tcp_handler::TcpStreamActor;
@@ -12,15 +16,27 @@ use super::utils::command_polling;
 impl Handler<StreamStarted> for TcpStreamActor {
     type Result = ();
     fn handle(&mut self, msg: StreamStarted, ctx: &mut Self::Context) -> Self::Result {
+        info!(
+            "Starting new {} tcp handler actor",
+            self.device_type.to_string().to_uppercase()
+        );
         let socket = self.stream_socket.clone();
         let stream = Arc::new(Mutex::new(msg.tcp_stream));
         let ctx_addr = ctx.address().clone();
         let pgpool = self.pgpool.clone();
         self.stream = Some(stream.clone());
-        
-        tokio::spawn(async move {
-            TcpStreamActor::read_states(ctx_addr, socket.clone(), stream,pgpool).await;
-        });
+        match self.device_type {
+            Device::Audio => {
+                tokio::spawn(async move {
+                    TcpStreamActor::read_audio_states(ctx_addr, socket, stream, pgpool).await;
+                });
+            }
+            Device::Video => {
+                tokio::spawn(async move {
+                    TcpStreamActor::read_video_states(ctx_addr, socket, stream, pgpool).await;
+                });
+            }
+        }
     }
 }
 
@@ -41,15 +57,22 @@ impl Handler<ClosedByRemotePeer> for TcpStreamActor {
 
 impl Handler<ClosedByAdmin> for TcpStreamActor {
     type Result = ();
-    fn handle(&mut self, _msg: ClosedByAdmin, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: ClosedByAdmin, ctx: &mut Self::Context) -> Self::Result {
+        if let Some(sessions) = msg.sessions.clone() {
+            let new_message = ClosedByAdmin {
+                sessions: msg.sessions,
+                device: Some(self.device_type.clone()),
+            };
+            sessions.iter().for_each(|s| s.do_send(new_message.clone()));
+        }
         ctx.stop();
     }
 }
 
-impl Handler<MatrixReady> for TcpStreamActor {
+impl Handler<DeviceReady> for TcpStreamActor {
     type Result = ();
-    fn handle(&mut self, msg: MatrixReady, ctx: &mut Self::Context) -> Self::Result {
-        self.machine_states = Some(msg.states.clone());
+    fn handle(&mut self, msg: DeviceReady, ctx: &mut Self::Context) -> Self::Result {
+        self.machine_states = Some(msg.get_states());
         self.tcp_manager.do_send(msg);
         if self.cmd_poller.is_none() {
             let cmd_poller = ctx.run_interval(
@@ -63,8 +86,9 @@ impl Handler<MatrixReady> for TcpStreamActor {
 
 impl Handler<GeneralError> for TcpStreamActor {
     type Result = ();
-    fn handle(&mut self, msg: GeneralError, _ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: GeneralError, ctx: &mut Self::Context) -> Self::Result {
         self.tcp_manager.do_send(msg);
+        ctx.stop();
     }
 }
 
@@ -74,12 +98,22 @@ impl Handler<Connect> for TcpStreamActor {
         if self.machine_states.is_none() {
             return;
         }
-        let states = self.machine_states.clone().unwrap();
-        let message = MatrixReady {
-            socket: msg.socket.unwrap(),
-            states,
-        };
-        self.tcp_manager.do_send(message);
+        match self.machine_states.clone().unwrap() {
+            MachineStates::MatrixStates(states) => {
+                let message = MatrixReady {
+                    socket: msg.socket.unwrap(),
+                    states,
+                };
+                self.tcp_manager.do_send(DeviceReady::MatrixReady(message));
+            }
+            MachineStates::CameraStates(states) => {
+                let message = CameraReady {
+                    socket: msg.socket.unwrap(),
+                    states,
+                };
+                self.tcp_manager.do_send(DeviceReady::CameraReady(message));
+            },
+        }
     }
 }
 
@@ -88,7 +122,8 @@ impl Handler<SetMessage> for TcpStreamActor {
     fn handle(&mut self, msg: SetMessage, ctx: &mut Self::Context) -> Self::Result {
         self.watch_inactive(ctx, msg.addr.clone());
         match msg.command {
-            Commands::SetCommand(sc) => self.handle_set_command(sc),
+            Commands::SetMatrixCommand(sc) => self.handle_set_matrix_command(sc),
+            Commands::SetCameraCommand(sc) => self.handle_set_camera_command(sc),
             Commands::SetVisibility(sv) => {
                 if self.machine_states.is_some() {
                     self.handle_set_visibility_command(
@@ -99,14 +134,34 @@ impl Handler<SetMessage> for TcpStreamActor {
                     );
                 }
             }
-            Commands::SetLabel(sl) => {
-                if self.machine_states.is_some(){
-                    self.handle_set_label_command(
+            Commands::SetChannelLabel(sl) => {
+                if self.machine_states.is_some() {
+                    self.handle_set_channel_labels_command(
                         sl,
                         self.pgpool.clone(),
                         msg.addr,
                         ctx.address(),
                     )
+                }
+            }
+            Commands::SetPresetLabel(sl) => {
+                if self.machine_states.is_some() {
+                    match self.device_type {
+                        Device::Audio => self.handle_set_preset_labels_command(
+                            sl,
+                            self.pgpool.clone(),
+                            msg.addr,
+                            ctx.address(),
+                            Device::Audio,
+                        ),
+                        Device::Video => self.handle_set_preset_labels_command(
+                            sl,
+                            self.pgpool.clone(),
+                            msg.addr,
+                            ctx.address(),
+                            Device::Video,
+                        ),
+                    }
                 }
             }
             Commands::ReCache => self.handle_recache(ctx),

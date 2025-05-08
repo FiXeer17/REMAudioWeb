@@ -2,25 +2,26 @@ use actix_web::web::Data;
 use futures_util::lock::Mutex;
 use std::{net::SocketAddrV4, sync::Arc};
 
+use crate::{
+    engines::audio_engine::{defs::fncodes::FNCODE, lib::MatrixCommand},
+    configs::tcp_comunication_settings,
+    services::{
+        private::app::{
+            messages::DeviceReady,
+            schemas::{DeviceCommnd, MachineStates},
+        },
+        public::{
+            interfaces::{self, add_io_channels, retrieve_socketid_from_db},
+            utils::{retrieve_all_channels, retrieve_all_presets},
+        },
+    },
+    AppState,
+};
 use actix::{Addr, AsyncContext, Context};
+use log::{info, warn};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
-};
-
-use crate::{
-    engine::{
-        defs::fncodes::FNCODE,
-        lib::MatrixCommand,
-    },
-    services::
-        public::{
-            interfaces::{add_io_channels, retrieve_socketid_from_db},
-            utils::retrieve_all_channels,
-        },
-    
-    configs::tcp_comunication_settings,
-    AppState,
 };
 
 use super::{
@@ -30,7 +31,11 @@ use super::{
     },
     tcp_handler::TcpStreamActor,
 };
-
+/*
+   This function deserialize the hex byte string recieved into a readable
+   command struct, if the command is a preset command then a full matrix read will be ran.
+   Else set_changes will take care of updating the cache.
+*/
 pub async fn process_response(
     not_timedout: Result<usize, std::io::Error>,
     socket: SocketAddrV4,
@@ -45,7 +50,7 @@ pub async fn process_response(
         Ok(n) => {
             if n == 0 {
                 let message = ClosedByRemotePeer {
-                    message: "Closed by remote peer.".to_string(),
+                    message: "error occurred on matrix".to_string(),
                     socket,
                 };
                 ctx_addr.do_send(message);
@@ -57,18 +62,23 @@ pub async fn process_response(
                     .collect::<Vec<String>>();
                 if converted.get(0) == Some(&"00".to_string()) {
                     if cmd.fcode != FNCODE::SCENE.to_string() {
-                        states.set_changes(cmd);
+                        states.set_changes(cmd); // set changes detect changes from the recieved command and update the cache.
                         let message = MatrixReady { socket, states };
-                        ctx_addr.do_send(message);
+                        ctx_addr.do_send(DeviceReady::MatrixReady(message));
                     } else {
-                        TcpStreamActor::read_states(ctx_addr, socket, stream,pgpool).await;
+                        TcpStreamActor::read_audio_states(ctx_addr, socket, stream, pgpool).await;
+                        //TODO DELETE .clone()
+                        /*                         warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
+                        states.set_changes(cmd); //TODO DELETE THIS LINE
+                        let message = MatrixReady { socket, states }; //TODO DELETE THIS LINE
+                        ctx_addr.do_send(DeviceReady::MatrixReady(message)); //TODO DELETE THIS LINE */
                     }
                 }
             }
         }
-        Err(e) => {
+        Err(_) => {
             let message = StreamFailed {
-                error: e.to_string(),
+                error: "error occurred on matrix".to_string(),
                 socket,
             };
             ctx_addr.do_send(message);
@@ -76,78 +86,138 @@ pub async fn process_response(
     }
 }
 
+/*
+   This function extract and send a command from the command_queue,
+   process_response fn will take care of converting the bytes buffer and
+   return a response to the WebSocket handler.
+*/
 pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActor>) {
     if !act.commands_queue.is_empty() {
         let cmd = act.commands_queue.pop_back().unwrap();
-        let stream = act.stream.as_mut().unwrap().clone();
-        let ctx_addr = ctx.address().clone();
-        let socket = act.stream_socket;
-        let states = act.machine_states.as_mut().unwrap().clone();
-        let pgpool = act.pgpool.clone();
-        tokio::spawn(async move {
-            let written_bytes = {
-                let mut steram_guard = stream.lock().await;
-                steram_guard.write(&cmd.to_byte_hex().unwrap()).await
-            };
-
-            if let Err(e) = written_bytes {
-                ctx_addr.do_send(ClosedByRemotePeer {
-                    message: e.to_string(),
-                    socket,
-                });
-                return;
-            }
-
-            let mut buffer = [0; 128];
-
-            let read_bytes = {
-                let mut stream_guard = stream.lock().await;
-                tokio::time::timeout(
-                    tcp_comunication_settings::get_read_timeout(),
-                    stream_guard.read(&mut buffer),
-                )
-                .await
-            };
-
-            match read_bytes {
-                Ok(not_timedout) => {
-                    process_response(not_timedout, socket, ctx_addr, buffer, states, cmd, stream,pgpool)
-                        .await
-                }
-                Err(t) => {
-                    let reason = format!("read error:{}", t.to_string());
-                    let message = StreamFailed {
-                        error: reason,
-                        socket,
-                    };
-                    ctx_addr.do_send(message);
-                }
-            }
-        });
-    }
-}
-
-
-pub async fn add_channels(pgpool: Data<AppState>, socket: SocketAddrV4) {
-    let socket_id = retrieve_socketid_from_db(&pgpool, socket).await;
-    if socket_id.is_err() {
-        println!("cannot retrieve socket_id from the database");
-        return;
-    }
-    let socket_id = socket_id.unwrap();
-    let channels = retrieve_all_channels(&pgpool, socket_id).await;
-    if channels.is_err() {
-        println!("cannot retrieve channels from database");
-        return;
-    }
-    if channels.unwrap().is_none() {
-        let result = add_io_channels(&pgpool, socket_id).await;
-        if result.is_err() {
-            println!("cannot add io channels");
-            return;
+        match cmd {
+            DeviceCommnd::MatrixCommand(mc) => handle_matrix_polling(act, ctx, mc),
+            DeviceCommnd::CameraCommand(cc) => handle_camera_polling(act,ctx,cc)
         }
     }
 }
+pub fn handle_camera_polling(
+    act: &mut TcpStreamActor,
+    ctx: &mut Context<TcpStreamActor>,
+    cmd: Vec<u8>,
+) {
+    let stream = act.stream.as_mut().unwrap().clone();
+    let ctx_addr = ctx.address().clone();
+    let socket = act.stream_socket;
+    let MachineStates::CameraStates(states) = act.machine_states.as_mut().unwrap().clone() else {
+        return;
+    };
+    let pgpool = act.pgpool.clone();
+    let device_type_clone = act.device_type.clone();
+}
+
+pub fn handle_matrix_polling(
+    act: &mut TcpStreamActor,
+    ctx: &mut Context<TcpStreamActor>,
+    cmd: MatrixCommand,
+) {
+    let stream = act.stream.as_mut().unwrap().clone();
+    let ctx_addr = ctx.address().clone();
+    let socket = act.stream_socket;
+    let MachineStates::MatrixStates(states) = act.machine_states.as_mut().unwrap().clone() else {
+        return;
+    };
+    let pgpool = act.pgpool.clone();
+    let device_type_clone = act.device_type.clone();
+    tokio::spawn(async move {
+        let written_bytes = {
+            let mut steram_guard = stream.lock().await;
+            steram_guard.write(&cmd.to_byte_hex().unwrap()).await
+        };
+
+        if let Err(_) = written_bytes {
+            warn!("closed by remote peer on write");
+            ctx_addr.do_send(ClosedByRemotePeer {
+                message: format!("error occurred on {}", device_type_clone.to_string()),
+                socket,
+            });
+            return;
+        }
+
+        let mut buffer = [0; 128];
+        let mut timeout= tcp_comunication_settings::get_read_timeout();
+        if cmd.fcode == FNCODE::SCENE.to_string(){
+            timeout = tcp_comunication_settings::get_preset_read_timeout();
+        }
+
+        let read_bytes = {
+            let mut stream_guard = stream.lock().await;
+            dbg!(tokio::time::timeout(timeout, stream_guard.read(&mut buffer)).await)
+        };
+        match read_bytes {
+            Ok(not_timedout) => {
+                process_response(
+                    not_timedout,
+                    socket,
+                    ctx_addr,
+                    buffer,
+                    states,
+                    cmd,
+                    stream,
+                    pgpool,
+                )
+                .await
+            }
+            Err(e) => {
+                warn!("closed by remote peer on read: {}", e.to_string());
+
+                let message = StreamFailed {
+                    error: "error occurred on matrix".to_string(),
+                    socket,
+                };
+                ctx_addr.do_send(message);
+            }
+        }
+    });
+}
+
+pub async fn add_channels(pgpool: Data<AppState>, socket: SocketAddrV4) {
+    let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
+        warn!("Cannot retrieve socket_id from the database");
+        return;
+    };
+    let Ok(channels) = retrieve_all_channels(&pgpool, socket_id).await else {
+        warn!("Cannot retrieve channels from database");
+        return;
+    };
+    if let None = channels {
+        if let Err(_) = add_io_channels(&pgpool, socket_id).await {
+            warn!("Cannot add io channels");
+            return;
+        };
+    }
+    info!(
+        "Channels added succesfully for socket:{}.",
+        socket.to_string()
+    )
+}
+pub async fn add_presets(pgpool: Data<AppState>, socket: SocketAddrV4, device: String) {
+    let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
+        warn!("Cannot retrieve socket_id from the database");
+        return;
+    };
+    let Ok(presets) = retrieve_all_presets(&pgpool, socket_id).await else {
+        warn!("Cannot retrieve presets from database");
+        return;
+    };
+    if let None = presets {
+        let Ok(_) = interfaces::add_presets(&pgpool, socket_id, device.clone()).await else {
+            warn!("Cannot add presets");
+            return;
+        };
+    }
+    info!("Presets added succesfully for device type: {}.", device)
+}
+
 pub mod errors {
     #[derive(Clone, Debug)]
     pub enum Error {

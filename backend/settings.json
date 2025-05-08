@@ -2,16 +2,22 @@
     "channels_settings":{
 
         "channel_label_prefix": "ch",   
-        "i_channels_number":16,
-        "o_channels_number":16,         
+        "channels_number":8,        
         "default_visibility":true       
+    },
+    "presets_settings": {
+        "audio_preset_label_prefix" : "preset",
+        "video_preset_label_prefix" : "preset",
+        "audio_presets_number" : 16,
+        "video_presets_number":10
     },
 
     "tcp_comunication_settings":{
 
         "command_delay":20,             
         "reconnect_delay":1500,         
-        "read_timeout":500,             
+        "read_timeout":500,     
+        "preset_read_timeout":30000,        
         "connection_timeout":2000,      
         "inactivity_timeout":5000,      
         "max_connection_retries":3

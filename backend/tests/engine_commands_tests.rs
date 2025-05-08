@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
-use backend::engine::defs::{errors::Error,datas::{io::*, rw}};
-use backend::engine::{mute::*, presets::read_current_preset, volume::*};
-use backend::engine::lib::*;
+use backend::engines::audio_engine::defs::{datas::{io::*, rw}, errors::Error} ;
+use backend::engines::audio_engine::{mute::*, presets::read_current_preset, volume::*};
+use backend::engines::audio_engine::lib::*;
 use backend::services::private::app::schemas::SetState;
 
 #[test]
@@ -10,7 +10,12 @@ fn ok_read_mute_cmd() {
     let cmd = read_mute_ch(SRC::INPUT, 16).unwrap();
     assert_eq!(
         cmd.to_string(),
-        "A5 C3 3C 5A FF 63 03 02 01 16 EE".to_string()
+        "A5 C3 3C 5A FF 63 03 02 01 10 EE".to_string()
+    );
+    let cmd = read_mute_ch(SRC::INPUT, 10).unwrap();
+    assert_eq!(
+        cmd.to_string(),
+        "A5 C3 3C 5A FF 63 03 02 01 0A EE".to_string()
     )
 }
 
@@ -33,13 +38,13 @@ A5 C3 3C 5A FF 63 03 02 01 06 EE
 A5 C3 3C 5A FF 63 03 02 01 07 EE
 A5 C3 3C 5A FF 63 03 02 01 08 EE
 A5 C3 3C 5A FF 63 03 02 01 09 EE
-A5 C3 3C 5A FF 63 03 02 01 10 EE
-A5 C3 3C 5A FF 63 03 02 01 11 EE
-A5 C3 3C 5A FF 63 03 02 01 12 EE
-A5 C3 3C 5A FF 63 03 02 01 13 EE
-A5 C3 3C 5A FF 63 03 02 01 14 EE
-A5 C3 3C 5A FF 63 03 02 01 15 EE
-A5 C3 3C 5A FF 63 03 02 01 16 EE"
+A5 C3 3C 5A FF 63 03 02 01 0A EE
+A5 C3 3C 5A FF 63 03 02 01 0B EE
+A5 C3 3C 5A FF 63 03 02 01 0C EE
+A5 C3 3C 5A FF 63 03 02 01 0D EE
+A5 C3 3C 5A FF 63 03 02 01 0E EE
+A5 C3 3C 5A FF 63 03 02 01 0F EE
+A5 C3 3C 5A FF 63 03 02 01 10 EE"
     )
 }
 
@@ -106,13 +111,13 @@ A5 C3 3C 5A FF 63 04 02 01 06 EE
 A5 C3 3C 5A FF 63 04 02 01 07 EE
 A5 C3 3C 5A FF 63 04 02 01 08 EE
 A5 C3 3C 5A FF 63 04 02 01 09 EE
-A5 C3 3C 5A FF 63 04 02 01 10 EE
-A5 C3 3C 5A FF 63 04 02 01 11 EE
-A5 C3 3C 5A FF 63 04 02 01 12 EE
-A5 C3 3C 5A FF 63 04 02 01 13 EE
-A5 C3 3C 5A FF 63 04 02 01 14 EE
-A5 C3 3C 5A FF 63 04 02 01 15 EE
-A5 C3 3C 5A FF 63 04 02 01 16 EE"
+A5 C3 3C 5A FF 63 04 02 01 0A EE
+A5 C3 3C 5A FF 63 04 02 01 0B EE
+A5 C3 3C 5A FF 63 04 02 01 0C EE
+A5 C3 3C 5A FF 63 04 02 01 0D EE
+A5 C3 3C 5A FF 63 04 02 01 0E EE
+A5 C3 3C 5A FF 63 04 02 01 0F EE
+A5 C3 3C 5A FF 63 04 02 01 10 EE"
     )
 }
 
@@ -141,13 +146,13 @@ A5 C3 3C 5A FF 63 03 02 01 06 EE
 A5 C3 3C 5A FF 63 03 02 01 07 EE
 A5 C3 3C 5A FF 63 03 02 01 08 EE
 A5 C3 3C 5A FF 63 03 02 01 09 EE
+A5 C3 3C 5A FF 63 03 02 01 0A EE
+A5 C3 3C 5A FF 63 03 02 01 0B EE
+A5 C3 3C 5A FF 63 03 02 01 0C EE
+A5 C3 3C 5A FF 63 03 02 01 0D EE
+A5 C3 3C 5A FF 63 03 02 01 0E EE
+A5 C3 3C 5A FF 63 03 02 01 0F EE
 A5 C3 3C 5A FF 63 03 02 01 10 EE
-A5 C3 3C 5A FF 63 03 02 01 11 EE
-A5 C3 3C 5A FF 63 03 02 01 12 EE
-A5 C3 3C 5A FF 63 03 02 01 13 EE
-A5 C3 3C 5A FF 63 03 02 01 14 EE
-A5 C3 3C 5A FF 63 03 02 01 15 EE
-A5 C3 3C 5A FF 63 03 02 01 16 EE
 A5 C3 3C 5A FF 63 03 02 02 01 EE
 A5 C3 3C 5A FF 63 03 02 02 02 EE
 A5 C3 3C 5A FF 63 03 02 02 03 EE
@@ -157,13 +162,13 @@ A5 C3 3C 5A FF 63 03 02 02 06 EE
 A5 C3 3C 5A FF 63 03 02 02 07 EE
 A5 C3 3C 5A FF 63 03 02 02 08 EE
 A5 C3 3C 5A FF 63 03 02 02 09 EE
+A5 C3 3C 5A FF 63 03 02 02 0A EE
+A5 C3 3C 5A FF 63 03 02 02 0B EE
+A5 C3 3C 5A FF 63 03 02 02 0C EE
+A5 C3 3C 5A FF 63 03 02 02 0D EE
+A5 C3 3C 5A FF 63 03 02 02 0E EE
+A5 C3 3C 5A FF 63 03 02 02 0F EE
 A5 C3 3C 5A FF 63 03 02 02 10 EE
-A5 C3 3C 5A FF 63 03 02 02 11 EE
-A5 C3 3C 5A FF 63 03 02 02 12 EE
-A5 C3 3C 5A FF 63 03 02 02 13 EE
-A5 C3 3C 5A FF 63 03 02 02 14 EE
-A5 C3 3C 5A FF 63 03 02 02 15 EE
-A5 C3 3C 5A FF 63 03 02 02 16 EE
 A5 C3 3C 5A FF 63 04 02 01 01 EE
 A5 C3 3C 5A FF 63 04 02 01 02 EE
 A5 C3 3C 5A FF 63 04 02 01 03 EE
@@ -173,13 +178,13 @@ A5 C3 3C 5A FF 63 04 02 01 06 EE
 A5 C3 3C 5A FF 63 04 02 01 07 EE
 A5 C3 3C 5A FF 63 04 02 01 08 EE
 A5 C3 3C 5A FF 63 04 02 01 09 EE
+A5 C3 3C 5A FF 63 04 02 01 0A EE
+A5 C3 3C 5A FF 63 04 02 01 0B EE
+A5 C3 3C 5A FF 63 04 02 01 0C EE
+A5 C3 3C 5A FF 63 04 02 01 0D EE
+A5 C3 3C 5A FF 63 04 02 01 0E EE
+A5 C3 3C 5A FF 63 04 02 01 0F EE
 A5 C3 3C 5A FF 63 04 02 01 10 EE
-A5 C3 3C 5A FF 63 04 02 01 11 EE
-A5 C3 3C 5A FF 63 04 02 01 12 EE
-A5 C3 3C 5A FF 63 04 02 01 13 EE
-A5 C3 3C 5A FF 63 04 02 01 14 EE
-A5 C3 3C 5A FF 63 04 02 01 15 EE
-A5 C3 3C 5A FF 63 04 02 01 16 EE
 A5 C3 3C 5A FF 63 04 02 02 01 EE
 A5 C3 3C 5A FF 63 04 02 02 02 EE
 A5 C3 3C 5A FF 63 04 02 02 03 EE
@@ -189,21 +194,20 @@ A5 C3 3C 5A FF 63 04 02 02 06 EE
 A5 C3 3C 5A FF 63 04 02 02 07 EE
 A5 C3 3C 5A FF 63 04 02 02 08 EE
 A5 C3 3C 5A FF 63 04 02 02 09 EE
+A5 C3 3C 5A FF 63 04 02 02 0A EE
+A5 C3 3C 5A FF 63 04 02 02 0B EE
+A5 C3 3C 5A FF 63 04 02 02 0C EE
+A5 C3 3C 5A FF 63 04 02 02 0D EE
+A5 C3 3C 5A FF 63 04 02 02 0E EE
+A5 C3 3C 5A FF 63 04 02 02 0F EE
 A5 C3 3C 5A FF 63 04 02 02 10 EE
-A5 C3 3C 5A FF 63 04 02 02 11 EE
-A5 C3 3C 5A FF 63 04 02 02 12 EE
-A5 C3 3C 5A FF 63 04 02 02 13 EE
-A5 C3 3C 5A FF 63 04 02 02 14 EE
-A5 C3 3C 5A FF 63 04 02 02 15 EE
-A5 C3 3C 5A FF 63 04 02 02 16 EE
 A5 C3 3C 5A FF 63 02 00 EE"
 )
 }
 
-
 #[test]
 fn ok_from_str_to_matrix_command(){
-    let cmd = MatrixCommand::from_str("A5 C3 3C 5A FF 63 03 02 02 16 EE").unwrap();
+    let cmd = MatrixCommand::from_str("A5 C3 3C 5A FF 63 03 02 02 10 EE").unwrap();
     
     assert_eq!(cmd, read_mute_ch(SRC::OUTPUT, 16).unwrap());
 
@@ -250,15 +254,45 @@ fn parse_preset_to_cmd(){
 
 #[test]
 fn ok_cmd_from_wsclient_simulation(){
+    
     let set_states = SetState{
         section: "volume".to_string(),
         io:Some("output".to_string()),
         channel: Some("16".to_string()),
-        value:Some("-60.0".to_string())
+        value:Some("-60.0".to_string()),
+        index: None
+    };
+
+
+    let cmd = MatrixCommand::new_from_client(rw::WRITE.to_string(),set_states);
+    assert!(cmd.is_ok());
+    assert_eq!(cmd.unwrap().to_string(),"A5 C3 3C 5A FF 36 04 04 02 10 A8 FD EE".to_string());
+
+    let set_states = SetState{
+        section: "matrix_mixing".to_string(),
+        index: Some("1".to_string()),
+        channel: Some("1".to_string()),
+        value:Some("connected".to_string()),
+        io:None
     };
 
     let cmd = MatrixCommand::new_from_client(rw::WRITE.to_string(),set_states);
     assert!(cmd.is_ok());
-    println!("{}",cmd.clone().unwrap().to_string());
-    assert_eq!(cmd.unwrap().to_string(),"A5 C3 3C 5A FF 36 04 04 02 16 A8 FD EE".to_string())
+    assert_eq!(cmd.unwrap().to_string(),"A5 C3 3C 5A FF 36 09 03 01 01 01 EE".to_string());
+}
+
+
+#[test]
+fn ok_cmd_deserialized(){
+    let set_state = SetState{
+        section:"mix_map".to_string(),
+        io:None,
+        channel:Some("5".to_string()),
+        value:Some("true".to_string()),
+        index:Some("4".to_string()),
+        velocity:None,
+        direction:None,
+    };
+    let cmd = dbg!(MatrixCommand::new_from_client(rw::WRITE.to_string(), set_state).unwrap());
+    assert_eq!(cmd.to_string(),"A5 C3 3C 5A FF 36 09 03 04 05 01 EE".to_string());
 }

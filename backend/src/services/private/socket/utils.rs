@@ -1,9 +1,37 @@
 use std::collections::HashMap;
 use std::net::SocketAddrV4;
+use std::str::FromStr;
 use tokio::net::TcpStream;
 use tokio::time::timeout;
 use crate::configs::ping_socket_settings;
 
+pub const AUDIO_LABEL:&str="matrix";
+pub const VIDEO_LABEL:&str="camera";
+
+#[derive(Debug,Clone,Hash,PartialEq,Eq)]
+pub enum Device{
+    Audio,
+    Video
+}
+
+impl ToString for Device{
+    fn to_string(&self) -> String {
+        match self{
+            Self::Audio => AUDIO_LABEL.to_string(),
+            Self::Video => VIDEO_LABEL.to_string(),
+        }
+    }
+}
+impl FromStr for Device{
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s{
+            AUDIO_LABEL => Ok(Self::Audio),
+            VIDEO_LABEL => Ok(Self::Video),
+            _ => Err(())
+        }
+    }
+}
 pub async fn try_connection(socket: SocketAddrV4) -> bool {
     let max_retries = ping_socket_settings::get_ping_socket_max_retries();
     let timeout_interval = ping_socket_settings::get_ping_socket_timeout();

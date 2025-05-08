@@ -1,91 +1,107 @@
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::{HashMap, HashSet, VecDeque},
     net::SocketAddrV4,
     str::FromStr,
 };
 
 use actix::Addr;
+use log::info;
 
 use crate::{
     services::{
         private::{
             app::{
-                messages::{InactiveQueue, SocketRestarted, UnavailableSockets},
-                schemas::MatrixStates,
-                ws_session::session::WsSession,
+                messages::{InactiveQueue, SocketRestarted, UnavailableSockets}, utils::DeviceState, ws_session::session::WsSession
             },
-            socket::utils::try_connection,
+            socket::utils::{try_connection, Device},
         },
-        public::{interfaces::{retrieve_socket_from_db, retrieve_sockets}, schemas::Socket},
+        public::{interfaces::{is_socket_in_db, retrieve_sockets}, schemas::Socket},
     },
     AppState,
 };
 
 use super::tcp_manager::TcpStreamsManager;
 
-pub fn attach_availability(
-    mut states: MatrixStates,
+pub fn attach_availability<T>(
+    states: &mut T,
     availability: &Option<Addr<WsSession>>,
     session: &Addr<WsSession>,
-) -> MatrixStates {
+)  where T:DeviceState{
+    
     if let Some(wsocket) = availability {
         if wsocket != session {
-            states.available = Some(false)
+            states.set_avaiable(false);
         } else {
-            states.available = Some(true)
+            states.set_avaiable(true);
         }
     } else {
-        states.available = Some(true)
+        states.set_avaiable(true);
     }
-    states
+    
 }
 
 pub async fn load_sockets_from_db(
     pgpool: actix_web::web::Data<AppState>,
-) -> Result<(HashMap<SocketAddrV4, String>, Option<SocketAddrV4>), sqlx::Error> {
+) -> Result<(HashMap<Socket, String>, Option<SocketAddrV4>,Option<SocketAddrV4>), sqlx::Error> {
     let sockets = retrieve_sockets(&pgpool).await?;
-    let mut map: HashMap<SocketAddrV4, String> = HashMap::new();
+    let mut map: HashMap<Socket, String> = HashMap::new();
     sockets.iter().for_each(|socket| {
-        let sockv4 = SocketAddrV4::from_str(&socket.socket).unwrap();
-        map.insert(sockv4, socket.socket_name.clone());
+        map.insert(socket.clone(), socket.socket_name.clone());
     });
-    let latest_socket = sockets.iter().find_map(|sock| {
-        if sock.latest {
+    let latest_audio_socket = sockets.iter().find_map(|sock| {
+        if sock.latest && sock.device == Device::Audio.to_string() {
             return Some(SocketAddrV4::from_str(&sock.socket).unwrap());
         }
         None
     });
-    return Ok((map, latest_socket));
+    let latest_video_socket = sockets.iter().find_map(|sock| {
+        if sock.latest && sock.device == Device::Video.to_string() {
+            return Some(SocketAddrV4::from_str(&sock.socket).unwrap());
+        }
+        None
+    });
+    return Ok((map, latest_audio_socket,latest_video_socket));
 }
 
 pub async fn remove_inactive_connection(
     pgpool: actix_web::web::Data<AppState>,
-) -> Result<(HashMap<SocketAddrV4, String>, Option<SocketAddrV4>), sqlx::Error> {
-    let (mut sockets, mut latest_socket) = load_sockets_from_db(pgpool.clone()).await?;
-    let mut inactive_sockets: Vec<SocketAddrV4> = Vec::new();
+) -> Result<(HashSet<Socket>, Option<SocketAddrV4>, Option<SocketAddrV4>), sqlx::Error> {
+    let (mut sockets, mut latest_audio_socket,mut latest_video_socket) = load_sockets_from_db(pgpool.clone()).await?;
+    let mut inactive_sockets: Vec<Socket> = Vec::new();
     for socket in sockets.keys() {
-        if !try_connection(*socket).await {
-            inactive_sockets.push(*socket);
+        let sockv4 = SocketAddrV4::from_str(&socket.socket).unwrap();
+        if !try_connection(sockv4).await {
+            inactive_sockets.push(socket.clone());
         }
     }
     for socket in inactive_sockets {
-        println!(
+        info!(
             "Inactive connection found, removing socket: {}...",
-            socket.to_string()
+            socket.socket_name
         );
         sockets.remove(&socket).unwrap();
     }
 
-    if latest_socket.is_some() {
-        if !try_connection(latest_socket.unwrap()).await {
-            println!(
+    if let Some(latest) = latest_audio_socket {
+        if !try_connection(latest).await {
+            info!(
                 "Inactive connection found, removing latest_socket: {}...",
-                latest_socket.unwrap().to_string()
+                latest.to_string()
             );
-            latest_socket = None;
+            latest_audio_socket = None;
         }
     }
-    Ok((sockets, latest_socket))
+    if let Some(latest) = latest_video_socket {
+        if !try_connection(latest).await {
+            info!(
+                "Inactive connection found, removing latest_socket: {}...",
+                latest.to_string()
+            );
+            latest_video_socket = None;
+        }
+    }
+    let sockets:HashSet<Socket> = sockets.keys().cloned().collect();
+    Ok((sockets, latest_audio_socket,latest_video_socket))
 }
 
 pub async fn detect_dead_sockets(socks: Vec<Socket>) -> Result<Vec<Socket>, sqlx::Error> {
@@ -98,32 +114,6 @@ pub async fn detect_dead_sockets(socks: Vec<Socket>) -> Result<Vec<Socket>, sqlx
 
     Ok(inactive_sockets)
 }
-pub fn socket_vec_builder(
-    sockets: HashMap<SocketAddrV4, String>,
-    latest_socket: Option<SocketAddrV4>,
-) -> Vec<Socket> {
-    let mut socks: Vec<Socket> = Vec::new();
-    for sock in sockets {
-        if let Some(latest) = latest_socket {
-            if latest == sock.0 {
-                socks.push(Socket {
-                    id: None,
-                    socket_name: sock.1,
-                    socket: latest.to_string(),
-                    latest: true,
-                });
-                continue;
-            }
-        }
-        socks.push(Socket {
-            id: None,
-            socket_name: sock.1,
-            socket: sock.0.to_string(),
-            latest: false,
-        });
-    }
-    socks
-}
 impl TcpStreamsManager {
     pub fn poll_sockets(
         mut inactive_sockets: VecDeque<Socket>,
@@ -133,7 +123,7 @@ impl TcpStreamsManager {
         tokio::spawn(async move {
             if !inactive_sockets.is_empty() {
                 let to_test = inactive_sockets.pop_back().unwrap();
-                if let Ok(res) = retrieve_socket_from_db(&pgpool, SocketAddrV4::from_str(&to_test.socket).unwrap()).await{
+                if let Ok(res) = is_socket_in_db(&pgpool, SocketAddrV4::from_str(&to_test.socket).unwrap()).await{
                     if !res {return;}
                 }
                 let response =

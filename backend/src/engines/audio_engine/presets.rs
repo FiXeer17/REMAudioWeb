@@ -1,6 +1,6 @@
-use crate::engine::defs;
-use crate::engine::defs::fncodes;
-use crate::engine::lib::MatrixCommand;
+use crate::engines::audio_engine::defs;
+use crate::engines::audio_engine::defs::fncodes;
+use crate::engines::audio_engine::lib::MatrixCommand;
 use crate::services::private::app::schemas::SetState;
 
 use super::defs::errors::Error;
@@ -20,8 +20,14 @@ pub fn into_data(data: SetState) ->Result<Vec<String>,Error>{
                         if v > 16 || v == 0 {
                             return Err(Error::InvalidPreset);
                         }
-                        Ok(vec![format!("{:02}", v)])
+                        Ok(vec![format!("{:02X}", v)])
                     }
                     Err(e) => return Err(Error::ConversionError(e.to_string())),
                 }
+}
+
+
+pub fn into_deserialized(mut data:Vec<String>) -> Option<u8>{
+    let value = data.remove(0);
+    Some(u8::from_str_radix(&value, 16).unwrap())
 }

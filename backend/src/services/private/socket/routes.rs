@@ -9,12 +9,13 @@ use crate::{
         },
         socket::{
             schemas::{RemoveSocketBody, SetSocketBody},
-            utils::{check_in_connections, try_connection},
+            utils::{try_connection, Device},
         },
-    }, public::interfaces::{remove_socket_in_db, retrieve_admin_from_id}},
+    }, public::{interfaces::{remove_socket_in_db, retrieve_admin_from_id}, schemas::IsContainedExt}},
     utils::common::{check_socket, toast}, AppState,
 };
 use actix_web::{post, web, HttpResponse, Responder};
+use log::{info,error};
 use serde_json::json;
 use uuid::Uuid;
 
@@ -46,28 +47,35 @@ pub async fn add_socket(
             if let Some(sock) = s {
                 let sockets = srv.send(GetConnections {}).await;
                 if let Ok(connections) = sockets {
-                    match check_in_connections(sock, connections) {
-                        true => (),
-                        false => {
-                            if !try_connection(sock).await {
-                                return HttpResponse::BadRequest().json(toast(
-                                    &format!("{} doesn't respond.", sock),
-                                ));
+                    if let Some(connections) = connections{
+                        match connections.socket_is_contained(&s.unwrap().to_string()) {
+                            Some(_) => (),
+                            None => {
+                                if !try_connection(sock).await {
+                                    return HttpResponse::BadRequest().json(toast(
+                                        &format!("{} doesn't respond.", sock),
+                                    ));
+                                }
                             }
                         }
                     }
+                    
                 }
+                if let Err(()) = Device::from_str(&request_body.device_type){
+                    return HttpResponse::BadRequest().json(toast("invalid device type"));
+                }
+
                 message = SetSocket {
                     socket_name:request_body.socket_name.clone(),
                     socket: sock.to_string(),
                     uuid: uuid.uuid.clone(),
+                    device:request_body.device_type.clone()
                 };
-                let response = srv.send(message).await;
-                if let Err(_) = response {
+                let Ok(response) = srv.send(message).await else {
                     return HttpResponse::InternalServerError()
                         .json(toast("couldn't set the socket"));
-                }
-                if let false = response.unwrap() {
+                };
+                if let false = response {
                     return HttpResponse::BadRequest().json(toast("invalid uuid"));
                 }
             }
@@ -84,10 +92,9 @@ pub async fn add_socket(
         }
     };
 
-    let response = json!({"name":socket_name,"socket": socket});
+    let response = json!({"name":socket_name,"socket": socket,"device":request_body.device_type});
     HttpResponse::Ok().json(response)
 }
-
 
 
 #[post("/remove")]
@@ -114,27 +121,32 @@ pub async fn remove_socket(
     };
 
     
-    let socket = match check_socket(socket.to_string()) {
+    match check_socket(socket.to_string()) {
         Ok(s) => {
+            if let Err(e) = remove_socket_in_db(&pgpool, s.unwrap()).await{
+                error!("Cannot remove socket from database, error:\n{}",e.to_string());
+                return HttpResponse::InternalServerError().finish();
+            }
+            info!("Socket: {} removed from database.",s.unwrap());
             let sockets = srv.send(GetConnections {}).await;
             if let Ok(connections) = sockets{
-                match check_in_connections(s.unwrap(), connections){
-                    true => (),
-                    false => {            
-                        let result = remove_socket_in_db(&pgpool, s.unwrap()).await;
-                        if result.is_err() {
-                            return HttpResponse::InternalServerError().finish();
+                if let Some(connections) = connections{
+                    match connections.socket_is_contained(&s.unwrap().to_string()){
+                        Some(_) => (),
+                        None => {  
+                            return HttpResponse::Ok().json(json!({"socket": s.unwrap().to_string()}));
                         }
-                        return HttpResponse::Ok().json(json!({"socket": s.unwrap().to_string()}));
                     }
                 }
+                
             }
+            
             let message = RemoveSocket {
                 socket:s.unwrap(),
-                uuid: uuid.uuid.clone(),
             };
             srv.do_send(message);
-            s.unwrap()
+            s.unwrap();
+            
         }
         Err(e) => {
             return HttpResponse::BadRequest().json(toast(&format!(
@@ -144,7 +156,7 @@ pub async fn remove_socket(
         }
     };
 
-    let response = json!({"socket": socket});
+    let response = json!({"socket": request_body.socket});
     HttpResponse::Ok().json(response)
 }
 
