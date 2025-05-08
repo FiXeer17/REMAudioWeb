@@ -1,4 +1,5 @@
 use crate::engines::audio_engine::lib::MatrixCommand;
+use crate::engines::video_engine::defs::CameraCommand;
 use crate::services::private::socket::utils::Device;
 use crate::services::public::schemas::Socket;
 
@@ -165,7 +166,7 @@ pub struct SetMatrixCommand{
 }
 #[derive(Debug,Clone)]
 pub struct SetCameraCommand{
-    pub command: Vec<u8>
+    pub command: CameraCommand
 }
 
 #[derive(Message,Clone)]

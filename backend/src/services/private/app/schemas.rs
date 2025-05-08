@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::engines::audio_engine::lib::MatrixCommand;
+use crate::engines::{audio_engine::lib::MatrixCommand, video_engine::defs::CameraCommand};
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -39,7 +39,7 @@ pub struct SessionUUID {
 
 pub enum DeviceCommnd{
     MatrixCommand(MatrixCommand),
-    CameraCommand(Vec<u8>)
+    CameraCommand(CameraCommand)
 }
 
 pub fn index_values<T>(indexable: Vec<T>) -> HashMap<u32, T>

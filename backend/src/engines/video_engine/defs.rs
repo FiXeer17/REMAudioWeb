@@ -6,6 +6,7 @@ pub mod fncodes{
     pub const ZOOM_WIDE_LABEL: &str = "zoom_wide";
     pub const MOVE_CAMERA_LABEL: &str = "move_camera";
 
+    #[derive(Debug, Clone, PartialEq)]
     pub enum FNCODE {
         Preset,
         ZoomTele,
@@ -38,6 +39,11 @@ pub mod fncodes{
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct CameraCommand{
+    pub fncode : crate::engines::video_engine::defs::fncodes::FNCODE,
+    pub cmd: Vec<u8>
+}
 pub mod errors{
     pub const INVALID_STATUS_CODE_LABEL: &str = "Invalid status code.";
     pub const TIMED_OUT_CODE_LABEL: &str = "Timed out.";
@@ -48,6 +54,7 @@ pub mod errors{
     pub const INVALID_TILT_LABEL :&str = "Invalid tilt";
     pub const INVALID_DIRECTION_LABEL:&str = "Invalid direction";
     pub const INVALID_VELOCITY_LABEL:&str = "Invalid velocity";
+    pub const INVALID_CMD_LABEL:&str = "Invalid command";
 
     #[derive(Debug,Clone,PartialEq)]
     pub enum Error{
@@ -60,6 +67,7 @@ pub mod errors{
         InvalidTilt,
         InvalidDirection,
         InvalidVelocity,
+        InvalidCmd,
     }
     impl ToString for Error{
         fn to_string(&self) -> String {
@@ -73,6 +81,7 @@ pub mod errors{
                 Self::InvalidTilt=> String::from(INVALID_TILT_LABEL),
                 Self::InvalidDirection => String::from(INVALID_DIRECTION_LABEL),
                 Self::InvalidVelocity => String::from(INVALID_VELOCITY_LABEL),
+                Self::InvalidCmd => String::from(INVALID_CMD_LABEL),
             }
         }
     }

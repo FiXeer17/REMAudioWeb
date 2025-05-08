@@ -3,7 +3,7 @@ use crate::{
     configs::websocket_settings, engines::{audio_engine::{
         defs::datas,
         lib::MatrixCommand,
-    }, sections::Sections, video_engine::{camera_presets_lib::call_preset, defs::fncodes::FNCODE, tilt_pan_lib::move_camera, zoom_lib::{zoom_tele, zoom_wide}}}, services::private::app::{
+    }, sections::Sections, video_engine::{camera_presets_lib::call_preset, defs::{fncodes::FNCODE, CameraCommand}, tilt_pan_lib::move_camera, zoom_lib::{zoom_tele, zoom_wide}}}, services::private::app::{
         messages::{self, Disconnect},
         schemas::{SetAttributes, SetState},
     }, AppState
@@ -100,13 +100,38 @@ fn handle_matrix_command(set_state: SetState) -> HandleText {
 fn handle_video_command(set_state: SetState,section:&Sections) -> HandleText{
     match section{
         Sections::CameraCommand(sc) =>match sc{
-            FNCODE::Preset => HandleText::CameraCommand(call_preset(set_state.value.unwrap())),
-            FNCODE::ZoomTele => HandleText::CameraCommand(zoom_tele(set_state.value.unwrap())),
-            FNCODE::ZoomWide => HandleText::CameraCommand(zoom_wide(set_state.value.unwrap())),
+            FNCODE::Preset => {
+                let call_preset  = call_preset(set_state.value.unwrap());
+                if let Err(e) = call_preset {
+                    return HandleText::CameraCommand(Err(e));
+                }else{
+                    return HandleText::CameraCommand(Ok(CameraCommand{fncode:sc.clone(),cmd:call_preset.unwrap()}));
+                }
+            },                
+            FNCODE::ZoomTele => {
+                let zoom_tele  = zoom_tele(set_state.value.unwrap());
+                if let Err(e) = zoom_tele {
+                    return HandleText::CameraCommand(Err(e));
+                }else{
+                    return HandleText::CameraCommand(Ok(CameraCommand{fncode:sc.clone(),cmd:zoom_tele.unwrap()}));
+                }
+            },
+            FNCODE::ZoomWide => {
+                let zoom_wide  = zoom_wide(set_state.value.unwrap());
+                if let Err(e) = zoom_wide {
+                    return HandleText::CameraCommand(Err(e));
+                }else{
+                    return HandleText::CameraCommand(Ok(CameraCommand{fncode:sc.clone(),cmd:zoom_wide.unwrap()}));
+                }
+            },
             FNCODE::MoveCamera =>{
                 let Some(velocity) = set_state.velocity else {return HandleText::Error("Velocity not found".to_string())};
                 let Some(direction) = set_state.direction else {return HandleText::Error("Direction not found".to_string())};
-                HandleText::CameraCommand(move_camera(velocity,direction))
+                let move_camera = move_camera(velocity, direction);
+                if let Err(e) = move_camera{
+                    return HandleText::CameraCommand(Err(e));
+                }
+                HandleText::CameraCommand(Ok(CameraCommand { fncode: sc.clone(), cmd: move_camera.unwrap() }))
             }
         },
         _ => HandleText::Error("Invalid video command".to_string())
