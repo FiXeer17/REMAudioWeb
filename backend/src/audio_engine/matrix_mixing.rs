@@ -2,10 +2,29 @@
 use std::str::FromStr;
 
 use super::{
-    defs::{datas::matrix_mixing_status::MatrixMixingStatus, errors::Error},
+    defs::{datas::{matrix_mixing_status::MatrixMixingStatus, rw::READ}, errors::Error, fncodes::FNCODE},
     lib::MatrixCommand,
 };
-use crate::services::private::app::schemas::SetState;
+use crate::{configs::channels_settings, services::private::app::schemas::SetState};
+
+pub fn read_mix_ch(indx:u32,ch: u32) -> Result<MatrixCommand, Error>{
+    let (ch,indx) = (format!("{:02X}", ch),format!("{:02X}", indx));
+    let _ =MatrixCommand::check_channel(&ch)?;
+    let _ =MatrixCommand::check_channel(&indx)?;
+    let data = vec![indx,ch];
+    let rw = READ.to_string();
+    let fcode = FNCODE::MATRIXMIXING.to_string();
+    MatrixCommand::new(rw,fcode,Some(data))
+}
+pub fn read_mix_all() -> Result<Vec<MatrixCommand>, Error> {
+    let mut commands:Vec<MatrixCommand> = Vec::new();
+    for indx in 1..=channels_settings::get_channels_number(){
+        for ch in 1..=channels_settings::get_channels_number(){
+            commands.push(read_mix_ch(indx as u32, ch as u32)?)
+        }
+    }
+    Ok(commands)
+}
 
 pub fn into_data(data: SetState) -> Result<Vec<String>, Error> {
     let index = format!(
@@ -16,8 +35,8 @@ pub fn into_data(data: SetState) -> Result<Vec<String>, Error> {
         "{:02X}",
         data.channel.unwrap().trim().parse::<u8>().unwrap()
     );
-    MatrixCommand::check_channel(channel.clone())?;
-    MatrixCommand::check_channel(index.clone())?;
+    MatrixCommand::check_channel(&channel)?;
+    MatrixCommand::check_channel(&index)?;
     
     let value = MatrixMixingStatus::from_str(&data.value.unwrap())?;
     
