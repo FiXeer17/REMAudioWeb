@@ -272,7 +272,14 @@ impl TcpStreamActor {
                                         },
                                     ));
                                 }
-                                MachineStates::CameraStates(_) => (),
+                                MachineStates::CameraStates(states) => {
+                                    act.tcp_manager.do_send(DeviceReady::CameraReady(
+                                        CameraReady {
+                                            socket: act.stream_socket,
+                                            states: states.clone(),
+                                        },
+                                    ));
+                                },
                             }
                         }
                     }
