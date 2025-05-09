@@ -38,7 +38,8 @@ pub struct SessionUUID {
 #[derive(Debug, Clone)]
 
 pub enum DeviceCommnd{
-    MatrixCommand(MatrixCommand)
+    MatrixCommand(MatrixCommand),
+    CameraCommand(Vec<u8>)
 }
 
 pub fn index_values<T>(indexable: Vec<T>) -> HashMap<u32, T>

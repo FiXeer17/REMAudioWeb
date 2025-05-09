@@ -9,7 +9,7 @@ use crate::{
     }, video_engine::{camera_presets_lib::call_preset, status_codes_lib::successfull}}, services::{
         private::{
             app::{
-                messages::{CameraReady, DeviceReady, GeneralError, SetHandlerState, SetMatrixCommand},
+                messages::{CameraReady, DeviceReady, GeneralError, SetCameraCommand, SetHandlerState, SetMatrixCommand},
                 schemas::{CameraStates, DeviceCommnd, MachineStates, SetAttributes},
                 ws_session::session::WsSession,
             },
@@ -284,9 +284,13 @@ impl TcpStreamActor {
        If a matrix command type is recieved it will be pushed inside the commands queue,
        command_polling fn will take care of it.
     */
-    pub fn handle_set_command(&mut self, sc: SetMatrixCommand) {
+    pub fn handle_set_matrix_command(&mut self, sc: SetMatrixCommand) {
         self.commands_queue
             .push_front(DeviceCommnd::MatrixCommand(sc.command));
+    }
+    pub fn handle_set_camera_command(&mut self, sc:SetCameraCommand){
+        self.commands_queue
+            .push_front(DeviceCommnd::CameraCommand(sc.command));
     }
     pub fn handle_recache(&mut self, ctx: &mut Context<Self>) {
         if self.machine_states.is_some() {

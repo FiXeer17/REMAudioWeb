@@ -122,7 +122,8 @@ impl Handler<SetMessage> for TcpStreamActor {
     fn handle(&mut self, msg: SetMessage, ctx: &mut Self::Context) -> Self::Result {
         self.watch_inactive(ctx, msg.addr.clone());
         match msg.command {
-            Commands::SetMatrixCommand(sc) => self.handle_set_command(sc),
+            Commands::SetMatrixCommand(sc) => self.handle_set_matrix_command(sc),
+            Commands::SetCameraCommand(sc) => self.handle_set_camera_command(sc),
             Commands::SetVisibility(sv) => {
                 if self.machine_states.is_some() {
                     self.handle_set_visibility_command(
@@ -164,7 +165,6 @@ impl Handler<SetMessage> for TcpStreamActor {
                 }
             }
             Commands::ReCache => self.handle_recache(ctx),
-            _ => ()
         }
     }
 }
