@@ -60,15 +60,14 @@ pub async fn process_response(
                 if converted.get(0) == Some(&"00".to_string()) {
                     if cmd.fcode != FNCODE::SCENE.to_string() {
                         states.set_changes(cmd); // set changes detect changes from the recieved command and update the cache.
-                        let message = MatrixReady { socket, states };
+                        let message = MatrixReady { socket,states };
                         ctx_addr.do_send(DeviceReady::MatrixReady(message));
                     } else {
-                        TcpStreamActor::read_audio_states(ctx_addr, socket, stream, pgpool).await;
-                        //TODO DELETE .clone()
-                        /*                         warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
+                        TcpStreamActor::read_audio_states(ctx_addr.clone(), socket, stream, pgpool).await;//TODO DELETE .clone()
+                        warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
                         states.set_changes(cmd); //TODO DELETE THIS LINE
                         let message = MatrixReady { socket, states }; //TODO DELETE THIS LINE
-                        ctx_addr.do_send(DeviceReady::MatrixReady(message)); //TODO DELETE THIS LINE */
+                        ctx_addr.do_send(DeviceReady::MatrixReady(message)); //TODO DELETE THIS LINE 
                     }
                 }
             }
