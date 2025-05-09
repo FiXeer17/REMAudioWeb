@@ -58,6 +58,7 @@ pub async fn process_response(
                     .map(|byte| format!("{:02X}", byte))
                     .collect::<Vec<String>>();
                 if converted.get(0) == Some(&"00".to_string()) {
+                    
                     if cmd.fcode != FNCODE::SCENE.to_string() {
                         states.set_changes(cmd); // set changes detect changes from the recieved command and update the cache.
                         let message = MatrixReady { socket,states };
@@ -88,7 +89,7 @@ pub async fn process_response(
    return a response to the WebSocket handler.
 */
 pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActor>) {
-    if !act.commands_queue.is_empty() {
+    if !act.commands_queue.is_empty(){
         let cmd = act.commands_queue.pop_back().unwrap();
         match cmd {
             DeviceCommnd::MatrixCommand(mc) => handle_matrix_polling(act, ctx, mc),

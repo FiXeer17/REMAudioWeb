@@ -42,7 +42,7 @@ pub enum DeviceCommnd{
     CameraCommand(CameraCommand)
 }
 
-pub fn index_values<T>(indexable: Vec<T>) -> HashMap<u32, T>
+pub fn index_values<T>(indexable: Vec<T>,from_0:bool) -> HashMap<u32, T>
 where
     T: std::fmt::Display,
 {
@@ -51,7 +51,8 @@ where
         .into_iter()
         .enumerate()
         .for_each(|(i, indexable_unit)| {
-            let index = i + 1;
+            let index ;
+            if from_0 {index= i} else{index = i+1}
             map.insert(index as u32, indexable_unit);
         });
     return map;
