@@ -107,10 +107,11 @@ impl MatrixStates {
         let (muted, io, channel) = (cmd.muted.unwrap(), cmd.io.clone().unwrap(), cmd.channel.unwrap());
 
         if io == SRC::INPUT.to_label() {
-            i_mute.entry(channel).or_insert(muted);
+            i_mute.insert(channel,muted);
             return;
         }
-        o_mute.entry(channel).or_insert(muted);
+        o_mute.insert(channel,muted);
+
     }
 
     fn handle_volume_cmd(i_volumes: &mut HashMap<u32, f32>,o_volumes: &mut HashMap<u32, f32>, cmd:&MatrixCommandDatas ){
