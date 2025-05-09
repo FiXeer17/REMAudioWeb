@@ -147,7 +147,7 @@ pub async fn add_presets(
         np = presets_settings::get_video_presets_number();
         prfx = presets_settings::get_video_preset_label_prefix()
     }
-    for i in 1..np {
+    for i in st..np {
         sqlx::query(query_string)
             .bind(format!("{}{}",prfx,i))
             .bind(i as i32)
