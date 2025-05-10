@@ -24,7 +24,7 @@ const buttonVariants = cva(
         channels_notVisible: "border-[1px] border-home_colors-Similar_White text-home_colors-Similar_White"
       },
       size: {
-        default: "h-9 px-3 py-2",
+        default: "h-9 w-14 px-3 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-10",

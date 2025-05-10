@@ -19,6 +19,8 @@ export const HomeAudio=()=> {
     const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
     const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
+    const [labelChannelInput,setLabelChannelInput]=useState<{[key: string]: string;}>({})
+    const [labelChannelOutput,setLabelChannelOutput]=useState<{[key: string]: string;}>({})
     const [currentPresets,setCurrentPresets]=useState(0)
     const {socket,message_matrix} = useContext(SocketContext).socketState
     const [isAvailable, setIsAvailable] = useState(true)
@@ -28,7 +30,7 @@ export const HomeAudio=()=> {
     useEffect(()=>{
       if(!message_matrix) return 
       
-      const { inputChannelStates,outputChannelStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message_matrix);
+      const { inputChannelStates,outputChannelStates,isAvailable,outputVisibility,inputVisibility,currentPresets,labelPresets,labelChannelsInput,labelChannelsOutput } = GetData(message_matrix);
         setInputChannelStates(inputChannelStates);
         setOutputChannelStates(outputChannelStates);
         setInputVisibility(inputVisibility)
@@ -36,6 +38,8 @@ export const HomeAudio=()=> {
         setIsAvailable(isAvailable)
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
+        setLabelChannelInput(labelChannelsInput)
+        setLabelChannelOutput(labelChannelsOutput)
       },[message_matrix])
 
     const handleState = (channel: string, type: string) => {
@@ -106,7 +110,17 @@ export const HomeAudio=()=> {
                       onClick={() => handleState(channel, "I")}
                       
                       >
-                      {`CH${channel}`}
+                      {labelChannelInput[channel] ? (
+                        labelChannelInput[channel].length > 3 ? (
+                          <div className="relative w-full overflow-hidden">
+                            <div className="whitespace-nowrap animate-marquee">
+                              {labelChannelInput[channel]}
+                            </div>
+                          </div>
+                        ) : (
+                          labelChannelInput[channel]
+                        )
+                      ) : null}
                       </Channel>
                   ))}
                   </div>
@@ -130,7 +144,17 @@ export const HomeAudio=()=> {
                       size={"desktop"}
                       onClick={() => handleState(channel, "O")}
                       >
-                      {`CH${channel}`}
+                      {labelChannelOutput[channel] ? (
+                          labelChannelOutput[channel].length > 3 ? (
+                            <div className="relative w-full overflow-hidden">
+                              <div className="whitespace-nowrap animate-marquee">
+                                {labelChannelOutput[channel]}
+                              </div>
+                            </div>
+                          ) : (
+                            labelChannelOutput[channel]
+                          )
+                        ) : null}
                       </Channel>
                   ))}
                   </div>

@@ -71,7 +71,7 @@ export const PreferenciesChannels=()=>{
 
                             const right = (index+1) %2 == 0
                             return (
-                                InOut === "IN" && (index === 0 || index === 1) ? null : 
+                                InOut === "OUT" && (index === 0 || index === 1) ? null : 
                                 <div className="flex items-center gap-2 w-full py-1" key={presets}>
                                     { !right && (
                                     <div className="flex-shrink-0 cursor-pointer" onClick={() => handleVisibility(presets)}>

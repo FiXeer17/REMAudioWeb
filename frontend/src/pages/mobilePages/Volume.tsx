@@ -31,12 +31,14 @@ export const Volume=()=>{
     const {socket,message_matrix} = useContext(SocketContext).socketState
     const [isAvailable, setIsAvailable] = useState(true)
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
+    const [labelChannelInput,setLabelChannelInput]=useState<{[key: string]: string;}>({})
+    const [labelChannelOutput,setLabelChannelOutput]=useState<{[key: string]: string;}>({})
     const [currentPresets,setCurrentPresets]=useState(0)
 
     
     useEffect(()=>{
       if (!message_matrix) return
-      const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message_matrix);
+      const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets,labelChannelsInput,labelChannelsOutput } = GetData(message_matrix);
 
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
@@ -47,6 +49,8 @@ export const Volume=()=>{
       setIsAvailable(isAvailable)
       setCurrentPresets(currentPresets)
       setlabelPresets(labelPresets)
+      setLabelChannelInput(labelChannelsInput)
+      setLabelChannelOutput(labelChannelsOutput)
       
       },[message_matrix])
     const navigate = useNavigate()
@@ -153,7 +157,33 @@ export const Volume=()=>{
                                   value={visibility[key] ? channelState[key] ? [-60] : [value] : [-60]} 
                                   onValueChange={(newValue) => handleSliderChange(newValue, key, source)} 
                                   onValueCommit={(newValue) => handleSliderCommit(newValue, key, source)}/> 
-                              <p className="text-home_colors-Similar_White text-sm font-bold"> CH{key} </p>
+                              <div className="text-home_colors-Similar_White text-sm font-bold text-center w-14">
+                                {channelSources[key]==="IN"?
+                                labelChannelInput[key] ? (
+                                  labelChannelInput[key].length > 3 ? (
+                                    <div className="relative w-full overflow-hidden">
+                                      <div className="whitespace-nowrap animate-marquee">
+                                        {labelChannelInput[key]}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    labelChannelInput[key]
+                                  )
+                                ) : null
+                                  :    
+                                  labelChannelOutput[key] ? (
+                                    labelChannelOutput[key].length > 3 ? (
+                                      <div className="relative w-full overflow-hidden">
+                                        <div className="whitespace-nowrap animate-marquee">
+                                          {labelChannelOutput[key]}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      labelChannelOutput[key]
+                                    )
+                                  ) : null
+                                  }
+                              </div>
                               { key==="1"||key==="2" ? 
                                                       <div className="text-home_colors-Selected_Borders/text border-[0.9px] w-10 justify-center text-center text-sm border-home_colors-Selected_Borders/text font-bold">
                                                         IN
