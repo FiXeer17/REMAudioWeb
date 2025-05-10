@@ -54,11 +54,11 @@ impl MatrixStates {
             0,
         );
 
-        let i_labels: HashMap<u32, String> = index_values(input_channel_labels);
-        let o_labels: HashMap<u32, String> = index_values(output_channel_labels);
-        let preset_labels: HashMap<u32,String> = index_values(preset_labels);
-        let i_visibility: HashMap<u32, bool> = index_values(input_visibility);
-        let o_visibility: HashMap<u32, bool> = index_values(output_visibility);
+        let i_labels: HashMap<u32, String> = index_values(input_channel_labels,false);
+        let o_labels: HashMap<u32, String> = index_values(output_channel_labels,false);
+        let preset_labels: HashMap<u32,String> = index_values(preset_labels,false);
+        let i_visibility: HashMap<u32, bool> = index_values(input_visibility,false);
+        let o_visibility: HashMap<u32, bool> = index_values(output_visibility,false);
         
 
         for command in cmds {
@@ -175,7 +175,7 @@ impl CameraStates{
         preset_labels: Vec<String>,
         current_preset: i32
     ) -> Self{
-        let preset_labels: HashMap<u32,String> = index_values(preset_labels);
+        let preset_labels: HashMap<u32,String> = index_values(preset_labels,true);
         Self {
             preset_labels,
             available:None,

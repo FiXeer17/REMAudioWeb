@@ -136,15 +136,18 @@ pub async fn add_presets(
     let query_string: &str =
         "INSERT INTO presets (label,relative_identifier,socket_id) VALUES ($1,$2,$3);";
     let np: u8;
+    let st: u8;
     let prfx: String;
     if device == Device::Audio.to_string() {
-        np = presets_settings::get_audio_presets_number();
+        st = 1;
+        np = presets_settings::get_audio_presets_number() +1 ;
         prfx = presets_settings::get_audio_preset_label_prefix()
     } else {
+        st=0;
         np = presets_settings::get_video_presets_number();
         prfx = presets_settings::get_video_preset_label_prefix()
     }
-    for i in 1..np + 1 {
+    for i in st..np {
         sqlx::query(query_string)
             .bind(format!("{}{}",prfx,i))
             .bind(i as i32)
