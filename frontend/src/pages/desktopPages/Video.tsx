@@ -10,10 +10,15 @@ import { useNavigate } from "react-router-dom";
 
 export const Video=()=>{
   const navigate = useNavigate()
-  const {socket,message_camera} = useContext(SocketContext).socketState
+  const {socket,message_camera,camera_status,matrix_status} = useContext(SocketContext).socketState
   const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
   const [currentPresets,setCurrentPresets]=useState(0)
   const [isAvailable, setIsAvailable] = useState(true)
+
+  useEffect(()=>{
+    if(camera_status==="disconnected" && matrix_status==="connected")
+      navigate("/homeAudio")
+  },[camera_status])
 
   useEffect(()=>{
       if(!message_camera) return

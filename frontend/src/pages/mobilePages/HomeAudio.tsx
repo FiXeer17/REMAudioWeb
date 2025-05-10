@@ -15,12 +15,17 @@ export const HomeAudio=() => {
   const [outputChannelStates, setOutputChannelStates] = useState<{[key: string]: boolean;}>({});
   const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
   const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
-  const {socket,message_matrix} = useContext(SocketContext).socketState
+  const {socket,message_matrix,camera_status,matrix_status} = useContext(SocketContext).socketState
   const [isAvailable, setIsAvailable] = useState(true)
   const [currentPresets,setCurrentPresets]=useState(0)
   const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
   const [labelChannelInput,setLabelChannelInput]=useState<{[key: string]: string;}>({})
   const [labelChannelOutput,setLabelChannelOutput]=useState<{[key: string]: string;}>({})
+
+  useEffect(()=>{
+    if(matrix_status==="disconnected" && camera_status==="connected")
+      navigate("/video")
+  },[matrix_status])
 
   useEffect(()=>{
     if (!message_matrix) return

@@ -1,6 +1,6 @@
 import { ButtonPresets } from "@/components/ui/button_presets"
 import NavbarDesktop from "@/components/ui/navbarDesktop"
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"
 import useSliderThrottle from "@/lib/handleSwipe"; 
 import { GetData } from "@/lib/WebSocketData";
@@ -20,7 +20,7 @@ export const Volume=()=>{
     const [inputVisibility, setInputVisibility] = useState<{[key: string]: boolean;}>({});
     const [outputVisibility, setOutputVisibility] = useState<{[key: string]: boolean;}>({});
 
-    const {socket,message_matrix} = useContext(SocketContext).socketState
+    const {socket,message_matrix,matrix_status,camera_status} = useContext(SocketContext).socketState
     const [isAvailable, setIsAvailable] = useState(true)
 
     const [labelChannelsInput,setlabelChannelInput]=useState<{[key: string]: string;}>({})
@@ -28,7 +28,11 @@ export const Volume=()=>{
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const [currentPresets,setCurrentPresets]=useState(0)
 
-    
+    useEffect(()=>{
+      if(matrix_status==="disconnected" && camera_status==="connected")
+        navigate("/video")
+    },[matrix_status])
+
     useEffect(()=>{
       if (!message_matrix) return
       const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets,labelChannelsInput,labelChannelsOutput } = GetData(message_matrix);
