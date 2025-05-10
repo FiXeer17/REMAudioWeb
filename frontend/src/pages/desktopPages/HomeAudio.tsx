@@ -23,7 +23,7 @@ export const HomeAudio=()=> {
     const {socket,message_matrix} = useContext(SocketContext).socketState
     const [isAvailable, setIsAvailable] = useState(true)
     const navigate=useNavigate()
-    const Channels = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16",];
+    const Channels = ["1","2","3","4","5","6","7","8"];
 
     useEffect(()=>{
       if(!message_matrix) return 
@@ -51,7 +51,7 @@ export const HomeAudio=()=> {
 
         } else if (type === "ALL") {
 
-          for (let channel = 1; channel <= 16; channel++) {
+          for (let channel = 1; channel <= 8; channel++) {
             const dataoutput = {section: "mute",io: "output",channel: channel.toString(),value: "true",};
             socket?.send(JSON.stringify(dataoutput));
             const datainput = {section: "mute",io: "input",channel: channel.toString(),value: "true",};

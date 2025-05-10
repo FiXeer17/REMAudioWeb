@@ -21,7 +21,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       
       if (!uuid) return
 
-      const socketServerUrl = `ws://192.168.88.252/ws/app?uuid=${uuid}`;  
+      const socketServerUrl = `ws://172.20.10.11/ws/app?uuid=${uuid}`;  
 
       const socket = new WebSocket(socketServerUrl)
       
@@ -36,13 +36,11 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         
         const datajson=JSON.parse(event.data)
         if (!datajson.hasOwnProperty('reason')){
-          
           if(datajson.device_type==="matrix"){
             socketDispatch({ type: 'new_message_matrix', payload: event.data })
             latest_matrix=true
           }
           if (datajson.device_type==="camera"){
-            console.log(datajson)
             socketDispatch({ type: 'new_message_camera', payload: event.data })
             latest_camera = true
           }

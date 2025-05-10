@@ -28,7 +28,7 @@ export const Volume=()=>{
 
     
     useEffect(()=>{
-      const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets } = GetData(message_matrix);
+      const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets,labelChannelsInput,labelChannelsOutput } = GetData(message_matrix);
 
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
@@ -39,6 +39,8 @@ export const Volume=()=>{
       setIsAvailable(isAvailable)
       setCurrentPresets(currentPresets)
       setlabelPresets(labelPresets)
+      setlabelChannelInput(labelChannelsInput)
+      setlabelChannelOutput(labelChannelsOutput)
       
       },[message_matrix])
     const navigate = useNavigate()
@@ -115,7 +117,7 @@ export const Volume=()=>{
                         if (key === "1" || key === "2") return null;
                         return(
                           
-                          <div className="flex flex-col items-center justify-center gap-3">
+                          <div className="flex flex-col items-center justify-center gap-3" key={key}>
                             <p className="text-home_colors-Similar_White text-sm font-bold">{ outputVolumesStates[key] } db </p>
                             <Slider orientation="vertical" className="h-full" 
                                     disabled={outputVisibility[key] ? outputChannelStates[key] : false} min={-60} max={15} 

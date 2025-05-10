@@ -32,7 +32,7 @@ export const Presets = () => {
     },[currentPresets])
 
     const handleSetPreset=(Preset:number)=>{
-      const dataoutput={"section":"preset","value":Preset.toString()}
+      const dataoutput={"section":"matrix_preset","value":Preset.toString()}
       socket?.send(JSON.stringify(dataoutput))
       setIsLoading(true)
     }
