@@ -37,10 +37,12 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         if (!datajson.hasOwnProperty('reason')){
           if(datajson.device_type==="matrix"){
             socketDispatch({ type: 'new_message_matrix', payload: event.data })
+            socketDispatch({ type: "matrix_status", payload: "connected" })
             latest_matrix=true
           }
           if (datajson.device_type==="camera"){
             socketDispatch({ type: 'new_message_camera', payload: event.data })
+            socketDispatch({ type: "camera_status", payload: "connected" })
             latest_camera = true
           }
           setLoading(false)
@@ -50,10 +52,10 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
           const reason=datajson.reason
           if(reason.includes("camera")){
             latest_camera=false
-            socketDispatch({ type: "device_disconnected", payload: "camera" })
+            socketDispatch({ type: "camera_status", payload: "disconnected" })
           }else if(reason.includes("matrix")){
             latest_matrix=false
-            socketDispatch({ type: "device_disconnected", payload: "matrix" })
+            socketDispatch({ type: "matrix_status", payload: "disconnected" })
           }
           if(!latest_camera && !latest_matrix){
             if (isAdmin) {

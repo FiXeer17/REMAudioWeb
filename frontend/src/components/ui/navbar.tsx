@@ -1,4 +1,3 @@
-import { useConnections } from "@/lib/socket/ComponentUuid";
 import SocketContext from "@/lib/socket/context";
 import { House,SpeakerHigh,VideoCamera,SlidersHorizontal } from "@phosphor-icons/react";
 import { useContext, useEffect, useState } from "react";
@@ -10,28 +9,25 @@ interface NavbarColor{
 
 export default function Navbar({selectedColor}:NavbarColor){
     const navigate=useNavigate()
-    const {device_disconnected,message_camera,message_matrix}= useContext(SocketContext).socketState
+    const {camera_status,matrix_status}= useContext(SocketContext).socketState
     const [ hasLatestAudio,setHasLatestAudio ] = useState(false)
     const [ hasLatestVideo,setHasLatestVideo ] = useState(false)
 
     useEffect(()=>{
-        if(device_disconnected==="camera"){
+        if(camera_status==="connected"){
+            setHasLatestVideo(true)
+        }else if(camera_status==="disconnected"){
             setHasLatestVideo(false)
         }
-        if(device_disconnected==="matrix"){
-            setHasLatestAudio(false)
-            
-        }
-
-    },[device_disconnected])
+    },[camera_status])
     useEffect(()=>{
-        if(message_camera && device_disconnected!=="camera"){
-            setHasLatestVideo(true)
-        }
-        if(message_matrix && device_disconnected!=="matrix"){
+        if(matrix_status==="connected"){
             setHasLatestAudio(true)
+        }else if(matrix_status==="disconnected"){
+            setHasLatestAudio(false)
         }
-    },[message_camera,message_matrix])
+    },[matrix_status])
+
     
     return(
         <div className="flex items-center justify-around bg-home_colors-Navbar/Selection_Bg w-full mx-5 rounded-full h-16 text-center ">

@@ -5,7 +5,8 @@ export interface ISocketContextState {
   socket: WebSocket | undefined;
   message_matrix: string,
   message_camera: string,
-  device_disconnected: string
+  matrix_status: string,
+  camera_status: string
  
 }
 
@@ -13,12 +14,13 @@ export const defaultSocketContextState: ISocketContextState = {
   socket: undefined,
   message_matrix: "",
   message_camera: "",
-  device_disconnected: ""
+  matrix_status: "",
+  camera_status: ""
 
 };
 
 
-export type TSocketContextActions = "update_socket"|"new_message_matrix"|"new_message_camera"|"device_disconnected";
+export type TSocketContextActions = "update_socket"|"new_message_matrix"|"new_message_camera"|"matrix_status"|"camera_status";
 
 export type TSocketContextPayload= WebSocket|string
 
@@ -36,8 +38,10 @@ export const SocketReducer = (state: ISocketContextState, action: ISocketContext
       return { ...state, message_matrix: action.payload as string };
     case "new_message_camera":
       return { ...state, message_camera: action.payload as string };
-    case "device_disconnected":
-      return { ...state, device_disconnected: action.payload as string };
+    case "matrix_status":
+      return { ...state, matrix_status: action.payload as string };
+    case "camera_status":
+      return { ...state, camera_status: action.payload as string };
     default:
       return state;
   }
