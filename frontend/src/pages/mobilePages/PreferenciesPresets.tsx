@@ -1,10 +1,9 @@
-import { Clock } from "@phosphor-icons/react";
 import { GetData } from "@/lib/WebSocketData";
 import Navbar from "@/components/ui/navbar";
 import { Button as PresetsButton } from "@/components/ui/audio_video";
 import { Badge } from "@/components/ui/badge";
 import SocketContext from "@/lib/socket/context";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {ButtonEdit} from "@/components/ui/button_edit";
 import { useContext, useEffect, useState } from "react";
 

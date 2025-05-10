@@ -15,13 +15,20 @@ export default function Navbar({selectedColor}:NavbarColor){
     const [ hasLatestVideo,setHasLatestVideo ] = useState(false)
 
     useEffect(()=>{
-        console.log(device_disconnected)
+        if(device_disconnected==="camera"){
+            setHasLatestVideo(false)
+        }
+        if(device_disconnected==="matrix"){
+            setHasLatestAudio(false)
+            
+        }
+
     },[device_disconnected])
     useEffect(()=>{
-        if(message_camera){
+        if(message_camera && device_disconnected!=="camera"){
             setHasLatestVideo(true)
         }
-        if(message_matrix){
+        if(message_matrix && device_disconnected!=="matrix"){
             setHasLatestAudio(true)
         }
     },[message_camera,message_matrix])

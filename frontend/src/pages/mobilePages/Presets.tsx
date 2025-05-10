@@ -1,4 +1,3 @@
-import { Clock } from "@phosphor-icons/react";
 import { useContext, useEffect, useState } from "react";
 import { GetData } from "@/lib/WebSocketData";
 import Navbar from "@/components/ui/navbar";
@@ -44,9 +43,7 @@ export const Presets = () => {
                 </div>:<div className="absolute inset-0 z-10"></div>}
       <div className="absolute inset-0 bg-black z-20">
         <div className="grid grid-rows-[70px,1fr,auto] h-screen relative">
-          <div >
-                
-          </div>
+          <div/>
           <div className="flex flex-1 px-7 pb-5 overflow-hidden relative pt-5">
                 <Badge className="absolute left-12 top-3 transform -translate-x-1/2">
                   PRESETS

@@ -7,6 +7,8 @@ import { GetData } from "@/lib/WebSocketData";
 import SocketContext from "@/lib/socket/context";
 import { Slider } from "@/components/ui/slider";
 import { Button as Mute } from "@/components/ui/button_mute";
+import { Clock } from "@phosphor-icons/react";
+import { RecentConnections } from "./RecentConnections";
 
 export const Volume=()=>{
 
@@ -77,6 +79,23 @@ export const Volume=()=>{
     );
 
     return(
+      <>
+        {isAvailable ? ( message_matrix ?
+            <div className="absolute inset-0 z-10"></div>:<RecentConnections isLoading={true}/> ) :
+              <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
+                <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
+                  <div className="mt-1">
+                    <Clock weight="bold"></Clock>
+                  </div>
+                  <div>
+                  <p>Matrix Unvailable</p>
+                  <p>Please wait...</p>
+                  </div>
+                </div>
+              </div>}
+    
+      <div className="absolute inset-0 bg-black z-20">
+      
         <div className="grid grid-cols-[100px_1fr_0.5fr] h-screen">
             <div>
                 <NavbarDesktop selectedColor="speaker" />
@@ -85,7 +104,6 @@ export const Volume=()=>{
                 <div className="flex border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[330px] w-[600px] overflow-hidden px-24  ">
                   <div className="flex gap-3 pb-3 overflow-x-auto ">
                     {Object.entries(inputVolumesStates).map(([key])=>{
-
                             return(
                               
                               <div className="flex flex-col items-center justify-center gap-3" key={key}>
@@ -144,7 +162,7 @@ export const Volume=()=>{
                 </div>
             </div>
             <div className="flex flex-col gap-5 items-center justify-center">
-                <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"house"})}}/>
+                <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"volume"})}}/>
                 <div className="flex flex-col items-center gap-3 border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[550px] w-[100px] py-20  ">
                         <p className="text-home_colors-Similar_White text-sm font-bold">{outputChannelStates["1"] && outputChannelStates["2"] ? [-60] : [outputVolumesStates["2"]]} db </p>
                         <Slider orientation="vertical" className="h-full" 
@@ -171,5 +189,7 @@ export const Volume=()=>{
                 </div>
             </div>
         </div>
+      </div>
+    </>
     )
 }

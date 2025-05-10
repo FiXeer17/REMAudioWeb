@@ -820,6 +820,10 @@ body {
   height: 100vh;
 }
 
+.h-\[600px\] {
+  height: 600px;
+}
+
 .min-h-svh {
   min-height: 100svh;
 }
@@ -907,6 +911,14 @@ body {
 
 .w-full {
   width: 100%;
+}
+
+.w-screen {
+  width: 100vw;
+}
+
+.w-\[500px\] {
+  width: 500px;
 }
 
 .min-w-0 {
@@ -1057,6 +1069,14 @@ body {
   grid-template-rows: auto 1fr;
 }
 
+.grid-rows-\[70px\2c 1fr\] {
+  grid-template-rows: 70px 1fr;
+}
+
+.grid-rows-2 {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
 .flex-col {
   flex-direction: column;
 }
@@ -1139,6 +1159,10 @@ body {
 
 .gap-\[10\%\] {
   gap: 10%;
+}
+
+.gap-10 {
+  gap: 2.5rem;
 }
 
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {
@@ -1471,10 +1495,6 @@ body {
 
 .pb-10 {
   padding-bottom: 2.5rem;
-}
-
-.pb-2 {
-  padding-bottom: 0.5rem;
 }
 
 .pb-3 {

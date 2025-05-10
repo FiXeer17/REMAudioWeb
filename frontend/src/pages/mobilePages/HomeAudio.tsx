@@ -2,13 +2,11 @@ import { Navbar } from "@/components/ui/navbar";
 import { Button as Mute } from "@/components/ui/button_mute";
 import { Button as Channel } from "@/components/ui/button_channels";
 import { Badge } from "@/components/ui/badge";
-import { Button as PresetsButton } from "@/components/ui/audio_video";
 import { useNavigate } from "react-router-dom";
-import { SwipeChannels } from "../../lib/swipeChannels";
 import { useState, useContext, useEffect } from "react";
 import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
-import { Circle, Clock } from "@phosphor-icons/react";
+import { Clock } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import { RecentConnections } from "../connections_socket/RecentConnections";
 

@@ -14,14 +14,14 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const { children } = props
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
     const [loading, setLoading]= useState(true)
-    const {uuid,isAdmin}=useConnections()
+    const {uuid,isAdmin,triggerRedirect}=useConnections()
     
 
     useEffect(()=>{
       
       if (!uuid) return
 
-      const socketServerUrl = `ws://172.20.10.11/ws/app?uuid=${uuid}`;  
+      const socketServerUrl = `ws://192.168.88.252/ws/app?uuid=${uuid}`;  
 
       const socket = new WebSocket(socketServerUrl)
       
@@ -57,7 +57,11 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
           }
           if(!latest_camera && !latest_matrix){
             if (isAdmin) {
-              navigate("/uuidprovider", { state: { show: true } });
+              const handleRedirect = async () => {
+                await triggerRedirect()
+                navigate("/uuidprovider",{state:{show:true}})
+                }
+                handleRedirect()
             } else {
               navigate("/callAdministrator");
             }
