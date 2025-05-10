@@ -13,7 +13,8 @@ export const PreferenciesPresets=()=>{
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
 
     useEffect(()=>{
-      const { labelPresets} = GetData(message_matrix);
+        if (!message_matrix) return
+        const { labelPresets} = GetData(message_matrix);
         setlabelPresets(labelPresets)
       },[message_matrix])
 

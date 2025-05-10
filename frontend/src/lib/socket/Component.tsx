@@ -2,7 +2,6 @@ import React, { PropsWithChildren, useEffect, useReducer, useState } from "react
 import { defaultSocketContextState,SocketReducer,SocketContextProvider } from "./context";
 import { useConnections } from "./ComponentUuid";
 import { useNavigate } from "react-router-dom";
-import { RecentConnections } from "@/pages/connections_socket/RecentConnections";
 
 
 
@@ -25,10 +24,15 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
 
       const socket = new WebSocket(socketServerUrl)
       
-      let closedByServer = false
       let manuallyClosed = false;
+      let isRefreshing = false;
       let latest_matrix = false
       let latest_camera = false
+
+      const handleBeforeUnload = () => {
+        isRefreshing = true;
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
 
       socket.onopen=()=>{};
       socketDispatch({type:"update_socket",payload:socket})
@@ -73,9 +77,11 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       }
       socket.onclose=()=>{
         
-        if (!manuallyClosed && !closedByServer) {
+        if (!manuallyClosed && !isRefreshing) {
+
           localStorage.removeItem("accessToken");
           navigate("/login");
+
         }
         }
 

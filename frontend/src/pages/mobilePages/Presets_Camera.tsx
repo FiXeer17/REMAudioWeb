@@ -16,9 +16,10 @@ export const Presets_Camera = () => {
 
 
     useEffect(()=>{
+      if (!message_camera) return
       const { currentPresets,labelPresets } = GetData(message_camera);
-        setCurrentPresets(currentPresets)
-        setlabelPresets(labelPresets)
+      setCurrentPresets(currentPresets)
+      setlabelPresets(labelPresets)
       },[message_camera])
 
     useEffect(()=>{

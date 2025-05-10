@@ -17,7 +17,8 @@ export const Presets = () => {
 
 
     useEffect(()=>{
-      const { currentPresets,labelPresets } = GetData(message_matrix);
+        if (!message_matrix)return
+        const { currentPresets,labelPresets } = GetData(message_matrix);
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
       },[message_matrix])

@@ -23,11 +23,12 @@ export const PreferenciesChannels=()=>{
 
 
     useEffect(()=>{
+      if (!message_matrix) return
       const { outputVisibility, inputVisibility, labelChannelsInput, labelChannelsOutput } = GetData(message_matrix);
-        setInputVisibility(inputVisibility)
-        setOutputVisibility(outputVisibility)
-        setLabelChannelInput(labelChannelsInput)
-        setLabelChannelOutput(labelChannelsOutput)
+      setInputVisibility(inputVisibility)
+      setOutputVisibility(outputVisibility)
+      setLabelChannelInput(labelChannelsInput)
+      setLabelChannelOutput(labelChannelsOutput)
 
       },[message_matrix])
 
