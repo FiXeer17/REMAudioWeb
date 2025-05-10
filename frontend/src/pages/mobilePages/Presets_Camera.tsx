@@ -7,31 +7,31 @@ import { Badge } from "@/components/ui/badge";
 import SocketContext from "@/lib/socket/context";
 import { useLocation, useNavigate } from "react-router-dom";
 
-export const Presets = () => {
+export const Presets_Camera = () => {
     const navigate=useNavigate()
     const location=useLocation()
     const [isLoading,setIsLoading] = useState(false)
-    const {socket,message_matrix} = useContext(SocketContext).socketState
+    const {socket,message_camera} = useContext(SocketContext).socketState
     const [currentPresets,setCurrentPresets]=useState(0)
     const [colorNav] = useState<string>(() => location.state);
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
 
 
     useEffect(()=>{
-      const { currentPresets,labelPresets } = GetData(message_matrix);
+      const { currentPresets,labelPresets } = GetData(message_camera);
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
-      },[message_matrix])
+      },[message_camera])
 
     useEffect(()=>{
       if (isLoading===true){
         setIsLoading(false)
-        colorNav==="house" ? navigate("/homeAudio") : navigate("/volume")
+        navigate("/video")
         }
     },[currentPresets])
 
     const handleSetPreset=(Preset:string)=>{
-      const dataoutput={"section":"matrix_preset","value":Preset}
+      const dataoutput={"section":"camera_preset","value":Preset}
       socket?.send(JSON.stringify(dataoutput))
       setIsLoading(true)
     }
@@ -52,11 +52,11 @@ export const Presets = () => {
                   PRESETS
                 </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto scroll">
-              {Object.entries(labelPresets).map(([key,Presets],index)=>(
+                  {Object.entries(labelPresets).map(([key,Presets],index)=>(
                     <PresetsButton size={"presets"} variant={currentPresets === index ? "blue" : "white"} key={key} onClick={()=>handleSetPreset(key)}>{Presets}</PresetsButton>
                   ))}
               </div>
-          </div>
+          </div>    
           <div className="flex items-center pb-3 pt-3">
                 <Navbar selectedColor={colorNav}/>
           </div>

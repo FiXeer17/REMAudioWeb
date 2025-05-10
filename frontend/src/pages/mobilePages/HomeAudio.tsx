@@ -35,28 +35,8 @@ export const HomeAudio=() => {
     },[message_matrix])
   const navigate = useNavigate();
 
-  const inputChannels1 = ["1", "2", "3", "4", "5", "6", "7", "8"];
-  const inputChannels2 = ["9", "10", "11", "12", "13", "14", "15", "16"];
+  const Channels = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
-  const outputChannels1 = ["1", "2", "3", "4", "5", "6", "7", "8"];
-  const outputChannels2 = ["9", "10", "11", "12", "13", "14", "15", "16"];
-
-  const {
-    currentSet: colorInputCircle,
-    displayedChannels: displayedInputChannels,
-    offset: inputOffset,
-    handleTouchStart: handleInputTouchStart,
-    handleTouchMove: handleInputTouchMove,
-    handleTouchEnd: handleInputTouchEnd,
-  } = SwipeChannels(inputChannels1, inputChannels2);
-  const {
-    currentSet: colorOutputCircle,
-    displayedChannels: displayedOutputChannels,
-    offset: outputOffset,
-    handleTouchStart: handleOutputTouchStart,
-    handleTouchMove: handleOutputTouchMove,
-    handleTouchEnd: handleOutputTouchEnd,
-  } = SwipeChannels(outputChannels1, outputChannels2);
   
   const handleState = (channel: string, type: string) => {
     if (type === "I") {;
@@ -100,25 +80,14 @@ export const HomeAudio=() => {
         <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"house"})}}/>
       </div>
       <div className="flex flex-col px-7 py-6">
-        <div
-          className="relative w-full h-full"
-          style={{
-            transform: `translateX(${inputOffset}px)`,
-            transition: inputOffset === 0 ? "transform 0.3s ease" : "none",
-          }}
-        >
+        <div className="relative w-full h-full">
           <Badge className="absolute top-[-10px] left-5 transform -translate-x-1/2">
             INPUT
           </Badge>
 
-          <div
-            className="grid grid-rows-[1fr,auto] w-full h-full px-4 bg-home_colors-Navbar/Selection_Bg rounded-3xl"
-            onTouchStart={handleInputTouchStart}
-            onTouchMove={handleInputTouchMove}
-            onTouchEnd={handleInputTouchEnd}
-          >
+          <div className="grid grid-rows-[1fr,auto] w-full h-full px-4 bg-home_colors-Navbar/Selection_Bg rounded-3xl">
             <div className="grid grid-cols-4 w-full items-center justify-items-center pt-2">
-              {displayedInputChannels.map((channel: string) => (
+              {Channels.map((channel: string) => (
                 
                 <Channel
                   key={channel}
@@ -137,40 +106,19 @@ export const HomeAudio=() => {
                 
               ))}
             </div>
-            <div className="flex items-center justify-center pb-2">
-              {colorInputCircle === 1 ? (
-                <Circle size={12} color="#ffffff" />
-              ) : (
-                <Circle size={12} color="#ffffff" weight="fill" />
-              )}
-              {colorInputCircle === 1 ? (
-                <Circle size={12} color="#ffffff" weight="fill" />
-              ) : (
-                <Circle size={12} color="#ffffff" />
-              )}
-            </div>
+
           </div>
         </div>
       </div>
       <div className="flex flex-col px-7 py-6">
         <div
-          className="relative w-full h-full "
-          style={{
-            transform: `translateX(${outputOffset}px)`,
-            transition: outputOffset === 0 ? "transform 0.3s ease" : "none",
-          }}
-        >
+          className="relative w-full h-full ">
           <Badge className="absolute top-[-10px] left-7 transform -translate-x-1/2">
             OUTPUT
           </Badge>
-          <div
-            className=" grid grid-rows-[1fr,auto] w-full h-full px-4 bg-home_colors-Navbar/Selection_Bg rounded-3xl"
-            onTouchStart={handleOutputTouchStart}
-            onTouchMove={handleOutputTouchMove}
-            onTouchEnd={handleOutputTouchEnd}
-          >
+          <div className=" grid grid-rows-[1fr,auto] w-full h-full px-4 bg-home_colors-Navbar/Selection_Bg rounded-3xl">
             <div className="grid grid-cols-4 w-full items-center justify-items-center pt-2">
-              {displayedOutputChannels.map((channel: string) => (
+              {Channels.map((channel: string) => (
                 <Channel
                   key={channel}
                   disabled={!outputVisibility[channel]}
@@ -186,18 +134,6 @@ export const HomeAudio=() => {
                   {`CH${channel}`}
                 </Channel>
               ))}
-            </div>
-            <div className="flex items-center justify-center pb-2">
-              {colorOutputCircle === 1 ? (
-                <Circle size={12} color="#ffffff" />
-              ) : (
-                <Circle size={12} color="#ffffff" weight="fill" />
-              )}
-              {colorOutputCircle === 1 ? (
-                <Circle size={12} color="#ffffff" weight="fill" />
-              ) : (
-                <Circle size={12} color="#ffffff" />
-              )}
             </div>
           </div>
         </div>

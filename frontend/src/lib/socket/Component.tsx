@@ -33,7 +33,6 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
       socket.onopen=()=>{};
       socketDispatch({type:"update_socket",payload:socket})
       socket.onmessage=(event)=>{
-        
         const datajson=JSON.parse(event.data)
         if (!datajson.hasOwnProperty('reason')){
           if(datajson.device_type==="matrix"){
@@ -51,8 +50,10 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
           const reason=datajson.reason
           if(reason.includes("camera")){
             latest_camera=false
+            socketDispatch({ type: "device_disconnected", payload: "camera" })
           }else if(reason.includes("matrix")){
             latest_matrix=false
+            socketDispatch({ type: "device_disconnected", payload: "matrix" })
           }
           if(!latest_camera && !latest_matrix){
             if (isAdmin) {
@@ -65,7 +66,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         
       }
       socket.onclose=()=>{
-
+        
         if (!manuallyClosed && !closedByServer) {
           localStorage.removeItem("accessToken");
           navigate("/login");
@@ -77,12 +78,6 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         socket.close();
       };
     },[uuid])
-
-
-    
-
-    
-    //if(loading) return <RecentConnections isLoading={true}/>
 
     return <SocketContextProvider value={{ socketState,socketDispatch }}>
         {children}

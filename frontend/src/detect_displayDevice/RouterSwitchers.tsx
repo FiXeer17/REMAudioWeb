@@ -25,6 +25,9 @@ import { Volume as VolumeMobile } from "@/pages/mobilePages/Volume"
 import { Presets as PresetsDesktop } from "@/pages/desktopPages/Presets"
 import { Presets as PresetsMobile  } from "@/pages/mobilePages/Presets"
 
+import { Presets_Camera as Presets_CameraDesktop } from "@/pages/desktopPages/Presets_Camera"
+import { Presets_Camera as Presets_CameraMobile } from "@/pages/mobilePages/Presets_Camera"
+
 import { PreferenciesPresets as PreferenciesPresetsDesktop } from "@/pages/desktopPages/PreferenciesPresets"
 import { PreferenciesPresets as PreferenciesPresetsMobile } from "@/pages/mobilePages/PreferenciesPresets"
 
@@ -80,6 +83,11 @@ export const Volume = () => {
 export const Presets = () => {
     const isDesktop = useIsDesktop();
     return isDesktop ? <PresetsDesktop /> : <PresetsMobile />;
+};
+
+export const PresetsCamera = () => {
+    const isDesktop = useIsDesktop();
+    return isDesktop ? <Presets_CameraDesktop /> : <Presets_CameraMobile />;
 };
 
 export const PreferenciesPresets = () => {

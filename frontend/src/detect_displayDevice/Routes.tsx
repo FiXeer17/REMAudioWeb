@@ -1,6 +1,6 @@
 import { createBrowserRouter,Navigate,Outlet } from "react-router-dom";
 import { 
-      SignIn,NewConnections,CreateConnections,RecentConnections,CallAdministrator,HomeAudio,Volume,Settings,Presets,PreferenciesPresets,PreferenciesChannels,Video 
+      SignIn,NewConnections,CreateConnections,RecentConnections,CallAdministrator,HomeAudio,Volume,Settings,Presets,PreferenciesPresets,PreferenciesChannels,Video,PresetsCamera 
        } from "./RouterSwitchers";
 import UUIDProvider from "../lib/socket/ComponentUuid";
 import SocketContextComponent from "../lib/socket/Component";
@@ -89,6 +89,10 @@ import {Test2} from "@/pages/test/Test2";
           {
             path: "/video",
             element: <Video/>
+          },
+          {
+            path: "/presetsCamera",
+            element: <PresetsCamera/>
           }
           
         ]

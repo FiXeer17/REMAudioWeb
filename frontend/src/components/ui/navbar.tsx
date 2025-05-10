@@ -1,6 +1,7 @@
 import { useConnections } from "@/lib/socket/ComponentUuid";
+import SocketContext from "@/lib/socket/context";
 import { House,SpeakerHigh,VideoCamera,SlidersHorizontal } from "@phosphor-icons/react";
-import { useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface NavbarColor{
@@ -9,21 +10,38 @@ interface NavbarColor{
 
 export default function Navbar({selectedColor}:NavbarColor){
     const navigate=useNavigate()
-    const {sockets}=useConnections()
+    const {device_disconnected,message_camera,message_matrix}= useContext(SocketContext).socketState
+    const [ hasLatestAudio,setHasLatestAudio ] = useState(false)
+    const [ hasLatestVideo,setHasLatestVideo ] = useState(false)
+
+    useEffect(()=>{
+        console.log(device_disconnected)
+    },[device_disconnected])
+    useEffect(()=>{
+        if(message_camera){
+            setHasLatestVideo(true)
+        }
+        if(message_matrix){
+            setHasLatestAudio(true)
+        }
+    },[message_camera,message_matrix])
     
     return(
         <div className="flex items-center justify-around bg-home_colors-Navbar/Selection_Bg w-full mx-5 rounded-full h-16 text-center ">
-            <div onClick={()=>navigate("/homeAudio")} className="cursor-pointer">
-            {selectedColor==="house" ? <House size={28} color="#007AFF" />
-            : <House size={28} color="#FAFAFA" />}
+            <div onClick={hasLatestAudio ? () => navigate("/homeAudio") : undefined} className="cursor-pointer">
+            { hasLatestAudio ? selectedColor==="house" ? <House size={28} color="#007AFF" />
+                : <House size={28} color="#FAFAFA"/>
+                : <House size={28} color="#A1A1AA"/>}
             </div>
-            <div onClick={()=>navigate("/volume")} className="cursor-pointer">
-            {selectedColor==="speaker" ? <SpeakerHigh size={28} color="#007AFF" />
-            : <SpeakerHigh size={28} color="#FAFAFA" />}
+            <div onClick={hasLatestAudio ? () => navigate("/volume") : undefined} className="cursor-pointer">
+            { hasLatestAudio ? selectedColor==="speaker" ? <SpeakerHigh size={28} color="#007AFF" />
+                : <SpeakerHigh size={28} color="#FAFAFA"/>
+                : <SpeakerHigh size={28} color="#A1A1AA"/>}
             </div>
-            <div onClick={()=>navigate("/video")} className="cursor-pointer">
-            {selectedColor==="video" ? <VideoCamera size={28} color="#007AFF" />
-            : <VideoCamera size={28} color="#FAFAFA" />}
+            <div onClick={hasLatestVideo ? () => navigate("/video") : undefined}  className="cursor-pointer">
+            { hasLatestVideo ? selectedColor==="video" ? <VideoCamera size={28} color="#007AFF" />
+                : <VideoCamera size={28} color="#FAFAFA"/>
+                : <VideoCamera size={28} color="#A1A1AA"/>}
             </div>
             <div onClick={()=>navigate("/settings")} className="cursor-pointer">
             {selectedColor==="settings" ? <SlidersHorizontal size={28} color="#007AFF" />

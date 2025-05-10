@@ -15,15 +15,14 @@ export const PreferenciesPresets = ()=>{
     const navigate=useNavigate()
     const {socket,message_matrix} = useContext(SocketContext).socketState
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
-    const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
 
     useEffect(()=>{
       const { labelPresets} = GetData(message_matrix);
         setlabelPresets(labelPresets)
       },[message_matrix])
 
-      const handleSetNamePreset=(value:string,Preset:number)=>{
-        const dataoutput={"section":"preset_labels","index":Preset.toString(),"value":value}
+      const handleSetNamePreset=(value:string,Preset:string)=>{
+        const dataoutput={"section":"preset_labels","index":Preset,"value":value}
         socket?.send(JSON.stringify(dataoutput))
       }
 
@@ -41,9 +40,9 @@ export const PreferenciesPresets = ()=>{
                   PRESETS
                 </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
-                  {Presets.map((presets)=>(
-                    <ButtonEdit key={presets} onChange={(value)=>{handleSetNamePreset(value,presets)}} Text={labelPresets[presets.toString()]}/>
-                  ))}
+                {Object.entries(labelPresets).map(([key,Presets])=>(
+                      <ButtonEdit  key={key} onChange={(value)=>{handleSetNamePreset(value,key)}} Text={Presets}/>
+                    ))}
               </div>
           </div>
           <div className="flex justify-between items-center pb-3 gap-12 pt-3">

@@ -4,19 +4,21 @@ import {createContext} from "react";
 export interface ISocketContextState {
   socket: WebSocket | undefined;
   message_matrix: string,
-  message_camera: string
+  message_camera: string,
+  device_disconnected: string
  
 }
 
 export const defaultSocketContextState: ISocketContextState = {
   socket: undefined,
   message_matrix: "",
-  message_camera: ""
+  message_camera: "",
+  device_disconnected: ""
 
 };
 
 
-export type TSocketContextActions = "update_socket"|"new_message_matrix"|"new_message_camera";
+export type TSocketContextActions = "update_socket"|"new_message_matrix"|"new_message_camera"|"device_disconnected";
 
 export type TSocketContextPayload= WebSocket|string
 
@@ -34,6 +36,8 @@ export const SocketReducer = (state: ISocketContextState, action: ISocketContext
       return { ...state, message_matrix: action.payload as string };
     case "new_message_camera":
       return { ...state, message_camera: action.payload as string };
+    case "device_disconnected":
+      return { ...state, device_disconnected: action.payload as string };
     default:
       return state;
   }

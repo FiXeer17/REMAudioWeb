@@ -6,9 +6,11 @@ import { RecentConnections } from "../connections_socket/RecentConnections";
 import { Clock,ImageSquare,MagnifyingGlassPlus,ArrowDown,ArrowLeft,ArrowUp,ArrowRight } from "@phosphor-icons/react";
 import { Slider } from "@/components/ui/slider";
 import { ButtonPresets } from "@/components/ui/button_presets";
+import { useNavigate } from "react-router-dom";
 
 
 export const Video=()=>{
+    const navigate = useNavigate()
     const {socket,message_camera} = useContext(SocketContext).socketState
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const [currentPresets,setCurrentPresets]=useState(0)
@@ -18,7 +20,6 @@ export const Video=()=>{
         if(!message_camera) return
 
         const { labelPresets,currentPresets,isAvailable } = GetData(message_camera)
-        console.log(labelPresets,currentPresets)
         setIsAvailable(isAvailable)
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
@@ -69,7 +70,7 @@ export const Video=()=>{
                             </div>
                             <div className="flex flex-col gap-5">
                                 <div className="">
-                                    <ButtonPresets text={labelPresets[currentPresets.toString()] }/>
+                                    <ButtonPresets text={labelPresets[currentPresets.toString()] } onClick={()=>{navigate("/presetsCamera")}}/>
                                 </div>
                                 <div className="flex h-11 border-[1px] rounded-sm font-bold border-home_colors-Enabled_Channels bg-home_colors-Navbar/Selection_Bg text-home_colors-Enabled_Channels justify-center items-center">
                                     LIVE

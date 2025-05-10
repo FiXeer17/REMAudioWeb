@@ -28,8 +28,9 @@ export const Volume=()=>{
 
     
     useEffect(()=>{
+      if (!message_matrix) return
       const { inputChannelStates,outputChannelStates,inputVolumesStates, outputVolumesStates,isAvailable,outputVisibility, inputVisibility,currentPresets,labelPresets,labelChannelsInput,labelChannelsOutput } = GetData(message_matrix);
-
+      
       setInputChannelStates(inputChannelStates);
       setOutputChannelStates(outputChannelStates);
       setInputVolumesStates(inputVolumesStates);
