@@ -1,5 +1,6 @@
 import axios,{AxiosInstance, AxiosRequestConfig,AxiosResponse} from "axios";
 
+const host = import.meta.env.VITE_WS_HOST
 class AxiosInterceptor {
     private axiosInstance : AxiosInstance;
 
@@ -37,5 +38,5 @@ class AxiosInterceptor {
   
 
   export const client = new AxiosInterceptor({
-    baseURL: "http://192.168.88.252/",
+    baseURL: `http://${host}/`,
   });

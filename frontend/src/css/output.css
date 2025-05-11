@@ -1000,6 +1000,14 @@ body {
   cursor: pointer;
 }
 
+.cursor-none {
+  cursor: none;
+}
+
+.cursor-default {
+  cursor: default;
+}
+
 .touch-none {
   touch-action: none;
 }
@@ -1577,6 +1585,14 @@ body {
   padding-top: 2rem;
 }
 
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
 .text-center {
   text-align: center;
 }
@@ -1703,6 +1719,11 @@ body {
 }
 
 .text-zinc-400 {
+  --tw-text-opacity: 1;
+  color: rgb(161 161 170 / var(--tw-text-opacity, 1));
+}
+
+.text-login_colors-place_holder {
   --tw-text-opacity: 1;
   color: rgb(161 161 170 / var(--tw-text-opacity, 1));
 }

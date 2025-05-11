@@ -119,6 +119,8 @@ services:
       - backend
     networks:
       - debug_net
+    env_file:
+      - ./.env
 networks:
   debug_net:
     driver: bridge
