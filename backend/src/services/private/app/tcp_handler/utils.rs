@@ -177,10 +177,19 @@ pub fn handle_matrix_polling(
     let stream = act.stream.as_mut().unwrap().clone();
     let ctx_addr = ctx.address().clone();
     let socket = act.stream_socket;
+    
     let MachineStates::MatrixStates(states) = act.machine_states.as_mut().unwrap().clone() else {
         return;
     };
     let pgpool = act.pgpool.clone();
+    if cmd.fcode == FNCODE::SCENE.to_string(){
+        if act.machine_states.is_some() {
+            if let Some(poller) = act.cmd_poller {
+                ctx.cancel_future(poller);
+                act.cmd_poller = None;
+            }
+        }
+    }
     tokio::spawn(async move {
         let written_bytes = {
             let mut steram_guard = stream.lock().await;
@@ -204,10 +213,11 @@ pub fn handle_matrix_polling(
 
         let read_bytes = {
             let mut stream_guard = stream.lock().await;
-            dbg!(tokio::time::timeout(timeout, stream_guard.read(&mut buffer)).await)
+            tokio::time::timeout(timeout, stream_guard.read(&mut buffer)).await
         };
         match read_bytes {
             Ok(not_timedout) => {
+                dbg!(&buffer);
                 process_response(
                     not_timedout,
                     socket,
@@ -221,6 +231,7 @@ pub fn handle_matrix_polling(
                 .await
             }
             Err(e) => {
+                dbg!(&buffer);
                 warn!("closed by remote peer on read: {}", e.to_string());
 
                 let message = StreamFailed {
