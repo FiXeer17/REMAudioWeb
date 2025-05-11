@@ -127,8 +127,10 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                     {displayedConnections.map((element:Connection)=>(
                         <div className={`flex flex-col items-start justify-center text-white w-fit px-6 py-3 text-sm border-2 rounded-2xl ${
                             element.isLatestAudio
-                            ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text"
-                            : "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
+                            ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text": element.isLatestVideo 
+                            ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Enabled_Channels":
+                                "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
+                            
                         }`} key={element.ip}>
                             <div className="flex justify-between w-full items-center ">
                                 <div className="flex items-center gap-3">
