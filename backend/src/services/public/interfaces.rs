@@ -22,7 +22,7 @@ pub async fn from_username(
     pgpool: &Data<AppState>,
     username: &str,
 ) -> Result<ReturnFullUser, sqlx::Error> {
-    let query_string = "SELECT id,username,admin,password FROM users WHERE username = $1 ";
+    let query_string = "SELECT id,username,admin,password FROM users WHERE username = $1 AND deleted_at IS NULL;";
     match sqlx::query_as::<_, ReturnFullUser>(query_string)
         .bind(username)
         .fetch_optional(&pgpool.db)

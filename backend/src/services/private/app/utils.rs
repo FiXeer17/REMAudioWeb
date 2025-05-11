@@ -17,10 +17,11 @@ impl CommandsExt for Commands{
         match self {
             Commands::ReCache => Device::Audio,
             Commands::SetChannelLabel(_) => Device::Audio,
-            Commands::SetPresetLabel(_) => Device::Audio,
+            Commands::SetPresetLabel(pl) =>pl.device.clone().unwrap(),
             Commands::SetMatrixCommand(_)=> Device::Audio,
             Commands::SetVisibility(_)=> Device::Audio,
             Commands::SetCameraCommand(_) => Device::Video,
+
             
         }
     }

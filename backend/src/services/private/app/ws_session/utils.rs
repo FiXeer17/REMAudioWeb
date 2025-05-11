@@ -30,7 +30,7 @@ pub fn check_preset(preset: u8, device: Device) -> bool {
             }
         }
         Device::Video => {
-            if preset <= presets_settings::get_video_presets_number() && preset > 0 {
+            if preset <= presets_settings::get_video_presets_number() {
                 return true;
             }
         }

@@ -3,13 +3,21 @@ use futures_util::lock::Mutex;
 use std::{net::SocketAddrV4, sync::Arc};
 
 use crate::{
-    configs::tcp_comunication_settings, engines::{audio_engine::{
-        defs::datas::io::SRC,
-        lib::{read_all_states, MatrixCommand},
-    }, video_engine::{camera_presets_lib::call_preset, status_codes_lib::successfull}}, services::{
+    configs::tcp_comunication_settings,
+    engines::{
+        audio_engine::{
+            defs::datas::io::SRC,
+            lib::{read_all_states, MatrixCommand},
+        },
+        video_engine::{camera_presets_lib::call_preset, status_codes_lib::successfull},
+    },
+    services::{
         private::{
             app::{
-                messages::{CameraReady, DeviceReady, GeneralError, SetCameraCommand, SetHandlerState, SetMatrixCommand},
+                messages::{
+                    CameraReady, DeviceReady, GeneralError, SetCameraCommand, SetHandlerState,
+                    SetMatrixCommand,
+                },
                 schemas::{CameraStates, DeviceCommnd, MachineStates, SetAttributes},
                 ws_session::session::WsSession,
             },
@@ -21,7 +29,8 @@ use crate::{
             update_channel_visibility, update_latest_preset_in_sockets_db,
             update_preset_labels_in_db,
         },
-    }, AppState
+    },
+    AppState,
 };
 use actix::{Addr, AsyncContext, Context};
 use log::warn;
@@ -63,16 +72,11 @@ impl TcpStreamActor {
                     socket,
                 });
                 return;
-
             }
             let timeout = tcp_comunication_settings::get_read_timeout();
             let read_bytes = {
                 let mut stream = stream.lock().await;
-                tokio::time::timeout(
-                    timeout,
-                    stream.read(&mut buffer),
-                )
-                .await
+                tokio::time::timeout(timeout, stream.read(&mut buffer)).await
             };
             if let Ok(Ok(n)) = read_bytes {
                 if n == 0 {
@@ -185,7 +189,7 @@ impl TcpStreamActor {
             });
             return;
         };
-        
+
         let Ok(preset_labels) = retrieve_preset_labels(&pgpool, &sock.id.unwrap()).await else {
             warn!("Cannot retrieve preset labels from db");
             ctx_addr.do_send(GeneralError {
@@ -215,7 +219,10 @@ impl TcpStreamActor {
                 }
                 match successfull(stream).await {
                     Ok(true) => {
-                        if update_latest_preset_in_sockets_db(&pgpool, sock.id.unwrap(), lp as i32).await.is_err(){
+                        if update_latest_preset_in_sockets_db(&pgpool, sock.id.unwrap(), lp as i32)
+                            .await
+                            .is_err()
+                        {
                             ctx_addr.do_send(ClosedByRemotePeer {
                                 message: "error occurred on camera".to_string(),
                                 socket,
@@ -235,7 +242,6 @@ impl TcpStreamActor {
                 lp as i32
             }
         };
-        
 
         let states = CameraStates::new(sock.socket, preset_labels, current_preset);
         ctx_addr.do_send(DeviceReady::CameraReady(CameraReady { states, socket }));
@@ -279,7 +285,7 @@ impl TcpStreamActor {
                                             states: states.clone(),
                                         },
                                     ));
-                                },
+                                }
                             }
                         }
                     }
@@ -295,7 +301,7 @@ impl TcpStreamActor {
         self.commands_queue
             .push_front(DeviceCommnd::MatrixCommand(sc.command));
     }
-    pub fn handle_set_camera_command(&mut self, sc:SetCameraCommand){
+    pub fn handle_set_camera_command(&mut self, sc: SetCameraCommand) {
         self.commands_queue
             .push_front(DeviceCommnd::CameraCommand(sc.command));
     }
@@ -503,7 +509,12 @@ impl TcpStreamActor {
                             states: ms,
                         }))
                     }
-                    MachineStates::CameraStates(_) => (),
+                    MachineStates::CameraStates(cs) => {
+                        selfaddr.do_send(DeviceReady::CameraReady(CameraReady {
+                            socket: stream_socket,
+                            states: cs,
+                        }))
+                    }
                 }
             }
         });

@@ -288,5 +288,5 @@ fn ok_cmd_from_wsclient_simulation(){
 
 #[test]
 fn ok_cmd_deserialized(){
-    dbg!(MatrixCommandDatas::try_from(MatrixCommand::from_str("A5 C3 3C 5A FF 63 02 01 02 EE").unwrap()));
+   // dbg!(MatrixCommandDatas::try_from(MatrixCommand::from_str("A5 C3 3C 5A FF 63 02 01 02 EE").unwrap()));
 }

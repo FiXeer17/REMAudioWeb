@@ -66,7 +66,6 @@ impl TcpStreamsManager {
                         tcp_actor.do_send(msg.clone());
                     }
                 } else {
-
                     tcp_actor.do_send(msg.clone());
                 }
             }
