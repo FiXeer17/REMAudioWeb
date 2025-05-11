@@ -7,12 +7,15 @@ use std::str::FromStr;
 
     pub const VISIBILITY_LABEL :&str = "visibility";
     pub const CHANNEL_LABELS_LABEL : &str = "channel_labels";
-    pub const PRESET_LABELS_LABEL : &str = "preset_labels";
+    pub const MATRIX_PRESET_LABELS_LABEL : &str = "matrix_preset_labels";
+    pub const CAMERA_PRESET_LABELS_LABEL : &str = "camera_preset_labels";
+
 
     pub enum Sections{
         Visibility,
         ChannelLabels,
-        PresetLabels,
+        MatrixPresetLabels,
+        CameraPresetLabels,
         MatrixCommand(audio_engine::defs::fncodes::FNCODE),
         CameraCommand(video_engine::defs::fncodes::FNCODE)
     }
@@ -21,7 +24,8 @@ use std::str::FromStr;
         fn to_string(&self) -> String {
             match self{
                 Sections::ChannelLabels => String::from(CHANNEL_LABELS_LABEL),
-                Sections::PresetLabels => String::from(PRESET_LABELS_LABEL),
+                Sections::MatrixPresetLabels => String::from(MATRIX_PRESET_LABELS_LABEL),
+                Sections::CameraPresetLabels => String::from(CAMERA_PRESET_LABELS_LABEL),
                 Sections::Visibility => String::from(VISIBILITY_LABEL),
                 Sections::MatrixCommand(cmd) => cmd.to_label(),
                 Sections::CameraCommand(cmd) => cmd.to_label(),
@@ -34,7 +38,8 @@ use std::str::FromStr;
             match s {
                 VISIBILITY_LABEL => Ok(Sections::Visibility),
                 CHANNEL_LABELS_LABEL => Ok(Sections::ChannelLabels),
-                PRESET_LABELS_LABEL => Ok(Sections::PresetLabels),
+                MATRIX_PRESET_LABELS_LABEL => Ok(Sections::MatrixPresetLabels),
+                CAMERA_PRESET_LABELS_LABEL => Ok(Sections::CameraPresetLabels),
                 VOLUME_LABEL => Ok(Sections::MatrixCommand(audio_engine::defs::fncodes::FNCODE::VOLUME)),
                 MUTE_LABEL => Ok(Sections::MatrixCommand(audio_engine::defs::fncodes::FNCODE::MUTE)),
                 SCENE_LABEL => Ok(Sections::MatrixCommand(audio_engine::defs::fncodes::FNCODE::SCENE)),

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::engines::audio_engine::lib::MatrixCommand;
+use crate::{engines::{audio_engine::lib::MatrixCommand, video_engine::defs::CameraCommand}, services::private::socket::utils::Device};
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -17,6 +17,7 @@ pub struct SetState {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SetAttributes {
+    pub device: Option<Device>,
     pub io: Option<String>,
     pub channel: Option<String>,
     pub index: Option<String>,
@@ -39,10 +40,10 @@ pub struct SessionUUID {
 
 pub enum DeviceCommnd{
     MatrixCommand(MatrixCommand),
-    CameraCommand(Vec<u8>)
+    CameraCommand(CameraCommand)
 }
 
-pub fn index_values<T>(indexable: Vec<T>) -> HashMap<u32, T>
+pub fn index_values<T>(indexable: Vec<T>,from_0:bool) -> HashMap<u32, T>
 where
     T: std::fmt::Display,
 {
@@ -51,7 +52,8 @@ where
         .into_iter()
         .enumerate()
         .for_each(|(i, indexable_unit)| {
-            let index = i + 1;
+            let index ;
+            if from_0 {index= i} else{index = i+1}
             map.insert(index as u32, indexable_unit);
         });
     return map;

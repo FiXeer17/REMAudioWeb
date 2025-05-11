@@ -17,10 +17,11 @@ impl CommandsExt for Commands{
         match self {
             Commands::ReCache => Device::Audio,
             Commands::SetChannelLabel(_) => Device::Audio,
-            Commands::SetPresetLabel(_) => Device::Audio,
+            Commands::SetPresetLabel(pl) =>pl.device.clone().unwrap(),
             Commands::SetMatrixCommand(_)=> Device::Audio,
             Commands::SetVisibility(_)=> Device::Audio,
             Commands::SetCameraCommand(_) => Device::Video,
+
             
         }
     }
@@ -54,11 +55,11 @@ impl MatrixStates {
             0,
         );
 
-        let i_labels: HashMap<u32, String> = index_values(input_channel_labels);
-        let o_labels: HashMap<u32, String> = index_values(output_channel_labels);
-        let preset_labels: HashMap<u32,String> = index_values(preset_labels);
-        let i_visibility: HashMap<u32, bool> = index_values(input_visibility);
-        let o_visibility: HashMap<u32, bool> = index_values(output_visibility);
+        let i_labels: HashMap<u32, String> = index_values(input_channel_labels,false);
+        let o_labels: HashMap<u32, String> = index_values(output_channel_labels,false);
+        let preset_labels: HashMap<u32,String> = index_values(preset_labels,false);
+        let i_visibility: HashMap<u32, bool> = index_values(input_visibility,false);
+        let o_visibility: HashMap<u32, bool> = index_values(output_visibility,false);
         
 
         for command in cmds {
@@ -107,10 +108,11 @@ impl MatrixStates {
         let (muted, io, channel) = (cmd.muted.unwrap(), cmd.io.clone().unwrap(), cmd.channel.unwrap());
 
         if io == SRC::INPUT.to_label() {
-            i_mute.entry(channel).or_insert(muted);
+            i_mute.insert(channel,muted);
             return;
         }
-        o_mute.entry(channel).or_insert(muted);
+        o_mute.insert(channel,muted);
+
     }
 
     fn handle_volume_cmd(i_volumes: &mut HashMap<u32, f32>,o_volumes: &mut HashMap<u32, f32>, cmd:&MatrixCommandDatas ){
@@ -174,7 +176,7 @@ impl CameraStates{
         preset_labels: Vec<String>,
         current_preset: i32
     ) -> Self{
-        let preset_labels: HashMap<u32,String> = index_values(preset_labels);
+        let preset_labels: HashMap<u32,String> = index_values(preset_labels,true);
         Self {
             preset_labels,
             available:None,

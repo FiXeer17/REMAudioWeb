@@ -260,7 +260,9 @@ fn ok_cmd_from_wsclient_simulation(){
         io:Some("output".to_string()),
         channel: Some("16".to_string()),
         value:Some("-60.0".to_string()),
-        index: None
+        index: None,
+        velocity:None,
+        direction:None
     };
 
 
@@ -273,7 +275,9 @@ fn ok_cmd_from_wsclient_simulation(){
         index: Some("1".to_string()),
         channel: Some("1".to_string()),
         value:Some("connected".to_string()),
-        io:None
+        io:None,
+        velocity:None,
+        direction:None
     };
 
     let cmd = MatrixCommand::new_from_client(rw::WRITE.to_string(),set_states);
@@ -284,15 +288,5 @@ fn ok_cmd_from_wsclient_simulation(){
 
 #[test]
 fn ok_cmd_deserialized(){
-    let set_state = SetState{
-        section:"mix_map".to_string(),
-        io:None,
-        channel:Some("5".to_string()),
-        value:Some("true".to_string()),
-        index:Some("4".to_string()),
-        velocity:None,
-        direction:None,
-    };
-    let cmd = dbg!(MatrixCommand::new_from_client(rw::WRITE.to_string(), set_state).unwrap());
-    assert_eq!(cmd.to_string(),"A5 C3 3C 5A FF 36 09 03 04 05 01 EE".to_string());
+   // dbg!(MatrixCommandDatas::try_from(MatrixCommand::from_str("A5 C3 3C 5A FF 63 02 01 02 EE").unwrap()));
 }

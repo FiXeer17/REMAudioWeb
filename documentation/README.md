@@ -158,23 +158,30 @@ To do so you have to send a json formatted WebSocket message with this body:
 ```
 {
     "section": "[POSSIBLE SECTIONS]",
-    "io": "[POSSIBLE IO]", -> OPTIONAL                   
-    "channel": String,  -> OPTIONAL,
-    "index": String -> OPTIONAL,
-    "value" : "[POSSIBLE VALUES]", 
+    "io": "[POSSIBLE IO]" -> OPTIONAL                   
+    "channel": -> OPTIONAL,
+    "index": -> OPTIONAL,
+    "direction":[POSSIBLE DIRECTIONS] -> OPTIONAL,
+    "velocity": [POSSIBLE VELOCITIES] -> OPTIONAL
+    "value" : " -> [POSSIBLE VALUES] -> OPTIONAL", 
 }
 ```
 
 ### SET COMMANDS FIELDS
-| | section | io | channnel | index | value |
-|-|---------|----|----------|-------|-------|
-| change channel labels | yes | yes | yes | no | yes |
-| change preset labels | yes | no | no | yes | yes |
-| change channel visibility | yes | yes | yes | no | yes |
-| change the current preset | yes | no | no | no | yes |
-| mute channel | yes | yes | yes | no | yes |
-| change the volume of the channel | yes | yes | yes | no | yes |
-|change matrix mixer map | yes | no | yes | yes | yes
+| | section | io | channnel | index | value | direction | velocity |
+|-|---------|----|----------|-------|-------| --------- | -------- |
+| change channel labels | yes | yes | yes | no | yes | no |  no |
+| change matrix/camera preset labels | yes | no | no | yes | yes | no | no |
+| change channel visibility | yes | yes | yes | no | yes | no | no |
+| change the matrix/camera current preset | yes | no | no | no | yes | no | no |
+| mute channel | yes | yes | yes | no | yes | no | no |
+| change the volume of the channel | yes | yes | yes | no | yes | no | no |
+| change matrix mixer map | yes | no | yes | yes | yes | no | no |
+| zoom (camera tele) | yes | no | no | no | yes | no | no |
+| zoom (camera wide) | yes | no | no | no | yes | no | no |
+| move the camera | yes | no | no | no | no | yes | yes |
+
+
 
 
 ### POSSIBLE DEVICE TYPES
@@ -190,12 +197,17 @@ sections are specific keywords, here is a list of sections that the engine curre
 | function | keyword |
 |---------|---------|
 | change channel labels | "channel_labels" |
-| change preset labels | "preset_labels" |
+| change matrix preset labels | "matrix_preset_labels" |
+| change camera preset labels | "camera_preset_labels" |
 | change channel visibility | "visibility" |
-| change the current preset | "preset" |
+| change the matrix current preset | "matrix_preset" |
+| change the camera current preset | "camera_preset" |
 | mute channel | "mute" |
 | change the volume of the channel | "volume" |
 | map input to output | "mix_map" |
+| telescopic zoom | "zoom_tele" |
+| wide zoom | "zoom_wide" |
+| move the camera | "move_camera" |
 
 
 ### POSSIBLE IO:
@@ -213,10 +225,30 @@ values can be used in different context, because of that it can assume different
 |-------|----------|
 | labels | string |
 | visibility | boolean |
-| preset | n positive integer: 1<=n<=16 |
+| preset | n positive integer|
 | mute | boolean |
 | volume | integer |
 | mix_map | boolean |
 
+
+### POSSIBLE DIRECTIONS:
+direction are used to move the camera:
+
+| direction | keyword |
+| --------- | ------- |
+| up | "up" |
+| down | "down" |
+| left | "left" |
+| right | "right" | 
+
+
+### POSSIBLE VELOCITIES:
+velocities are used to move the camera:
+
+| direction | keyword |
+| --------- | ------- |
+| slow | "slow" |
+| medium | "medium" |
+| fast | "fast" |
 
 

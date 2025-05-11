@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::net::SocketAddrV4;
 use std::str::FromStr;
+use serde::{Deserialize, Serialize};
 use tokio::net::TcpStream;
 use tokio::time::timeout;
 use crate::configs::ping_socket_settings;
@@ -8,7 +9,7 @@ use crate::configs::ping_socket_settings;
 pub const AUDIO_LABEL:&str="matrix";
 pub const VIDEO_LABEL:&str="camera";
 
-#[derive(Debug,Clone,Hash,PartialEq,Eq)]
+#[derive(Debug,Clone,Hash,PartialEq,Eq,Serialize,Deserialize)]
 pub enum Device{
     Audio,
     Video

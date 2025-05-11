@@ -3,19 +3,16 @@ use futures_util::lock::Mutex;
 use std::{net::SocketAddrV4, sync::Arc};
 
 use crate::{
-    engines::audio_engine::{defs::fncodes::FNCODE, lib::MatrixCommand},
-    configs::tcp_comunication_settings,
-    services::{
+    configs::tcp_comunication_settings, engines::{audio_engine::{defs::fncodes::FNCODE, lib::MatrixCommand}, video_engine::{defs::CameraCommand, status_codes_lib::successfull}}, services::{
         private::app::{
-            messages::DeviceReady,
+            messages::{CameraReady, DeviceReady},
             schemas::{DeviceCommnd, MachineStates},
         },
         public::{
-            interfaces::{self, add_io_channels, retrieve_socketid_from_db},
+            interfaces::{self, add_io_channels, retrieve_socketid_from_db, update_latest_preset_in_sockets_db},
             utils::{retrieve_all_channels, retrieve_all_presets},
         },
-    },
-    AppState,
+    }, AppState
 };
 use actix::{Addr, AsyncContext, Context};
 use log::{info, warn};
@@ -61,17 +58,17 @@ pub async fn process_response(
                     .map(|byte| format!("{:02X}", byte))
                     .collect::<Vec<String>>();
                 if converted.get(0) == Some(&"00".to_string()) {
+                    
                     if cmd.fcode != FNCODE::SCENE.to_string() {
                         states.set_changes(cmd); // set changes detect changes from the recieved command and update the cache.
-                        let message = MatrixReady { socket, states };
+                        let message = MatrixReady { socket,states };
                         ctx_addr.do_send(DeviceReady::MatrixReady(message));
                     } else {
-                        TcpStreamActor::read_audio_states(ctx_addr, socket, stream, pgpool).await;
-                        //TODO DELETE .clone()
-                        /*                         warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
+                        TcpStreamActor::read_audio_states(ctx_addr.clone(), socket, stream, pgpool).await;//TODO DELETE .clone()
+                        warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
                         states.set_changes(cmd); //TODO DELETE THIS LINE
                         let message = MatrixReady { socket, states }; //TODO DELETE THIS LINE
-                        ctx_addr.do_send(DeviceReady::MatrixReady(message)); //TODO DELETE THIS LINE */
+                        ctx_addr.do_send(DeviceReady::MatrixReady(message)); //TODO DELETE THIS LINE 
                     }
                 }
             }
@@ -92,7 +89,7 @@ pub async fn process_response(
    return a response to the WebSocket handler.
 */
 pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActor>) {
-    if !act.commands_queue.is_empty() {
+    if !act.commands_queue.is_empty(){
         let cmd = act.commands_queue.pop_back().unwrap();
         match cmd {
             DeviceCommnd::MatrixCommand(mc) => handle_matrix_polling(act, ctx, mc),
@@ -103,16 +100,73 @@ pub fn command_polling(act: &mut TcpStreamActor, ctx: &mut Context<TcpStreamActo
 pub fn handle_camera_polling(
     act: &mut TcpStreamActor,
     ctx: &mut Context<TcpStreamActor>,
-    cmd: Vec<u8>,
+    cmd: CameraCommand,
 ) {
     let stream = act.stream.as_mut().unwrap().clone();
     let ctx_addr = ctx.address().clone();
     let socket = act.stream_socket;
-    let MachineStates::CameraStates(states) = act.machine_states.as_mut().unwrap().clone() else {
+    let MachineStates::CameraStates(mut states) = act.machine_states.as_mut().unwrap().clone() else {
         return;
     };
     let pgpool = act.pgpool.clone();
-    let device_type_clone = act.device_type.clone();
+    tokio::spawn(async move {
+        let written_bytes = {
+            let mut steram_guard = stream.lock().await;
+            steram_guard.write(&cmd.cmd[..]).await
+        };
+
+        if let Err(_) = written_bytes {
+            warn!("closed by remote peer on write");
+            ctx_addr.do_send(ClosedByRemotePeer {
+                message: "error occurred on camera".to_string(),
+                socket,
+            });
+            return;
+        }
+
+        match successfull(stream).await{
+            Ok(true) => {
+                if cmd.fncode == crate::engines::video_engine::defs::fncodes::FNCODE::Preset{
+                    let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
+                        warn!("Cannot retrieve socket_id from the database");
+                        let message = StreamFailed {
+                            error: "error occurred on camera".to_string(),
+                            socket,
+                        };
+                        ctx_addr.do_send(message);
+                        return;
+                    };
+                    let latest_preset =*cmd.cmd.get(5).unwrap() as i32;
+                    states.current_preset = latest_preset;
+                    if let Err(_) = update_latest_preset_in_sockets_db(&pgpool, socket_id, latest_preset).await{
+                        warn!("Cannot update camera preset from the database");
+                        let message = StreamFailed {
+                            error: "error occurred on camera".to_string(),
+                            socket,
+                        };
+                        ctx_addr.do_send(message);
+                        return;
+                    }
+                    let message = CameraReady{socket,states:states};
+                    ctx_addr.do_send(DeviceReady::CameraReady(message));
+
+                }
+            },
+            Ok(false) => {let message = StreamFailed {
+                error: "error occurred on camera".to_string(),
+                socket,
+            };
+            ctx_addr.do_send(message);},
+            Err(_) => {
+                let message = StreamFailed {
+                    error: "error occurred on camera".to_string(),
+                    socket,
+                };
+                ctx_addr.do_send(message);
+            }
+        }
+    });
+    
 }
 
 pub fn handle_matrix_polling(
@@ -123,11 +177,19 @@ pub fn handle_matrix_polling(
     let stream = act.stream.as_mut().unwrap().clone();
     let ctx_addr = ctx.address().clone();
     let socket = act.stream_socket;
+    
     let MachineStates::MatrixStates(states) = act.machine_states.as_mut().unwrap().clone() else {
         return;
     };
     let pgpool = act.pgpool.clone();
-    let device_type_clone = act.device_type.clone();
+    if cmd.fcode == FNCODE::SCENE.to_string(){
+        if act.machine_states.is_some() {
+            if let Some(poller) = act.cmd_poller {
+                ctx.cancel_future(poller);
+                act.cmd_poller = None;
+            }
+        }
+    }
     tokio::spawn(async move {
         let written_bytes = {
             let mut steram_guard = stream.lock().await;
@@ -137,7 +199,7 @@ pub fn handle_matrix_polling(
         if let Err(_) = written_bytes {
             warn!("closed by remote peer on write");
             ctx_addr.do_send(ClosedByRemotePeer {
-                message: format!("error occurred on {}", device_type_clone.to_string()),
+                message: "error occurred on matrix".to_string(),
                 socket,
             });
             return;
@@ -151,10 +213,11 @@ pub fn handle_matrix_polling(
 
         let read_bytes = {
             let mut stream_guard = stream.lock().await;
-            dbg!(tokio::time::timeout(timeout, stream_guard.read(&mut buffer)).await)
+            tokio::time::timeout(timeout, stream_guard.read(&mut buffer)).await
         };
         match read_bytes {
             Ok(not_timedout) => {
+                dbg!(&buffer);
                 process_response(
                     not_timedout,
                     socket,
@@ -168,6 +231,7 @@ pub fn handle_matrix_polling(
                 .await
             }
             Err(e) => {
+                dbg!(&buffer);
                 warn!("closed by remote peer on read: {}", e.to_string());
 
                 let message = StreamFailed {

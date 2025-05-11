@@ -53,6 +53,7 @@ impl TcpStreamsManager {
         })
     }
     pub fn handle_message(&self, msg: SetMessage) {
+
         let addr = &msg.addr;
         for stream in &self.streams {
             let socket = self.sockets.iter().find_map(|s|if s.socket == stream.0.to_string() {Some(s)} else {None}).unwrap();

@@ -10,14 +10,14 @@ pub fn move_camera(velocity: String, direction: String) -> Result<Vec<u8>, Error
     let Ok(direction) = Direction::from_str(&direction) else {
         return Err(Error::InvalidDirection);
     };
-    let coefficent = 33 / 100;
-    let max_pan = 0x18;
-    let max_tilt = 0x14;
+    let coefficent:f32 = 33.0 / 100.0;
+    let max_pan: f32 = 24.0;
+    let max_tilt: f32 = 20.0;
 
     let (vv, ww) = match velocity {
-        Velocity::SLOW => (max_pan * coefficent * 1, max_tilt * coefficent * 1),
-        Velocity::MEDIUM => (max_pan * coefficent * 2, max_tilt * coefficent * 2),
-        Velocity::FAST => (max_pan * coefficent * 3, max_tilt * coefficent * 3)
+        Velocity::SLOW => ((max_pan * coefficent).floor() as u8 * 1, (max_tilt * coefficent).floor() as u8 * 1),
+        Velocity::MEDIUM => ((max_pan * coefficent).floor() as u8 * 2, (max_tilt * coefficent).floor() as u8 * 2),
+        Velocity::FAST => ((max_pan * coefficent).floor() as u8 * 3, (max_tilt * coefficent).floor() as u8 * 3)
     };
 
     let mut direction = match direction {
@@ -26,12 +26,9 @@ pub fn move_camera(velocity: String, direction: String) -> Result<Vec<u8>, Error
         Direction::LEFT => LEFT,
         Direction::RIGHT => RIGHT,
     };
-
-    let pan_condition = vv > 0 && vv <= max_pan;
-    let tilt_condition = ww > 0 && ww <= max_tilt;
+    let pan_condition = vv > 0 && vv <= max_pan as u8;
+    let tilt_condition = ww > 0 && ww <= max_tilt as u8;
     if pan_condition && tilt_condition {
-
-
         direction[4] |= vv;
         direction[5] |= ww;
         Ok(direction.to_vec())
