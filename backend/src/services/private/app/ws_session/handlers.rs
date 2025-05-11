@@ -2,7 +2,6 @@ use std::time::Instant;
 
 use crate::services::private::app::schemas::MachineStates;
 use crate::services::private::app::utils::HasStatesMessage;
-use crate::services::private::socket::utils::Device;
 use crate::utils::common::toast;
 use actix::{ActorContext, AsyncContext, Handler, StreamHandler};
 use actix_web_actors::ws;
@@ -141,7 +140,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                     HandleText::SetPresetLabels(sl) => {
                         let sl_clone = sl.clone();
                         let index = sl_clone.index.unwrap().parse::<u8>().unwrap();
-                        if check_preset(index, Device::Audio) {
+                        if check_preset(index, sl.device.clone().unwrap()) {
                             self.srv.do_send(SetMessage {
                                 addr,
                                 command: Commands::SetPresetLabel(sl),

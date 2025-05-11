@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::engines::{audio_engine::lib::MatrixCommand, video_engine::defs::CameraCommand};
+use crate::{engines::{audio_engine::lib::MatrixCommand, video_engine::defs::CameraCommand}, services::private::socket::utils::Device};
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -17,6 +17,7 @@ pub struct SetState {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SetAttributes {
+    pub device: Option<Device>,
     pub io: Option<String>,
     pub channel: Option<String>,
     pub index: Option<String>,
