@@ -63,7 +63,9 @@ export default {
 				'Enabled_Channels':'#87FF77',
 				'Disabled_Channels':'#FF3030',
 				'Navbar/Selection_Bg':'#101011',
-				'Similar_White':'#FAFAFA'
+				'Similar_White':'#FAFAFA',
+				'Border_Connections':'#444444',
+				'newconnections':'#007AFF'
 
 			}
 			
@@ -71,6 +73,15 @@ export default {
   		},
 		fontFamily: {
 			sans: ['Inter','sans-serif']
+		},
+		keyframes:{
+			marquee: {
+				'0%': { transform: 'translateX(100%)' },
+				'100%': { transform: 'translateX(-100%)' },
+			}
+		},
+		animation: {
+			marquee: 'marquee 7s linear infinite'
 		}
   	}
   },

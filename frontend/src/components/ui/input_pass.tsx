@@ -29,7 +29,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> &
           : <EyeSlash id="EyeSlash" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white cursor-pointer" size={22} onClick={()=>setState(!state)} />}
           </div>   
         </div>
-        <Link to={"/Login"} className= {cn("flex self-start px-3 text-login_colors-forgot_pass text-sm mt-1 underline",Forgot)}>Forgot password?</Link>
+        
       </div>
     );
   }
