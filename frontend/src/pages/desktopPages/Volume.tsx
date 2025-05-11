@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button as Mute } from "@/components/ui/button_mute";
 import { Clock } from "@phosphor-icons/react";
 import { RecentConnections } from "./RecentConnections";
+import { ButtonDb } from "@/components/ui/button_db";
 
 export const Volume=()=>{
 
@@ -77,6 +78,34 @@ export const Volume=()=>{
           const data = {"section": "volume", "io": io, "channel": channel, "value": value.toString()};
           socket?.send(JSON.stringify(data));
         }, [socket]);
+    const handleButtonDb =(value:string,channel:string,source:string)=>{
+      
+      const isNumeric = (str: string) => /^[^a-zA-Z]+$/.test(str)
+      if(!isNumeric(value)) return
+
+      let valueNum = Number(value)
+
+      valueNum = Math.round(valueNum);
+
+      if (valueNum < -60) {
+        value = "-60";
+      } else if (valueNum > 15) {
+        value = "15";
+      } else {
+        value = valueNum.toString();
+      }
+      if (source==="ALL"){
+        const data = {"section": "volume", "io": "output", "channel": "1", "value": value};
+        socket?.send(JSON.stringify(data));
+        const data1 = {"section": "volume", "io": "output", "channel": "2", "value": value};
+        socket?.send(JSON.stringify(data1));
+      }else{
+        const io = source === "IN" ? "input" : "output";
+        const data = {"section": "volume", "io": io, "channel": channel, "value": value};
+        socket?.send(JSON.stringify(data));
+      }
+      
+    }
     
     const { handleSliderChange, handleSliderCommit } = useSliderThrottle(
         sendVolumeUpdate, { speedThreshold: 0.3, slowInterval: 50, fastInterval: 100, skipCount: 3  }
@@ -111,7 +140,10 @@ export const Volume=()=>{
                             return(
                               
                               <div className="flex flex-col items-center justify-center gap-3" key={key}>
-                                <p className="text-home_colors-Similar_White text-sm font-bold">{ inputVolumesStates[key] } db </p>
+                                <div className="flex gap-1">
+                                  <ButtonDb onChange={(value) => handleButtonDb(value, key,"IN")} Text={inputVolumesStates[key].toString()}/>
+                                  <p className="text-home_colors-Similar_White text-sm font-bold">db</p>
+                                </div>
                                 <Slider orientation="vertical" className="h-full" 
                                         disabled={inputVisibility[key] ? inputChannelStates[key] : false} min={-60} max={15} 
                                         value={ inputVisibility[key] ? inputChannelStates[key] ? [-60] : [inputVolumesStates[key]] : [-60] } 
@@ -139,9 +171,11 @@ export const Volume=()=>{
                       {Object.entries(outputVolumesStates).map(([key])=>{
                         if (key === "1" || key === "2") return null;
                         return(
-                          
                           <div className="flex flex-col items-center justify-center gap-3" key={key}>
-                            <p className="text-home_colors-Similar_White text-sm font-bold">{ outputVolumesStates[key] } db </p>
+                            <div className="flex gap-1">
+                              <ButtonDb onChange={(value) => handleButtonDb(value, key,"OUT")} Text={outputVolumesStates[key].toString()}/>
+                              <p className="text-home_colors-Similar_White text-sm font-bold">db</p>
+                            </div>
                             <Slider orientation="vertical" className="h-full" 
                                     disabled={outputVisibility[key] ? outputChannelStates[key] : false} min={-60} max={15} 
                                     value={ outputVisibility[key] ? outputChannelStates[key] ? [-60] : [outputVolumesStates[key]] : [-60] } 
@@ -168,7 +202,10 @@ export const Volume=()=>{
             <div className="flex flex-col gap-5 items-center justify-center">
                 <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"volume"})}}/>
                 <div className="flex flex-col items-center gap-3 border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[550px] w-[100px] py-20  ">
-                        <p className="text-home_colors-Similar_White text-sm font-bold">{outputChannelStates["1"] && outputChannelStates["2"] ? [-60] : [outputVolumesStates["2"]]} db </p>
+                        <div className="flex gap-1">
+                          <ButtonDb onChange={(value) => handleButtonDb(value, "1","ALL")} Text={outputChannelStates["1"] && outputChannelStates["2"] ? "-60" : outputVolumesStates["1"]?outputVolumesStates["1"].toString():""}/>
+                          <p className="text-home_colors-Similar_White text-sm font-bold">db</p>
+                        </div>
                         <Slider orientation="vertical" className="h-full" 
                                 min={-60} max={15} 
                                 value={ outputChannelStates["1"] && outputChannelStates["2"] ? [-60] : [outputVolumesStates["2"]] } 

@@ -4,10 +4,9 @@
 
 
 ### Backend env variables
-enter the backend folder and create a .env file where you have to store all principal settings that the application will use (database options, connectivity options, default users ...)
+enter the root folder and create a .env file where you have to store all principal settings that the application will use (database options, connectivity options, default users ...)
 
 ```
-cd backend
 nano .env
 ```
 
@@ -86,3 +85,17 @@ to change some application behavior you can do it in the `settings.json` file in
 | ping_socket_max_retries | positive integer | max ping retries after a failed ping attempt. |
 | heartbeat_interval | milliseconds (positive integer) | time to wait before sending a ping to the WebSocket client |
 | client_timeout | milliseconds (positive integer) | time to wait for a response to the sent WebSocket ping |
+
+
+# USERS-CLI USAGE
+
+The users-cli executable was maid to edit users inside the database, you can list, edit, create or remove users inside the running database (the database container has to be already started).
+
+to execute it, simply type: `./users-cli [COMMAND KEYWORD]`
+
+| command | keyword |
+| ------- | ------- |
+| list users inside the database | ls |
+| create new user inside the database | new | 
+| edit a user inside the database | edit |
+| remove a user inside the database | rm |
