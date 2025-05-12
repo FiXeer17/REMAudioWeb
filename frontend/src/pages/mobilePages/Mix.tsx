@@ -16,10 +16,19 @@ export const Mix = () =>{
         },[message_matrix])
 
     const handleSetMix=(input:string , output:string,value:boolean)=>{
+        if (!mix_map) return
+            for (const key in mix_map) {
+                const [col, row] = key.slice(1, -1).split(",").map(Number);
+                
+                if (col.toString()===input && mix_map[key]===true) {
+                    const data = { "section": "mix_map", "channel": row.toString(), "index": col.toString(), "value": "false" };
+                    socket?.send(JSON.stringify(data));
+                }
+                }
         const data={"section":"mix_map","channel":output,"index":input,"value":value.toString()}
-        console.log(data)
+
         socket?.send(JSON.stringify(data))
-        console.log(input,output)
+
     }
 
     return(
