@@ -680,11 +680,6 @@ body {
   margin-right: 1.75rem;
 }
 
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-
 .my-4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -843,10 +838,6 @@ body {
   height: 100vh;
 }
 
-.h-5 {
-  height: 1.25rem;
-}
-
 .min-h-svh {
   min-height: 100svh;
 }
@@ -944,29 +935,12 @@ body {
   width: 100%;
 }
 
-.w-12 {
-  width: 3rem;
-}
-
-.w-5 {
-  width: 1.25rem;
-}
-
-.w-8 {
-  width: 2rem;
-}
-
 .min-w-0 {
   min-width: 0px;
 }
 
 .max-w-\[600px\] {
   max-width: 600px;
-}
-
-.max-w-fit {
-  max-width: -moz-fit-content;
-  max-width: fit-content;
 }
 
 .flex-1 {
@@ -1069,6 +1043,10 @@ body {
   grid-template-columns: 100px 1fr 0.5fr;
 }
 
+.grid-cols-\[repeat\(auto-fit\2c minmax\(50px\2c 1fr\)\)\] {
+  grid-template-columns: repeat(auto-fit,minmax(50px,1fr));
+}
+
 .grid-rows-2 {
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
@@ -1105,6 +1083,10 @@ body {
   grid-template-rows: 1fr auto;
 }
 
+.grid-rows-\[50px\2c 1fr\2c auto\] {
+  grid-template-rows: 50px 1fr auto;
+}
+
 .grid-rows-\[70px\2c 1fr\2c auto\] {
   grid-template-rows: 70px 1fr auto;
 }
@@ -1121,8 +1103,12 @@ body {
   grid-template-rows: auto 1fr;
 }
 
-.grid-rows-\[50px\2c 1fr\2c auto\] {
-  grid-template-rows: 50px 1fr auto;
+.grid-rows-\[repeat\(auto-fit\2c minmax\(50px\2c 1fr\)\)\] {
+  grid-template-rows: repeat(auto-fit,minmax(50px,1fr));
+}
+
+.grid-rows-8 {
+  grid-template-rows: repeat(8, minmax(0, 1fr));
 }
 
 .flex-col {
@@ -1261,10 +1247,6 @@ body {
 
 .rounded-xl {
   border-radius: 0.75rem;
-}
-
-.rounded {
-  border-radius: 0.25rem;
 }
 
 .rounded-l-xl {
@@ -1458,16 +1440,6 @@ body {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
-}
-
-.bg-gray-300 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1));
-}
-
-.bg-gray-700 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(55 65 81 / var(--tw-bg-opacity, 1));
 }
 
 .fill-white {
@@ -1671,11 +1643,6 @@ body {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
-}
-
-.text-lg {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
 }
 
 .font-bold {
