@@ -7,7 +7,7 @@ import { useContext, useEffect, useState } from "react";
 export const Mix = () =>{
     const {socket,message_matrix} = useContext(SocketContext).socketState
     const [ mix_map,setMix_Map ] = useState<{[key: string]: boolean}>()
-    
+    const array = Array.from({ length: 8 }, (_, i) => i + 1);
     
     useEffect(()=>{
         if (!message_matrix) return
@@ -39,7 +39,15 @@ export const Mix = () =>{
                     MIXING
                 </Badge>
                 <div className="flex h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 justify-center items-center">
-                    <div className="w-full aspect-square">
+                    <div className="flex flex-col w-full aspect-square">
+                        <div className="grid grid-cols-8 w-full h-10">
+                            {array.map((num) => {
+                                return(
+                                    <div key={num} className="text-white"></div>
+                                )
+                                
+                                })};
+                        </div>
                         <div className="grid grid-cols-8 grid-rows-8 w-full h-full gap-0">
                             {mix_map && Object.entries(mix_map).map(([key, value]) => {
                             const [col, row] = key.slice(1, -1).split(",").map(Number);
