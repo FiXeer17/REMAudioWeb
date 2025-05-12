@@ -3,7 +3,7 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { RecentConnections } from "./RecentConnections";
 import { useContext, useEffect, useState } from "react";
-import { Clock,ImageSquare,MagnifyingGlassPlus,ArrowDown,ArrowLeft,ArrowUp,ArrowRight } from "@phosphor-icons/react";
+import { Clock,ImageSquare,MagnifyingGlassPlus,ArrowDown,ArrowLeft,ArrowUp,ArrowRight,ArrowsClockwise } from "@phosphor-icons/react";
 import { Slider } from "@/components/ui/slider";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import { useNavigate } from "react-router-dom";
@@ -56,22 +56,26 @@ export const Video=()=>{
                   <div className="flex bg-home_colors-Navbar/Selection_Bg mx-10 border-[1px] border-home_colors-Selected_Borders/text justify-center items-center">
                       <ImageSquare size={60} color="white" weight="thin"/>
                   </div>
-                  <div className="grid grid-rows-[1fr,2fr]">
+                  <div className="grid grid-rows-[1fr,1fr,2fr]">
+                        <div>
+                            
+                        </div>
                       <div className="flex justify-center items-center gap-3">
                           <MagnifyingGlassPlus color="white"size={32}/>
                           <Slider className="w-[250px]" />
                       </div>
                       <div className="flex items-center justify-center gap-10">
                           <div className="flex flex-col w-32 h-32 border-[1px] rounded-2xl border-home_colors-Selected_Borders/text bg-home_colors-Navbar/Selection_Bg">
-                              <div className="flex justify-center items-start py-1">
-                                  <ArrowUp color="white" size={36}/>
+                              <div className="flex justify-center items-start py-[6px]">
+                                  <ArrowUp color="white" size={36} weight="bold"/>
                               </div>
-                              <div className="flex justify-between px-1">
-                                  <ArrowLeft color="white" size={36}/>
-                                  <ArrowRight color="white" size={36}/>
+                              <div className="flex justify-between px-1 items-center">
+                                  <ArrowLeft color="white" size={36} weight="bold"/>
+                                  <ArrowsClockwise color="white" size={30} weight="bold"/>
+                                  <ArrowRight color="white" size={36} weight="bold"/>
                               </div>
                               <div className="flex items-end justify-center">
-                                  <ArrowDown color="white" size={36}/>
+                                  <ArrowDown color="white" size={36} weight="bold"/>
                               </div>
                           </div>
                           <div className="flex flex-col gap-5">

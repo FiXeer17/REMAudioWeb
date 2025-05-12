@@ -28,7 +28,7 @@ export const MatrixCameraButton=({ onChange,device_disconnected }: InOutButtonPr
     <div className="flex w-fit">
       <div
         onClick={() => { if (device_disconnected !== "matrix") handleSelected("MATRIX") }}
-        className={`flex border-[0.9px] text-sm font-bold justify-center w-20 cursor-pointer
+        className={`flex border-[0.9px] text-sm font-bold justify-center w-20 cursor-pointer select-none
           ${device_disconnected!=="matrix"? selected === "MATRIX" 
                     ? "text-home_colors-Selected_Borders/text border-home_colors-Selected_Borders/text"
                     : "text-home_colors-Similar_White border-home_colors-Similar_White"
@@ -38,7 +38,7 @@ export const MatrixCameraButton=({ onChange,device_disconnected }: InOutButtonPr
       </div>
       <div
         onClick={() => { if (device_disconnected !== "camera") handleSelected("CAMERA") }}
-        className={`flex border-[0.9px] text-sm font-bold justify-center w-20 cursor-pointer
+        className={`flex border-[0.9px] text-sm font-bold justify-center w-20 cursor-pointer select-none
             ${device_disconnected!=="camera"? selected === "CAMERA" 
                 ? "text-home_colors-Selected_Borders/text border-home_colors-Selected_Borders/text"
                 : "text-home_colors-Similar_White border-home_colors-Similar_White"

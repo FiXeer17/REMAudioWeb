@@ -143,7 +143,7 @@ export const Volume=()=>{
                   <div className="flex gap-3 pb-3 overflow-x-auto h-[400px] ">
                     <div className="flex flex-col items-center gap-3 pr-3 border-r-2">
                       <div className="flex gap-1">
-                          <ButtonDb onChange={(value) => handleButtonDb(value, "1","ALL")} Text={outputChannelStates["1"] && outputChannelStates["2"] ? "-60" : outputVolumesStates["1"]?outputVolumesStates["1"].toString():""}/>
+                          <ButtonDb onChange={(value) => handleButtonDb(value, "1","ALL")} Text={outputChannelStates["1"] && outputChannelStates["2"] ? "-60" : outputVolumesStates["1"]?outputVolumesStates["1"].toString():"0"}/>
                           <p className="text-home_colors-Similar_White text-sm font-bold">db</p>
                       </div>
                       <Slider orientation="vertical" className="h-full" 

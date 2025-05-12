@@ -37,6 +37,9 @@ import { PreferenciesChannels as PreferenciesChannelsMobile } from "@/pages/mobi
 import { Video as VideoDesktop} from "@/pages/desktopPages/Video"
 import { Video as VideoMobile } from "@/pages/mobilePages/Video"
 
+import { Mix as MixDesktop } from "@/pages/desktopPages/Mix"
+import { Mix as MixMobile } from "@/pages/mobilePages/Mix"
+
 import { useIsDesktop } from "./useDeviceType"
 
 
@@ -103,6 +106,11 @@ export const PreferenciesChannels = () => {
 export const Video = () => {
     const isDesktop = useIsDesktop();
     return isDesktop ? <VideoDesktop /> : <VideoMobile />;
+};
+
+export const Mix = () => {
+    const isDesktop = useIsDesktop();
+    return isDesktop ? <MixDesktop /> : <MixMobile />;
 };
 
 
