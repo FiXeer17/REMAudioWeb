@@ -1,5 +1,5 @@
 import { ArrowLeft } from "@phosphor-icons/react";
-import { Link,useNavigate } from "react-router-dom";
+import { Link,useLocation,useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input_email";
 import { Button } from "@/components/ui/button";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -19,6 +19,7 @@ type FormFields = {
 
 export const CreateConnections=()=>{
     const navigate=useNavigate()
+    const location = useLocation()
     const { register,handleSubmit,setValue } =useForm<FormFields>();
     const {uuid}=useConnections()
 
@@ -42,9 +43,18 @@ export const CreateConnections=()=>{
     return (
         <div className="grid grid-rows-[1fr,2fr,1fr]  min-h-svh">
             <div className="flex mt-9 mx-7 justify-between items-start"  >
-                <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
-                <ArrowLeft size={32} color="#FFFFFF" />
-                </Link>
+                 
+                    <ArrowLeft size={32} color="#FFFFFF" onClick={() => {
+                        if(location.state){
+                            navigate("/recentConnections")
+                        }
+                        else{
+                            localStorage.removeItem("accessToken")
+                            navigate("/login")
+                        }
+                        }}
+                        />
+
                 <p className="flex text-white font-sans font-semibold flex-grow items-end justify-center">CREATE CONNECTIONS</p>
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>

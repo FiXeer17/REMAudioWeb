@@ -108,12 +108,10 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
             <div className="absolute inset-0 bg-black z-20">
                 <div className="grid grid-rows-6 min-h-svh">
                     <div className="flex justify-between mt-9 ml-7 mr-7">
-                        <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
-                            <ArrowLeft size={32} color="#FFFFFF" />
-                        </Link>
-                        <Link to={"/createConnections"}>
-                            <Plus color="#FFFFFF" size={32}/>
-                        </Link>
+                        <ArrowLeft size={32} color="#FFFFFF" onClick={() => {
+                                localStorage.removeItem("accessToken") 
+                                navigate("/login")}}/> 
+                        <Plus color="#FFFFFF" size={32} onClick={()=>navigate("/createConnections",{state: { recent: true }})}/>
                     </div>
                     <div className="grid row-span-4 grid-rows-4 mx-10 gap-5 justify-center" style={{
                     transform: `translateX(${Offset}px)`,

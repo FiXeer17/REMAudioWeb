@@ -1,5 +1,5 @@
 import { ArrowLeft } from "@phosphor-icons/react";
-import { Link,useNavigate } from "react-router-dom";
+import { Link,useLocation,useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input_email";
 import { Button } from "@/components/ui/button";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -18,7 +18,7 @@ type FormFields = {
 
 
 export const CreateConnections=()=>{
-
+    const location=useLocation()
     const navigate=useNavigate()
     const { register,handleSubmit,setValue } =useForm<FormFields>();
     const {uuid}=useConnections()
@@ -45,9 +45,16 @@ export const CreateConnections=()=>{
     return(
         <div className="flex flex-col pt-8 gap-14">
             <div className="relative w-full h-14 flex items-center justify-center ">
-                <Link to={"/Login"} className="absolute left-7" onClick={() => localStorage.removeItem("accessToken")}>
-                    <ArrowLeft size={32} color="#FFFFFF" />
-                </Link>
+                <ArrowLeft size={32} color="#FFFFFF" className="absolute left-7" onClick={() => {
+                    if(location.state){
+                        navigate("/recentConnections")
+                    }
+                    else{
+                        localStorage.removeItem("accessToken")
+                        navigate("/login")
+                    }
+                    }}
+                    />
                 <p className="text-white font-sans font-semibold text-center">RECENT CONNECTIONS</p>
             </div>
         <div className="flex h-full justify-center items-start ">
