@@ -8,7 +8,7 @@ import { GetData } from "@/lib/WebSocketData";
 import SocketContext from "@/lib/socket/context";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import useSliderThrottle from "@/lib/handleSwipe"; 
-import { RecentConnections } from "../connections_socket/RecentConnections";
+import { RecentConnections } from "./RecentConnections";
 import { Clock } from "@phosphor-icons/react";
 import { ButtonDb } from "@/components/ui/button_db";
 

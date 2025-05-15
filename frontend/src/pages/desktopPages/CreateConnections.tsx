@@ -14,13 +14,14 @@ type FormFields = {
     ip: string;
     port: string;
     device_type:string;
+    ws_port:string;
   }
 
 
 export const CreateConnections=()=>{
     const location=useLocation()
     const navigate=useNavigate()
-    const { register,handleSubmit,setValue } =useForm<FormFields>();
+    const { register,handleSubmit,setValue,watch } =useForm<FormFields>();
     const {uuid}=useConnections()
 
 
@@ -59,42 +60,55 @@ export const CreateConnections=()=>{
             </div>
         <div className="flex h-full justify-center items-start ">
             <div className="flex border-[1.5px] items-center justify-center border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[500px] w-[400px]">
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="flex flex-col mx-12 gap-4 justify-start">
-                        <div className="flex flex-col gap-1 ">
-                            <p className="text-white font-sans">MATRIX NAME</p>
-                            <Input  {...register("name")} placeholder="name"  className="w-full"/>
-                        </div>
-                        <div className="flex flex-col gap-1 ">
-                            <p className="text-white font-sans">MATRIX IP</p>
-                            <Input {...register("ip")} placeholder="ip" className="w-full"/>
-                        </div>
-                        <div className="flex mt-5 items-end ">
-                    <div className="flex w-1/2 flex-col gap-1">
-                        <p className="text-white font-sans ">MATRIX PORT</p>
-                        <Input {...register("port")} placeholder="port" className="w-2/3"/>
-                    </div>
-                    <div >
-                        <RadioGroup onValueChange={(value) => setValue("device_type", value)}>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem  value="matrix"  />
-                                <Label htmlFor="matrix">Matrix</Label>
+                <div className="w-full">
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <div className="flex flex-col mx-16 gap-4 justify-start">
+                            <div className="flex flex-col gap-1 ">
+                                <p className="text-white font-sans">MATRIX NAME</p>
+                                <Input  {...register("name")} placeholder="name"  className="w-full"/>
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem  value="camera" />
-                                <Label htmlFor="camera">Camera</Label>
+                            <div className="flex flex-col gap-1 ">
+                                <p className="text-white font-sans">MATRIX IP</p>
+                                <Input {...register("ip")} placeholder="ip" className="w-full"/>
                             </div>
-                        </RadioGroup>
-                    </div>
+                            <div className="flex mt-5 items-start ">
+                                <div className="flex w-1/2 flex-col gap-1">
+                                    {watch("device_type") && (
+                                            <>
+                                                <p className="text-white font-sans">
+                                                    {watch("device_type") === "matrix" ? "MATRIX PORT" : "VISCA PORT"}
+                                                </p>
+                                                <Input {...register("port")} placeholder="port" className="w-2/3"/>
+                                                {watch("device_type")==="camera" &&(
+                                                    <>
+                                                    <p className="text-white font-sans">WS PORT</p>
+                                                    <Input {...register("ws_port")} placeholder="port" className="w-2/3"/>
+                                                    </>
+                                                    )}
+                                            </>
+                                            )}
+                                </div>
+                                <div className="flex w-1/2 h-[64px] items-end">
+                                    <RadioGroup onValueChange={(value) => setValue("device_type", value)}>
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem  value="matrix"  />
+                                            <Label htmlFor="matrix">Matrix</Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem  value="camera" />
+                                            <Label htmlFor="camera">Camera</Label>
+                                        </div>
+                                    </RadioGroup>
+                                </div>
+                            </div>
+                            <div className="flex justify-center mt-7">
+                                <Button className="text-black bg-white" type="submit">
+                                    Continue
+                                </Button> 
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                        <div className="flex justify-center mt-7">
-                            <Button className="text-black bg-white" type="submit">
-                                Continue
-                            </Button> 
-                        </div>
-            
-                    </div>
-                </form>
             </div>
         </div>
         </div>

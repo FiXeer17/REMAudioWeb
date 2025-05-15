@@ -5,7 +5,7 @@ import {
 import UUIDProvider from "../lib/socket/ComponentUuid";
 import SocketContextComponent from "../lib/socket/Component";
 import { clientLoader } from "../lib/clientLoader";
-import UUIDLayout from "@/pages/connections_socket/Redirect";
+import UUIDLayout from "@/lib/Redirect";
 import {Test2} from "@/pages/test/Test2";
   
   const UUIDLay = () => (

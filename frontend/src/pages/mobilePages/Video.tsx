@@ -2,7 +2,7 @@ import Navbar from "@/components/ui/navbar"
 import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { useContext, useEffect, useState } from "react";
-import { RecentConnections } from "../connections_socket/RecentConnections";
+import { RecentConnections } from "./RecentConnections";
 import { Clock,ImageSquare,MagnifyingGlassPlus,ArrowDown,ArrowLeft,ArrowUp,ArrowRight, ArrowsClockwise } from "@phosphor-icons/react";
 import { Slider } from "@/components/ui/slider";
 import { ButtonPresets } from "@/components/ui/button_presets";
@@ -17,6 +17,16 @@ export const Video=()=>{
     const [WideTele,setWideTele]=useState<"WIDE"|"TELE">("WIDE")
     const [currentPresets,setCurrentPresets]=useState(0)
     const [isAvailable, setIsAvailable] = useState(true)
+
+    useEffect(() => {
+        if (!isAvailable || message_camera) return;
+      
+        const timeout = setTimeout(() => {
+          navigate("/uuidprovider");
+        }, 10000);
+      
+        return () => clearTimeout(timeout); 
+      }, [isAvailable, message_camera]);
 
     useEffect(()=>{
         if(camera_status==="disconnected" && matrix_status==="connected")

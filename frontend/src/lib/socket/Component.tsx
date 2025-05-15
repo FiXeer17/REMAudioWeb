@@ -72,6 +72,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         }
         
       }
+
       socket.onclose=()=>{
         
         if (!manuallyClosed && !isRefreshing) {

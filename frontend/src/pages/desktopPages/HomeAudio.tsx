@@ -27,6 +27,16 @@ export const HomeAudio=()=> {
     const navigate=useNavigate()
     const Channels = ["1","2","3","4","5","6","7","8"];
 
+    useEffect(() => {
+      if (!isAvailable || message_matrix) return;
+    
+      const timeout = setTimeout(() => {
+        navigate("/uuidprovider");
+      }, 10000);
+    
+      return () => clearTimeout(timeout); 
+    }, [isAvailable, message_matrix]);
+
     useEffect(()=>{
       if(matrix_status==="disconnected" && camera_status==="connected")
         navigate("/video")

@@ -15,6 +15,16 @@ export const Video=()=>{
   const [currentPresets,setCurrentPresets]=useState(0)
   const [isAvailable, setIsAvailable] = useState(true)
 
+  useEffect(() => {
+    if (!isAvailable || message_camera) return;
+  
+    const timeout = setTimeout(() => {
+      navigate("/uuidprovider");
+    }, 10000);
+  
+    return () => clearTimeout(timeout); 
+  }, [isAvailable, message_camera]);
+
   useEffect(()=>{
     if(camera_status==="disconnected" && matrix_status==="connected")
       navigate("/homeAudio")

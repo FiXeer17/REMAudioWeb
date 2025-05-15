@@ -8,7 +8,7 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { Clock } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
-import { RecentConnections } from "../connections_socket/RecentConnections";
+import { RecentConnections } from "./RecentConnections";
 
 export const HomeAudio=() => {
   const [inputChannelStates, setInputChannelStates] = useState<{[key: string]: boolean;}>({});
@@ -22,6 +22,16 @@ export const HomeAudio=() => {
   const [labelChannelInput,setLabelChannelInput]=useState<{[key: string]: string;}>({})
   const [labelChannelOutput,setLabelChannelOutput]=useState<{[key: string]: string;}>({})
 
+  useEffect(() => {
+    if (!isAvailable || message_matrix) return;
+  
+    const timeout = setTimeout(() => {
+      navigate("/uuidprovider");
+    }, 10000);
+  
+    return () => clearTimeout(timeout); 
+  }, [isAvailable, message_matrix]);
+  
   useEffect(()=>{
     if(matrix_status==="disconnected" && camera_status==="connected")
       navigate("/video")
