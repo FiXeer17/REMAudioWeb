@@ -16,8 +16,8 @@
 
         "command_delay":20,             
         "reconnect_delay":1500,         
-        "read_timeout":2000,     
-        "preset_read_timeout":30000,        
+        "read_timeout":1000,     
+        "preset_read_timeout":3500,        
         "connection_timeout":2000,      
         "inactivity_timeout":5000,      
         "max_connection_retries":3
