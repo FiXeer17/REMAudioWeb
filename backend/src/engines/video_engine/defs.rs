@@ -2,6 +2,7 @@ pub mod fncodes{
     use std::str::FromStr;
 
     pub const PRESETS_LABEL: &str = "camera_preset";
+    pub const READ_PRESET_LABEL: &str = "read_preset";
     pub const ZOOM_TELE_LABEL: &str = "zoom_tele";
     pub const ZOOM_WIDE_LABEL: &str = "zoom_wide";
     pub const MOVE_CAMERA_LABEL: &str = "move_camera";
@@ -12,6 +13,7 @@ pub mod fncodes{
         ZoomTele,
         ZoomWide,
         MoveCamera,
+        ReadPreset,
     }
 
   
@@ -22,6 +24,7 @@ pub mod fncodes{
                 FNCODE::ZoomTele => String::from(ZOOM_TELE_LABEL),
                 FNCODE::ZoomWide => String::from(ZOOM_WIDE_LABEL),
                 FNCODE::MoveCamera => String::from(MOVE_CAMERA_LABEL),
+                FNCODE::ReadPreset => String::from(READ_PRESET_LABEL),
             }
         }
     }
@@ -33,6 +36,7 @@ pub mod fncodes{
                 ZOOM_TELE_LABEL => Ok(Self::ZoomTele),
                 ZOOM_WIDE_LABEL => Ok(Self::ZoomWide),
                 MOVE_CAMERA_LABEL => Ok(Self::MoveCamera),
+                READ_PRESET_LABEL => Ok(Self::ReadPreset),
                 _ => Err(())
             }
         }
@@ -134,32 +138,32 @@ pub mod status_codes{
 }
 
 pub mod camera_zoom{
-    pub const STOP: [u8;6] = [0x08,0x01,0x04,0x07,0x00,0xff];
+    pub const STOP: [u8;6] = [0x81,0x01,0x04,0x07,0x00,0xff];
                                                             //
-    pub const TELE_VARIABLE: [u8;6] = [0x08,0x01,0x04,0x07,0x20,0xff]; //the 4th byte has to be sum with the hex speed like 0x20 OR 0x04 -> 0x24
+    pub const TELE_VARIABLE: [u8;6] = [0x81,0x01,0x04,0x07,0x20,0xff]; //the 4th byte has to be sum with the hex speed like 0x20 OR 0x04 -> 0x24
                                                             //
-    pub const WIDE_VARIABLE: [u8;6] = [0x08,0x01,0x04,0x07,0x30,0xff]; //the 4th byte has to be sum with the hex speed like 0x30 OR 0x04 -> 0x34
+    pub const WIDE_VARIABLE: [u8;6] = [0x81,0x01,0x04,0x07,0x30,0xff]; //the 4th byte has to be sum with the hex speed like 0x30 OR 0x04 -> 0x34
 
     
 
 }
 
 pub mod camera_presets{                                    //
-    pub const RECALL : [u8;7] = [0x08,0x01,0x04,0x3F,0x02,0x00,0xff]; // the 5th byte has to be sum with the preset number like 0x00 OR 0x04 -> 0x04
-
-}
+    pub const RECALL : [u8;7] = [0x81,0x01,0x04,0x3F,0x02,0x00,0xff]; // the 5th byte has to be sum with the preset number like 0x00 OR 0x04 -> 0x04
+    pub const READ_PRESET : [u8;5] = [0x81,0x09,0x04,0x3f,0xff];
+}   
 
 pub mod pan_tilt{
     use std::str::FromStr;
 
                                                  //   //
-    pub const UP: [u8;9] = [0x08,0x01,0x06,0x01,0x00,0x00,0x03,0x01,0xff]; //the 4th and the 5th byte has to be sum with the pan and the tilt hex speed like 0x00 OR 0x04 -> 0x04
+    pub const UP: [u8;9] = [0x81,0x01,0x06,0x01,0x00,0x00,0x03,0x01,0xff]; //the 4th and the 5th byte has to be sum with the pan and the tilt hex speed like 0x00 OR 0x04 -> 0x04
                                                    //   //
-    pub const DOWN: [u8;9] = [0x08,0x01,0x06,0x01,0x00,0x00,0x03,0x02,0xff]; //the 4th and the 5th byte has to be sum with the pan and the tilt hex speed like 0x00 OR 0x04 -> 0x04
+    pub const DOWN: [u8;9] = [0x81,0x01,0x06,0x01,0x00,0x00,0x03,0x02,0xff]; //the 4th and the 5th byte has to be sum with the pan and the tilt hex speed like 0x00 OR 0x04 -> 0x04
                                                    //   //
-    pub const LEFT: [u8;9] = [0x08,0x01,0x06,0x01,0x00,0x00,0x01,0x03,0xff]; //the 4th and the 5th byte has to be sum with the pan and the tilt hex speed like 0x00 OR 0x04 -> 0x04
+    pub const LEFT: [u8;9] = [0x81,0x01,0x06,0x01,0x00,0x00,0x01,0x03,0xff]; //the 4th and the 5th byte has to be sum with the pan and the tilt hex speed like 0x00 OR 0x04 -> 0x04
                                                     //   //
-    pub const RIGHT: [u8;9] = [0x08,0x01,0x06,0x01,0x00,0x00,0x02,0x03,0xff]; //the 4th and the 5th byte has to be sum with the pan and the tilt hex speed like 0x00 OR 0x04 -> 0x04
+    pub const RIGHT: [u8;9] = [0x81,0x01,0x06,0x01,0x00,0x00,0x02,0x03,0xff]; //the 4th and the 5th byte has to be sum with the pan and the tilt hex speed like 0x00 OR 0x04 -> 0x04
 
 
     pub const UP_LABEL: &str = "up";
@@ -231,3 +235,5 @@ pub mod pan_tilt{
     }
 
 }
+
+

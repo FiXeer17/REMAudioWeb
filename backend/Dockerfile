@@ -4,6 +4,11 @@ FROM rust:1.82
 # Set the working directory
 WORKDIR /usr/src/app
 
+# Update the ubuntu system and install ffmpeg for rstp conversion in hls
+
+RUN apt update -y && apt upgrade -y && \
+apt install ffmpeg -y
+
 # Install sqlx-cli and cargo-watch tools
 RUN cargo install sqlx-cli --version 0.8.2 --no-default-features --features postgres && \
     cargo install cargo-watch

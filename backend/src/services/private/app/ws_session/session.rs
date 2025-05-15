@@ -135,6 +135,7 @@ fn handle_video_command(set_state: SetState,section:&Sections) -> HandleText{
                 }
                 HandleText::CameraCommand(Ok(CameraCommand { fncode: sc.clone(), cmd: move_camera.unwrap() }))
             }
+            FNCODE::ReadPreset => unreachable!()
         },
         _ => HandleText::Error("Invalid video command".to_string())
     }
