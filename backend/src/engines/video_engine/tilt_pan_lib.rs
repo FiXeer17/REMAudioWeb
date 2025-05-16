@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use super::defs::errors::Error;
-use super::defs::pan_tilt::{Direction, Velocity, DOWN, LEFT, RIGHT, UP};
+use super::defs::pan_tilt::{Direction, Velocity, DOWN, LEFT, RIGHT, UP,HOME};
 
 pub fn move_camera(velocity: String, direction: String) -> Result<Vec<u8>, Error> {
     let Ok(velocity) = Velocity::from_str(&velocity) else {
@@ -25,6 +25,7 @@ pub fn move_camera(velocity: String, direction: String) -> Result<Vec<u8>, Error
         Direction::DOWN => DOWN,
         Direction::LEFT => LEFT,
         Direction::RIGHT => RIGHT,
+        _ => return Err(Error::InvalidDirection)
     };
     let pan_condition = vv > 0 && vv <= max_pan as u8;
     let tilt_condition = ww > 0 && ww <= max_tilt as u8;
@@ -39,4 +40,8 @@ pub fn move_camera(velocity: String, direction: String) -> Result<Vec<u8>, Error
             Err(Error::InvalidTilt)
         }
     }
+}
+
+pub fn return_home() -> Vec<u8>{
+    HOME.to_vec()
 }

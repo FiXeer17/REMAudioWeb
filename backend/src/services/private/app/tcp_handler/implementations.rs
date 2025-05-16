@@ -9,7 +9,7 @@ use crate::{
             defs::datas::io::SRC,
             lib::{read_all_states, MatrixCommand},
         },
-        video_engine::{camera_presets_lib::call_preset, status_codes_lib::successfull},
+        video_engine::{self, camera_presets_lib::read_preset, },
     },
     services::{
         private::{
@@ -26,7 +26,7 @@ use crate::{
         public::interfaces::{
             retrieve_channel_labels, retrieve_preset_labels, retrieve_socket_from_db,
             retrieve_socketid_from_db, retrieve_visibility, update_channel_labels_in_db,
-            update_channel_visibility, update_latest_preset_in_sockets_db,
+            update_channel_visibility,
             update_preset_labels_in_db,
         },
     },
@@ -62,7 +62,7 @@ impl TcpStreamActor {
             let cmd = command.to_byte_hex().unwrap();
             let written_bytes = {
                 let mut stream = stream.lock().await;
-                stream.write(&cmd[..]).await
+                stream.write(&cmd).await
             };
 
             if let Err(_) = written_bytes {
@@ -198,50 +198,25 @@ impl TcpStreamActor {
             });
             return;
         };
-        let current_preset = {
-            if let Some(lp) = sock.latest_preset {
-                lp
-            } else {
-                let lp = 0;
-
-                let written_bytes = {
-                    let cmd = call_preset(lp.to_string()).unwrap();
-                    let mut stream = stream.lock().await;
-                    stream.write(&cmd[..]).await
-                };
-
-                if let Err(_) = written_bytes {
-                    ctx_addr.do_send(ClosedByRemotePeer {
-                        message: "error occurred on camera".to_string(),
-                        socket,
-                    });
+        let current_preset = read_preset(stream).await;
+        if let Err(e) = current_preset{
+            match e {
+                video_engine::defs::errors::Error::ClosedByRemotePeer => {
+                    let mess = ClosedByRemotePeer {socket,message:"error occurred on camera".to_string()};
+                    ctx_addr.do_send(mess);
                     return;
-                }
-                match successfull(stream).await {
-                    Ok(true) => {
-                        if update_latest_preset_in_sockets_db(&pgpool, sock.id.unwrap(), lp as i32)
-                            .await
-                            .is_err()
-                        {
-                            ctx_addr.do_send(ClosedByRemotePeer {
-                                message: "error occurred on camera".to_string(),
-                                socket,
-                            });
-                            return;
-                        }
-                    }
-                    _ => {
-                        ctx_addr.do_send(ClosedByRemotePeer {
-                            message: "error occurred on camera".to_string(),
-                            socket,
-                        });
-                        return;
-                    }
-                };
+                },
+                video_engine::defs::errors::Error::InvalidPreset => {
+                    let mess = StreamFailed {socket,error:"error occurred on camera".to_string()};
+                    ctx_addr.do_send(mess);
+                    return;
+                },
+                _ => unreachable!()
 
-                lp as i32
             }
-        };
+        }
+        let current_preset = current_preset.unwrap();
+        
 
         let states = CameraStates::new(sock.socket, preset_labels, current_preset);
         ctx_addr.do_send(DeviceReady::CameraReady(CameraReady { states, socket }));
