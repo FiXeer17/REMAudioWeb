@@ -7,6 +7,7 @@ import { useForm,SubmitHandler } from "react-hook-form";
 import { toast,Toaster } from "sonner";
 import axios from "axios";
 import { login as loginUser } from "@/lib/services";
+import { useEffect } from "react";
 
 type FormFields = {
     username:string;
@@ -15,8 +16,11 @@ type FormFields = {
 
 export const SignInPage=()=>{
 
-    const { register,handleSubmit } =useForm<FormFields>();
+  const { register,handleSubmit } =useForm<FormFields>();
   const navigate= useNavigate()
+  useEffect(()=>{
+      localStorage.removeItem("accessToken")
+    })
   
    const showErrorToast = (data : FormFields) => {
       if (data.username===""||data.password===""){

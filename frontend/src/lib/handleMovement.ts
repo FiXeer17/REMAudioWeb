@@ -1,80 +1,153 @@
-type Speed = 'slow' | 'medium' | 'fast';
+import { useEffect, useState, useCallback } from "react";
 
-interface SpeedValues {
-  [key: string]: number;
+export type IntensityType = "slow" | "medium" | "fast";
+export type MovementDirection = "up" | "down" | "left" | "right";
+
+interface UseClickAndHoldOptions {
+  onHold?: (intensity: IntensityType) => void;
+  onSlowClick?: (action: string) => void;
+  holdDelay?: number;
+  clickResetDelay?: number;
+  holdInterval?: number;
+  rapidClickThreshold?: number;
 }
 
-interface CameraSpeedControl {
-  getCurrentSpeed: () => { name: Speed; delay: number };
-  speedValues: SpeedValues;
+interface UseClickAndHoldResult {
+  clickCount: number;
+  isHolding: boolean;
+  currentIntensity: IntensityType | null;
+  handleAction: (isStart: boolean) => void;
 }
 
-function setupCameraSpeedControl(controlElement: HTMLElement): CameraSpeedControl {
-  let clickCount = 0;
-  let clickTimer: number | null = null;
-  let currentSpeed: Speed = 'slow';
-  let moveInterval: number | null = null;
+export const useClickAndHold = (options: UseClickAndHoldOptions = {}): UseClickAndHoldResult => {
+  const {
+    onHold = () => {},
+    onSlowClick = () => {},
+    holdDelay = 300,
+    clickResetDelay = 500,
+    holdInterval = 200,
+    rapidClickThreshold = 300
+  } = options;
 
-  const speedValues: Record<Speed, number> = {
-    slow: 300,
-    medium: 150,
-    fast: 50
-  };
+  const [clickCount, setClickCount] = useState<number>(0);
+  const [isHolding, setIsHolding] = useState<boolean>(false);
+  const [currentIntensity, setCurrentIntensity] = useState<IntensityType | null>(null);
+  const [clickTimeoutId, setClickTimeoutId] = useState<number | null>(null);
+  const [holdTimeoutId, setHoldTimeoutId] = useState<number | null>(null);
+  const [intervalId, setIntervalId] = useState<number | null>(null);
+  const [lastClickTime, setLastClickTime] = useState<number>(0);
 
-  controlElement.addEventListener('click', () => {
-    clickCount++;
+  const resetClickCount = useCallback(() => {
+    setClickCount(0);
+  }, []);
 
-    if (clickTimer) clearTimeout(clickTimer);
-    clickTimer = window.setTimeout(() => {
-      if (clickCount === 1) {
-        currentSpeed = 'slow';
-      } else if (clickCount === 2) {
-        currentSpeed = 'medium';
-      } else if (clickCount >= 3) {
-        currentSpeed = 'fast';
+  const getIntensity = useCallback((count: number): IntensityType => {
+    if (count === 1) return "slow";
+    if (count === 2) return "medium";
+    return "fast";
+  }, []);
+
+  const handleAction = useCallback((isStart: boolean) => {
+    if (isStart) {
+
+      const currentTime = Date.now();
+
+      if (clickTimeoutId !== null) {
+        window.clearTimeout(clickTimeoutId);
+        setClickTimeoutId(null);
       }
 
-      console.log(`Velocità impostata a: ${currentSpeed}`);
-      clickCount = 0;
-    }, 400);
-  });
+      if (holdTimeoutId !== null) {
+        window.clearTimeout(holdTimeoutId);
+        setHoldTimeoutId(null);
+      }
 
-  controlElement.addEventListener('mousedown', () => {
-    if (moveInterval !== null) {
-      clearInterval(moveInterval);
+      const isFirstOrSlowClick = currentTime - lastClickTime > rapidClickThreshold;
+      
+      setClickCount(prevCount => {
+        if (isFirstOrSlowClick) {
+          onSlowClick("slow");
+          return 1;
+        } else {
+          const newCount = prevCount + 1;
+          return newCount > 3 ? 3 : newCount;
+        }
+      });
+
+      setLastClickTime(currentTime);
+
+      const holdTimer = window.setTimeout(() => {
+        setClickCount(currentClickCount => {
+          const intensity = getIntensity(currentClickCount);
+          setCurrentIntensity(intensity);
+          setIsHolding(true);
+          onHold(intensity);
+
+          const interval = window.setInterval(() => {
+            onHold(intensity);
+          }, holdInterval);
+
+          setIntervalId(interval);
+
+          return currentClickCount;
+        });
+      }, holdDelay);
+
+      setHoldTimeoutId(holdTimer);
+
+      const clickTimer = window.setTimeout(resetClickCount, clickResetDelay);
+      setClickTimeoutId(clickTimer);
+    } else {
+      
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+        setIntervalId(null);
+      }
+
+      if (holdTimeoutId !== null) {
+        window.clearTimeout(holdTimeoutId);
+        setHoldTimeoutId(null);
+      }
+
+      if (isHolding) {
+        setIsHolding(false);
+        setCurrentIntensity(null);
+        setClickCount(0);
+
+        if (clickTimeoutId !== null) {
+          window.clearTimeout(clickTimeoutId);
+          setClickTimeoutId(null);
+        }
+      }
     }
+  }, [
+    clickTimeoutId, 
+    holdTimeoutId, 
+    intervalId, 
+    isHolding, 
+    lastClickTime, 
+    rapidClickThreshold, 
+    onSlowClick, 
+    holdDelay, 
+    getIntensity, 
+    onHold, 
+    holdInterval, 
+    clickResetDelay, 
+    resetClickCount
+  ]);
 
-    const delay = speedValues[currentSpeed];
-    console.log(`Avvio movimento a velocità ${currentSpeed} (${delay}ms)`);
-
-    moveInterval = window.setInterval(() => {
-      console.log(`Movimento attivo (${currentSpeed})`);
-      // Inserisci qui la logica per muovere la videocamera
-    }, delay);
-  });
-
-  controlElement.addEventListener('mouseup', stopMovement);
-  controlElement.addEventListener('mouseleave', stopMovement);
-
-  function stopMovement(): void {
-    if (moveInterval !== null) {
-      clearInterval(moveInterval);
-      moveInterval = null;
-      console.log('Movimento fermato');
-    }
-  }
-
-  function getCurrentSpeed(): { name: Speed; delay: number } {
-    return {
-      name: currentSpeed,
-      delay: speedValues[currentSpeed]
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutId !== null) window.clearTimeout(clickTimeoutId);
+      if (holdTimeoutId !== null) window.clearTimeout(holdTimeoutId);
+      if (intervalId !== null) window.clearInterval(intervalId);
     };
-  }
+  }, [clickTimeoutId, holdTimeoutId, intervalId]);
 
   return {
-    getCurrentSpeed,
-    speedValues
+    handleAction,
+    clickCount,
+    isHolding,
+    currentIntensity
   };
-}
-
-export default setupCameraSpeedControl;
+};

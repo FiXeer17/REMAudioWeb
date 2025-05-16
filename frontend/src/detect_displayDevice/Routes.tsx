@@ -31,10 +31,6 @@ import {Test2} from "@/pages/test/Test2";
     },
     
     {
-      path: "/test",
-      element: <Test2/>
-    },
-    {
       element: <UUIDLay/>,
       children:[
         {

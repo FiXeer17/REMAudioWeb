@@ -1,6 +1,6 @@
 import Navbar from "@/components/ui/navbar"
 import { Avatar,AvatarImage } from "@/components/ui/avatar"
-import { BookBookmark,Translate,Network,SignOut } from "@phosphor-icons/react"
+import { BookBookmark,Faders,Network,SignOut } from "@phosphor-icons/react"
 import { useNavigate } from "react-router-dom"
 import { useConnections } from "@/lib/socket/ComponentUuid"
 import { useContext, useEffect, useState } from "react"
@@ -48,7 +48,7 @@ export const Settings=()=>{
                 {isAdmin && hasLatestAudio &&(
                 <div className="flex-1 border-y-[0.7px] border-home_colors-Border_Connections border-opacity-45 pl-10">
                     <div className="flex gap-1 h-full items-center w-fit cursor-pointer" onClick={()=>navigate("/mix")}>
-                        <Translate color="#FAFAFA" size={30} weight="light" />
+                        <Faders color="#FAFAFA" size={30} weight="light" />
                         <p className="flex font-bold text-sm text-home_colors-Similar_White">Change Map</p>
                     </div>
                 </div>
