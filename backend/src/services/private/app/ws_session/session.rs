@@ -1,8 +1,8 @@
 use super::{
     text_handlers::{
-        handle_channel_label, handle_matrix_command, handle_preset_label, handle_visibility,
+        handle_channel_label, handle_matrix_command, handle_preset_label, handle_video_command, handle_visibility
     },
-    utils::{handle_video_command, HandleText},
+    utils::HandleText,
 };
 use crate::{
     configs::websocket_settings,

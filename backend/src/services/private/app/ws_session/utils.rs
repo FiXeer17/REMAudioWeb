@@ -1,26 +1,8 @@
-use std::str::FromStr;
-
-use crate::engines::video_engine::camera_presets_lib::call_preset;
-use crate::engines::video_engine::defs::fncodes::FNCODE;
 use crate::engines::{audio_engine, video_engine};
 use crate::{
     configs::{channels_settings, presets_settings},
-    engines::{
-        audio_engine::lib::MatrixCommand,
-        sections::Sections,
-        video_engine::{
-            defs::{
-                camera_zoom::{ZOOM_STOP, ZOOM_TELE, ZOOM_WIDE},
-                pan_tilt::Direction,
-                CameraCommand,
-            },
-            tilt_pan_lib::{move_camera, return_home},
-        },
-    },
-    services::private::{
-        app::schemas::{SetAttributes, SetState},
-        socket::utils::Device,
-    },
+    engines::{audio_engine::lib::MatrixCommand, video_engine::defs::CameraCommand},
+    services::private::{app::schemas::SetAttributes, socket::utils::Device},
 };
 
 #[derive(Debug, Clone)]
@@ -56,5 +38,3 @@ pub fn check_preset(preset: u8, device: Device) -> bool {
     }
     return false;
 }
-
-
