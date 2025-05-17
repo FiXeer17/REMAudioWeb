@@ -9,7 +9,7 @@ use crate::{
 };
 use actix::Addr;
 use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
-use base64::{prelude::BASE64_URL_SAFE, Engine};
+use base64::{prelude::BASE64_URL_SAFE_NO_PAD, Engine};
 
 use super::streams_manager::streams_manager::StreamManager;
 
@@ -20,7 +20,7 @@ pub async fn stream(
     rtsp_socket: web::Query<B64Address>,
 ) -> impl Responder {
     let rtsp_socket = rtsp_socket.a.clone();
-    let Ok(rtsp_socket) = BASE64_URL_SAFE.decode(rtsp_socket) else {
+    let Ok(rtsp_socket) = BASE64_URL_SAFE_NO_PAD.decode(rtsp_socket) else {
         return HttpResponse::BadRequest().json(toast("Invalid base64 query param"));
     };
     let Ok(rtsp_string) = String::from_utf8(rtsp_socket) else {
