@@ -428,6 +428,7 @@ dependencies = [
  "actix-web-actors",
  "actix-ws",
  "argon2",
+ "base64",
  "chrono",
  "derive_more 2.0.1",
  "dotenv",
