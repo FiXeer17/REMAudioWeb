@@ -280,6 +280,8 @@ impl TcpStreamActor {
         self.commands_queue
             .push_front(DeviceCommnd::CameraCommand(sc.command));
     }
+
+    
     pub fn handle_recache(&mut self, ctx: &mut Context<Self>) {
         if self.machine_states.is_some() {
             if let Some(poller) = self.cmd_poller {

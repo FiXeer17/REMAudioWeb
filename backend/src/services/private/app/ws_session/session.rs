@@ -43,6 +43,7 @@ impl WsSession {
             ctx.ping(b"");
         });
     }
+    
     pub fn deserialize_text(&self, text: String) -> HandleText {
         if text == String::from("recache") {
             return HandleText::Recache;
