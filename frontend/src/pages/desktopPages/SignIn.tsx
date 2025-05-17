@@ -47,10 +47,12 @@ export const SignInPage=()=>{
       return navigate("/uuidprovider",{state:{isAdmin}})
     }catch(error){
       
-        if (axios.isAxiosError(error) && error.response?.status !== 200) {
-          
-          toast.error("Wrong credentials",{duration:1000});
-          }
+      if (axios.isAxiosError(error) && error.response?.status !== 200) {
+        if(error.response?.status === 401)
+          toast.error("Wrong credentials");
+        else
+          toast.error("Error connecting ")
+      }
     return navigate("/login")
     }}
   

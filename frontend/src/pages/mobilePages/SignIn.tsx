@@ -49,9 +49,11 @@ export const SignInPage=() => {
     }catch(error){
       
         if (axios.isAxiosError(error) && error.response?.status !== 200) {
-          
-          toast.error("Wrong credentials");
-          }
+          if(error.response?.status === 401)
+            toast.error("Wrong credentials");
+          else
+            toast.error("Error connecting ")
+        }
     return navigate("/login")
     }}
   

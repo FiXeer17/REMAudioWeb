@@ -88,8 +88,23 @@ export const Video = () => {
       
     }
 
-    const handleZoom = ()=>{
-
+    const handleZoomDown = (type:string) =>{
+        if (type==="plus"){
+            const data = {"section": "zoom_tele", "direction": ""};
+            //socket?.send(JSON.stringify(data));
+        }else {
+            const data = {"section": "zoom_tele", "direction": ""};
+            //socket?.send(JSON.stringify(data));
+        }
+    }
+    const handleZoomUp = (type:string) =>{
+        if (type==="plus"){
+            const data = {"section": "zoom_wide", "direction": ""};
+            //socket?.send(JSON.stringify(data));
+        }else {
+            const data = {"section": "zoom_wide", "direction": ""};
+            //socket?.send(JSON.stringify(data));
+        }
     }
 
     return (
@@ -124,13 +139,17 @@ export const Video = () => {
                         </div>
                         <div className="grid grid-rows-[auto,1fr,2fr]">
                             <div className="flex items-center justify-center">
-                                <WideTeleButton onChange={setWideTele} />
+                                
                             </div>
                             <div className="flex justify-center items-center gap-3">
-                                <div className="border-[1px] border-home_colors-Similar_White rounded-full">
+                                <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
+                                    onMouseDown={() => { handleZoomDown("minus") }}
+                                    onMouseUp={() => { handleZoomUp("minus") }}>
                                   <Minus size={22} color="white" className="m-1"/>
                                 </div>
-                                <div className="border-[1px] border-home_colors-Similar_White rounded-full">
+                                <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
+                                    onMouseDown={() => { handleZoomDown("plus") }}
+                                    onMouseUp={() => { handleZoomUp("plus") }}>
                                   <Plus size={22} color="white" className="m-1"/>
                                 </div>
                             </div>

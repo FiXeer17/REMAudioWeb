@@ -3,8 +3,7 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { useContext, useEffect, useRef, useState } from "react";
 import { RecentConnections } from "./RecentConnections";
-import { Clock, ImageSquare, MagnifyingGlassPlus, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise } from "@phosphor-icons/react";
-import { Slider } from "@/components/ui/slider";
+import { Clock, ImageSquare, ArrowDown, MagnifyingGlassMinus, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise, Minus, Plus } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import { useNavigate } from "react-router-dom";
 import { WideTeleButton } from "@/components/ui/wide_tele";
@@ -45,7 +44,6 @@ export const Video = () => {
         setIsAvailable(isAvailable)
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
-
     }, [message_camera])
 
 
@@ -80,11 +78,36 @@ export const Video = () => {
     };
 
 
-    const handleMovement = (direction: MovementDirection, intensity: IntensityType = "slow") => {
-        const data = {"section": "move_camera", "direction": direction, "velocity": intensity};
-        socket?.send(JSON.stringify(data));
+    const handleMovement = (direction: MovementDirection|"home", intensity: IntensityType = "slow") => {
+        if (direction==="home"){
+          const data = {"section": "move_camera", "direction": direction};
+          //socket?.send(JSON.stringify(data));
+        }else{
+          const data = {"section": "move_camera", "direction": direction, "velocity": intensity};
+          socket?.send(JSON.stringify(data));
+        }
+        
+      }
+    
+    const handleZoomDown = (type:string) =>{
+        if (type==="plus"){
+            const data = {"section": "zoom_tele", "direction": ""};
+            //socket?.send(JSON.stringify(data));
+        }else {
+            const data = {"section": "zoom_tele", "direction": ""};
+            //socket?.send(JSON.stringify(data));
+        }
     }
-
+    const handleZoomUp = (type:string) =>{
+        if (type==="plus"){
+            const data = {"section": "zoom_wide", "direction": ""};
+            //socket?.send(JSON.stringify(data));
+        }else {
+            const data = {"section": "zoom_wide", "direction": ""};
+            //socket?.send(JSON.stringify(data));
+        }
+    }
+        
 
     return (
         <>
@@ -111,13 +134,21 @@ export const Video = () => {
                     <div className="flex bg-home_colors-Navbar/Selection_Bg mx-10 justify-center items-center">
                         <ImageSquare size={60} color="white" weight="thin" />
                     </div>
-                    <div className="grid grid-rows-[0.5fr_1fr_2fr]">
-                        <div className="flex items-center justify-center">
-                            <WideTeleButton onChange={setWideTele} />
-                        </div>
+                    <div className="grid grid-rows-[1fr,2fr]">
+
                         <div className="flex justify-center items-center gap-3">
-                            <MagnifyingGlassPlus color="white" size={32} />
-                            <Slider className="w-[250px]" />
+                            <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
+                                onContextMenu={(e) => e.preventDefault()}
+                                onTouchStart={() => { handleZoomDown("minus") }}
+                                onTouchEnd={() => { handleZoomUp("minus") }}>
+                                <Minus size={22} color="white" className="m-1" />
+                            </div>
+                            <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
+                                onContextMenu={(e) => e.preventDefault()}
+                                onTouchStart={() => { handleZoomDown("plus") }}
+                                onTouchEnd={() => { handleZoomUp("plus") }}>
+                                <Plus size={22} color="white" className="m-1"/>
+                            </div>
                         </div>
                         <div className="flex items-center justify-center">
                             <div className="flex flex-col w-32 h-32 border-[1px] rounded-2xl border-home_colors-Selected_Borders/text bg-home_colors-Navbar/Selection_Bg">
@@ -145,7 +176,7 @@ export const Video = () => {
                                     >
                                         <ArrowLeft color="white" size={36} weight="bold" />
                                     </div>
-                                    <ArrowsClockwise color="white" size={30} weight="bold" />
+                                    <ArrowsClockwise color="white" size={30} weight="bold" onClick={()=>{handleMovement("home")}} />
                                     <div 
                                         ref={rightArrowRef}
                                         onMouseDown={handleMouseDown(rightControl)}
