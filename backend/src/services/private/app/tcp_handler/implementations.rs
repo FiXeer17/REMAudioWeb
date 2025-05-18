@@ -448,7 +448,7 @@ impl TcpStreamActor {
         tokio::spawn(async move {
             let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, stream_socket).await else {
                 addr_clone.do_send(GeneralError {
-                    error: format!("error occured on {}", device.to_string()),
+                    error: format!("error occurred on {}", device.to_string()),
                     socket: Some(stream_socket),
                 });
                 warn!("Cannot retrieve socket id from the database");
@@ -466,7 +466,7 @@ impl TcpStreamActor {
             if let Err(_) = result {
                 warn!("Cannot update preset label indatabase");
                 addr_clone.do_send(GeneralError {
-                    error: format!("error occured on {}", device.to_string()),
+                    error: format!("error occurred on {}", device.to_string()),
                     socket: Some(stream_socket),
                 });
                 return;
