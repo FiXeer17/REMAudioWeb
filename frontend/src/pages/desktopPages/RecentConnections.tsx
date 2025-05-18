@@ -138,8 +138,8 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                                     </div>
                                 </div>
                                 <div className="flex text-[12px] items-center">
-                                    <div className=" bg-home_colors-Navbar/Selection_Bg px-5 py-2 border-2 rounded-l-xl border-home_colors-Border_Connections ">{element.ip}</div>
-                                    <div className=" bg-home_colors-Navbar/Selection_Bg px-3 py-2 border-2 rounded-r-xl border-l-transparent border-home_colors-Border_Connections  ">{element.port}</div>
+                                    <div className=" bg-home_colors-Navbar/Selection_Bg px-5 py-2 border-2 rounded-l-xl border-home_colors-Border_Connections select-none">{element.ip}</div>
+                                    <div className=" bg-home_colors-Navbar/Selection_Bg px-3 py-2 border-2 rounded-r-xl border-l-transparent border-home_colors-Border_Connections select-none">{element.port}</div>
                                     <Button size={"recentConnections"} className=" ml-2  bg-white text-black " onClick={()=>handleClick(element)}>Connect</Button>
                                 </div>
                             </div>
