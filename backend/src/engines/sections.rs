@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-    use super::video_engine::defs::fncodes::{MOVE_CAMERA_LABEL, PRESETS_LABEL, ZOOM_TELE_LABEL, ZOOM_WIDE_LABEL};
+    use super::video_engine::defs::fncodes::{MOVE_CAMERA_LABEL, PRESETS_LABEL, ZOOM_TELE_LABEL, ZOOM_WIDE_LABEL,ZOOM_STOP_LABEL};
     use super::{audio_engine, video_engine};
     use super::audio_engine::defs::{errors, fncodes::*};
 
@@ -47,6 +47,7 @@ use std::str::FromStr;
                 PRESETS_LABEL => Ok(Sections::CameraCommand(video_engine::defs::fncodes::FNCODE::Preset)),
                 ZOOM_TELE_LABEL => Ok(Sections::CameraCommand(video_engine::defs::fncodes::FNCODE::ZoomTele)),
                 ZOOM_WIDE_LABEL => Ok(Sections::CameraCommand(video_engine::defs::fncodes::FNCODE::ZoomWide)),
+                ZOOM_STOP_LABEL => Ok(Sections::CameraCommand(video_engine::defs::fncodes::FNCODE::ZoomStop)),
                 MOVE_CAMERA_LABEL => Ok(Sections::CameraCommand(video_engine::defs::fncodes::FNCODE::MoveCamera)),
                 _ => Err(errors::Error::InvalidSection)
             }

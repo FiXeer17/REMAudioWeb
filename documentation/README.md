@@ -177,8 +177,9 @@ To do so you have to send a json formatted WebSocket message with this body:
 | mute channel | yes | yes | yes | no | yes | no | no |
 | change the volume of the channel | yes | yes | yes | no | yes | no | no |
 | change matrix mixer map | yes | no | yes | yes | yes | no | no |
-| zoom (camera tele) | yes | no | no | no | yes | no | no |
-| zoom (camera wide) | yes | no | no | no | yes | no | no |
+| zoom (camera tele) | yes | no | no | no | no | no | no |
+| zoom (camera wide) | yes | no | no | no | no | no | no |
+| zoom (stop) | yes | no | no | no | no | no | no | 
 | move the camera | yes | no | no | no | no | yes | yes |
 
 
@@ -207,6 +208,7 @@ sections are specific keywords, here is a list of sections that the engine curre
 | map input to output | "mix_map" |
 | telescopic zoom | "zoom_tele" |
 | wide zoom | "zoom_wide" |
+| stop zoom | "zoom_stop" | 
 | move the camera | "move_camera" |
 
 
@@ -252,3 +254,10 @@ velocities are used to move the camera:
 | fast | "fast" |
 
 
+### For Stream url the prefix is `/stream`
+
+### Stream url:
+
+- [GET] stream (mjpeg stream): `/stream/[rtps socket base64 encoded (URL SAFE NO PADDING)]`
+
+the stream url is used to display the preview from the PTZ camera

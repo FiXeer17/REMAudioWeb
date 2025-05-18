@@ -7,22 +7,24 @@ use actix_web::{
     App, HttpServer,
 };
 use services::{
-    private::{self, app::tcp_manager::tcp_manager::TcpStreamsManager},
+    private::{
+        self, app::tcp_manager::tcp_manager::TcpStreamsManager,
+        stream::streams_manager::streams_manager::StreamManager,
+    },
     public::{self, interfaces::insert_default_user},
 };
 use sqlx::{Pool, Postgres};
 use utils::auth_middleware::auth_middleware;
 
+pub mod configs;
 pub mod engines;
 pub mod services;
 pub mod utils;
-pub mod configs;
-
 
 pub const SERVER_ADDR: &str = "0.0.0.0";
 pub const SERVER_PORT: u16 = 8000;
 
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct AppState {
     pub db: Pool<Postgres>,
 }
@@ -31,9 +33,13 @@ pub async fn create_app() -> Result<(), std::io::Error> {
     let pool = establish_connection().await; // create a connection with the database
     let _ = sqlx::migrate!("./migrations").run(&pool).await.unwrap(); // migrate
     let app_state = AppState { db: pool.clone() };
-    let dbdata =Data::new(app_state.clone());
+    let dbdata = Data::new(app_state.clone());
     insert_default_user(&app_state).await.unwrap();
-    let server = TcpStreamsManager::new(dbdata.clone()).await.expect("cannot start tcp manager...").start(); // start tcp connections manager
+    let server = TcpStreamsManager::new(dbdata.clone())
+        .await
+        .expect("cannot start tcp manager...")
+        .start(); // start tcp connections manager
+    let streams_server = StreamManager::new().start();
     HttpServer::new(move || {
         let cors = actix_cors::Cors::permissive();
 
@@ -43,26 +49,23 @@ pub async fn create_app() -> Result<(), std::io::Error> {
             .wrap(NormalizePath::trim())
             .app_data(dbdata.clone())
             .app_data(Data::new(server.clone()))
+            .app_data(Data::new(streams_server.clone()))
             .service(
                 web::scope("/api")
-                            .configure(public::root::router)
-                            .service(
-                    web::scope("/auth")
-                        .configure(public::signin::router),
-                ),
+                    .configure(public::root::router)
+                    .service(web::scope("/auth").configure(public::signin::router)),
             )
             .service(
                 web::scope("/ws")
                     .service(
                         web::scope("/auth")
                             .wrap(from_fn(auth_middleware))
-                            .configure(private::auth::router)    
-                    ).service(
-                        web::scope("/socket")
-                        .configure(private::socket::router)
+                            .configure(private::auth::router),
                     )
+                    .service(web::scope("/socket").configure(private::socket::router))
                     .configure(private::app::router),
             )
+            .service(web::scope("/stream").configure(private::stream::router))
     })
     .bind((SERVER_ADDR, SERVER_PORT))?
     .run()

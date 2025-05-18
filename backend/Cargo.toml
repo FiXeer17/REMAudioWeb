@@ -10,6 +10,7 @@ actix-web = {version = "4"}
 actix-web-actors = "4"
 actix-ws = {version = "0.3.0"}
 argon2 = {version = "0.5.0"}
+base64 = "0.22.1"
 chrono = {version = "0.4.39"}
 derive_more = {version = "2.0.1", features = ["display", "error", "from"]}
 dotenv = {version = "0.15.0"}
