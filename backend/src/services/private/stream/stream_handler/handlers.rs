@@ -14,14 +14,6 @@ impl Handler<Connect> for StreamHandler{
     }
 }
 
-impl Handler<AttachStream> for StreamHandler{
-    type Result = ();
-    fn handle(&mut self, msg: AttachStream, ctx: &mut Self::Context) -> Self::Result {
-        self.ffmpeg_process = Some(msg.stream);
-        ctx.address().do_send(ReadStdout{});
-    }
-}
-
 impl Handler<ReadStdout> for StreamHandler{
     type Result = ();
     fn handle(&mut self, _msg: ReadStdout, ctx: &mut Self::Context) -> Self::Result {

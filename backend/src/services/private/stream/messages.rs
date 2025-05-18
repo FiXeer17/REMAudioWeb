@@ -1,5 +1,5 @@
 use std::{net::SocketAddrV4,};
-use tokio::{process::Child, sync::broadcast};
+use tokio::sync::broadcast;
 use actix::Message;
 
 
@@ -13,12 +13,6 @@ pub struct Connect{
 #[rtype(result="()")]
 pub struct StropStream {}
 
-
-#[derive(Message,Debug)]
-#[rtype(result="()")]
-pub struct AttachStream {
-    pub stream: Child
-}
 #[derive(Message,Debug,Clone)]
 #[rtype(result="()")]
 

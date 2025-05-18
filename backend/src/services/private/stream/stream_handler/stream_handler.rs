@@ -6,9 +6,9 @@ use tokio::{
     sync::broadcast::{self, Sender},
 };
 
-use crate::services::private::stream::{
-    messages::AttachStream, streams_manager::streams_manager::StreamManager,
-};
+use crate::services::private::stream::{messages::ReadStdout, streams_manager::streams_manager::StreamManager};
+
+
 
 pub struct StreamHandler {
     pub rtsp_url: SocketAddrV4,
@@ -48,8 +48,7 @@ impl Actor for StreamHandler {
                 .stderr(Stdio::null())
                 .spawn()
                 .expect("Failed to start ffmpeg");
-
-         
-            ctx.address().do_send(AttachStream { stream: ffmpeg });
+        self.ffmpeg_process = Some(ffmpeg);
+        ctx.address().do_send(ReadStdout{});
     }
 }
