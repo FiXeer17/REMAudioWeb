@@ -89,7 +89,7 @@ export const Video = () => {
     const handleMovement = (direction: MovementDirection|"home", intensity: IntensityType = "slow") => {
         if (direction==="home"){
           const data = {"section": "move_camera", "direction": direction};
-          //socket?.send(JSON.stringify(data));
+          socket?.send(JSON.stringify(data));
         }else{
           const data = {"section": "move_camera", "direction": direction, "velocity": intensity};
           socket?.send(JSON.stringify(data));
@@ -100,15 +100,15 @@ export const Video = () => {
     const handleZoomDown = (type:string) =>{
         if (type==="plus"){
             const data = {"section": "zoom_tele"};
-            //socket?.send(JSON.stringify(data));
+            socket?.send(JSON.stringify(data));
         }else {
             const data = {"section": "zoom_wide"};
-            //socket?.send(JSON.stringify(data));
+            socket?.send(JSON.stringify(data));
         }
     }
     const handleZoomUp = () =>{
         const data = {"section": "zoom_stop"};
-        //socket?.send(JSON.stringify(data));
+        socket?.send(JSON.stringify(data));
     }
         
     const handleConnect = async ({ port }: FormFields) => {
@@ -117,8 +117,8 @@ export const Video = () => {
         const latestVideoDevice = updatedSockets?.find(updatedSockets => updatedSockets.isLatestVideo);
 
         const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
-        //console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
-        console.log(`${latestVideoDevice?.ip}:${port}`)
+        console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+        
 
       };
 
