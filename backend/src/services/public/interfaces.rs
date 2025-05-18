@@ -319,18 +319,6 @@ pub async fn retrieve_preset_labels(
     
 }
 
-pub async fn update_latest_preset_in_sockets_db(
-    pgpool: &AppState,
-    socket_id: i32,
-    latest_preset:i32
-)-> Result<(),sqlx::Error>{
-    let query_string : &str = "UPDATE sockets SET latest_preset=$1 WHERE id=$2; ";
-    sqlx::query(query_string)
-        .bind(latest_preset)
-        .bind(socket_id)
-        .execute(&pgpool.db).await?;
-    Ok(())
-}
 
 pub async fn update_channel_labels_in_db(
     pgpool: &AppState,

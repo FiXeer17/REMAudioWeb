@@ -38,7 +38,6 @@ pub struct Socket {
     pub socket: String,
     pub latest: bool,
     pub device: String,
-    pub latest_preset: Option<i32>
 }
 
 impl Hash for Socket{

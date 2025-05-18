@@ -16,7 +16,6 @@ use crate::{
         public::{
             interfaces::{
                 self, add_io_channels, retrieve_socketid_from_db,
-                update_latest_preset_in_sockets_db,
             },
             utils::{retrieve_all_channels, retrieve_all_presets},
         },
@@ -89,7 +88,6 @@ pub fn handle_camera_polling(
     else {
         return;
     };
-    let pgpool = act.pgpool.clone();
     tokio::spawn(async move {
         let written_bytes = {
             let mut steram_guard = stream.lock().await;
@@ -108,28 +106,9 @@ pub fn handle_camera_polling(
         match successfull(stream).await {
             Ok(true) => {
                 if cmd.fncode == crate::engines::video_engine::defs::fncodes::FNCODE::Preset {
-                    let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
-                        warn!("Cannot retrieve socket_id from the database");
-                        let message = StreamFailed {
-                            error: "error occurred on camera".to_string(),
-                            socket,
-                        };
-                        ctx_addr.do_send(message);
-                        return;
-                    };
+
                     let latest_preset = *cmd.cmd.get(5).unwrap() as i32;
                     states.current_preset = latest_preset;
-                    if let Err(_) =
-                        update_latest_preset_in_sockets_db(&pgpool, socket_id, latest_preset).await
-                    {
-                        warn!("Cannot update camera preset from the database");
-                        let message = StreamFailed {
-                            error: "error occurred on camera".to_string(),
-                            socket,
-                        };
-                        ctx_addr.do_send(message);
-                        return;
-                    }
                     let message = CameraReady {
                         socket,
                         states: states,
