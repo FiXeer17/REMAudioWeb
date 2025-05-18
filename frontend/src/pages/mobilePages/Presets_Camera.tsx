@@ -4,11 +4,10 @@ import Navbar from "@/components/ui/navbar";
 import { Button as PresetsButton } from "@/components/ui/audio_video";
 import { Badge } from "@/components/ui/badge";
 import SocketContext from "@/lib/socket/context";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const Presets_Camera = () => {
     const navigate=useNavigate()
-    const location=useLocation()
     const [isLoading,setIsLoading] = useState(false)
     const {socket,message_camera} = useContext(SocketContext).socketState
     const [currentPresets,setCurrentPresets]=useState(0)

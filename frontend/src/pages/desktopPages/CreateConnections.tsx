@@ -1,5 +1,5 @@
 import { ArrowLeft } from "@phosphor-icons/react";
-import { Link,useLocation,useNavigate } from "react-router-dom";
+import { useLocation,useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input_email";
 import { Button } from "@/components/ui/button";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -14,7 +14,6 @@ type FormFields = {
     ip: string;
     port: string;
     device_type:string;
-    ws_port:string;
   }
 
 
@@ -79,12 +78,6 @@ export const CreateConnections=()=>{
                                                     {watch("device_type") === "matrix" ? "MATRIX PORT" : "VISCA PORT"}
                                                 </p>
                                                 <Input {...register("port")} placeholder="port" className="w-2/3"/>
-                                                {watch("device_type")==="camera" &&(
-                                                    <>
-                                                    <p className="text-white font-sans">WS PORT</p>
-                                                    <Input {...register("ws_port")} placeholder="port" className="w-2/3"/>
-                                                    </>
-                                                    )}
                                             </>
                                             )}
                                 </div>

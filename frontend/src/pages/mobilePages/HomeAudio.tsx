@@ -64,7 +64,7 @@ export const HomeAudio=() => {
       const data={"section":"mute","io":"output","channel":channel,"value":(!outputChannelStates[channel]).toString()}
       socket?.send(JSON.stringify(data))
     }else if(type==="ALL"){
-      for (let channel=1;channel<=16;channel++){
+      for (let channel=1;channel<=8;channel++){
         const dataoutput={"section":"mute","io":"output","channel":channel.toString(),"value":"true"}
         socket?.send(JSON.stringify(dataoutput))
         const datainput={"section":"mute","io":"input","channel":channel.toString(),"value":"true"}

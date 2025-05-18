@@ -3,7 +3,7 @@ import InOutButton from "@/components/ui/in_out"
 import { Button as Mute } from "@/components/ui/button_mute";
 import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { GetData } from "@/lib/WebSocketData";
 import SocketContext from "@/lib/socket/context";
 import { ButtonPresets } from "@/components/ui/button_presets";

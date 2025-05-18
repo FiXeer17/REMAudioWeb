@@ -1,8 +1,7 @@
 import { ArrowLeft, Camera, HardDrive, Plus, Trash } from "@phosphor-icons/react";
-import { Link,useNavigate,useLocation } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { Circle } from "@phosphor-icons/react";
 import { SwipeConnections } from "@/lib/swipeConnections";
 import { useConnections } from "@/lib/socket/ComponentUuid";
 import { removeSocket, setSocket } from "@/lib/services";
@@ -89,9 +88,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
     }
 
             const {
-            currentSet:currentSet,
             displayedConnections:displayedConnections,
-            connections:displayedAllConnections,
             offset:Offset,
             handleTouchStart:handleTouchStart,
             handleTouchMove:handleTouchMove,

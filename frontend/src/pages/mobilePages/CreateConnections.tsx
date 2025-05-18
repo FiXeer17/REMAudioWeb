@@ -1,5 +1,5 @@
 import { ArrowLeft } from "@phosphor-icons/react";
-import { Link,useLocation,useNavigate } from "react-router-dom";
+import { useLocation,useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input_email";
 import { Button } from "@/components/ui/button";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -8,14 +8,12 @@ import { useConnections } from "@/lib/socket/ComponentUuid";
 import { toast, Toaster } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { watch } from "fs";
 
 type FormFields = {
     name:string;
     ip: string;
     port: string;
     device_type:string;
-    ws_port:string;
   }
 
 
@@ -43,8 +41,8 @@ export const CreateConnections=()=>{
         }
     }
     return (
-        <div className="grid grid-rows-[auto_1fr_auto]  min-h-svh">
-            <div className="flex mt-9 mb-16 mx-7 justify-between items-start"  >
+        <div className="grid grid-rows-[0.45fr_1fr_0.5fr]  min-h-svh">
+            <div className="flex mt-9 mx-7 justify-between items-start"  >
                  
                     <ArrowLeft size={32} color="#FFFFFF" onClick={() => {
                         if(location.state){
@@ -78,15 +76,8 @@ export const CreateConnections=()=>{
                                         {watch("device_type") === "matrix" ? "MATRIX PORT" : "VISCA PORT"}
                                     </p>
                                     <Input {...register("port")} placeholder="port" className="w-2/3"/>
-                                    {watch("device_type")==="camera" &&(
-                                        <>
-                                        <p className="text-white font-sans">WS PORT</p>
-                                        <Input {...register("ws_port")} placeholder="port" className="w-2/3"/>
-                                        </>
-                                        )}
                                 </>
                                 )}
-                            
                         </div>
                         <div className="flex w-1/2 h-[64px] items-end">
                             <RadioGroup onValueChange={(value) => setValue("device_type", value)}>

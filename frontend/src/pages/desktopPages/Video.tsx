@@ -6,14 +6,22 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Clock, ImageSquare, Plus, Minus, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import { useNavigate } from "react-router-dom";
-import { WideTeleButton } from "@/components/ui/wide_tele";
 import { useClickAndHold, IntensityType, MovementDirection } from "@/lib/handleMovement";
+import { Input } from "@/components/ui/input_email";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { useConnections } from "@/lib/socket/ComponentUuid";
+
+type FormFields = {
+    port: string;
+  };
 
 export const Video = () => {
     const navigate = useNavigate()
+    const {sockets,triggerRedirect}=useConnections()
+    const { register:connect, handleSubmit } = useForm<FormFields>();
     const { socket, message_camera, matrix_status, camera_status } = useContext(SocketContext).socketState
     const [labelPresets, setlabelPresets] = useState<{ [key: string]: string; }>({})
-    const [WideTele, setWideTele] = useState<"WIDE" | "TELE">("WIDE")
     const [currentPresets, setCurrentPresets] = useState(0)
     const [isAvailable, setIsAvailable] = useState(true)
 
@@ -90,22 +98,26 @@ export const Video = () => {
 
     const handleZoomDown = (type:string) =>{
         if (type==="plus"){
-            const data = {"section": "zoom_tele", "direction": ""};
+            const data = {"section": "zoom_tele"};
             //socket?.send(JSON.stringify(data));
         }else {
-            const data = {"section": "zoom_tele", "direction": ""};
+            const data = {"section": "zoom_wide"};
             //socket?.send(JSON.stringify(data));
         }
     }
-    const handleZoomUp = (type:string) =>{
-        if (type==="plus"){
-            const data = {"section": "zoom_wide", "direction": ""};
-            //socket?.send(JSON.stringify(data));
-        }else {
-            const data = {"section": "zoom_wide", "direction": ""};
-            //socket?.send(JSON.stringify(data));
-        }
+    const handleZoomUp = () =>{
+        const data = {"section": "zoom_stop"};
+        //socket?.send(JSON.stringify(data));
     }
+
+    const handleConnect = async ({ port }: FormFields) => {
+        await triggerRedirect()
+        const latestVideoDevice = sockets?.find(sockets => sockets.isLatestVideo === true);
+
+        const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
+        console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+
+      };
 
     return (
         <>
@@ -134,8 +146,21 @@ export const Video = () => {
                         <div className="flex items-center justify-center">
                             <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
                         </div>
-                        <div className="flex bg-home_colors-Navbar/Selection_Bg mx-10 border-[1px] border-home_colors-Selected_Borders/text justify-center items-center">
-                            <ImageSquare size={60} color="white" weight="thin" />
+                        <div className="flex flex-col bg-home_colors-Navbar/Selection_Bg mx-10 border-[1px] gap-2 border-home_colors-Selected_Borders/text justify-center items-center">
+                            <p className="text-white font-bold text-sm">RTSP PORT</p>
+                            <div className="flex gap-3">
+                                <form onSubmit={handleSubmit(handleConnect)} className="flex gap-3">
+                                    <Input 
+                                        placeholder="port" 
+                                        className="w-20" 
+                                        autoComplete="off"
+                                        {...connect("port", { required: true })} 
+                                    />
+                                    <Button className="text-black bg-white w-16" type="submit">
+                                        Connect
+                                    </Button>
+                                </form>
+                            </div>
                         </div>
                         <div className="grid grid-rows-[auto,1fr,2fr]">
                             <div className="flex items-center justify-center">
@@ -144,12 +169,12 @@ export const Video = () => {
                             <div className="flex justify-center items-center gap-3">
                                 <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
                                     onMouseDown={() => { handleZoomDown("minus") }}
-                                    onMouseUp={() => { handleZoomUp("minus") }}>
+                                    onMouseUp={() => { handleZoomUp() }}>
                                   <Minus size={22} color="white" className="m-1"/>
                                 </div>
                                 <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
                                     onMouseDown={() => { handleZoomDown("plus") }}
-                                    onMouseUp={() => { handleZoomUp("plus") }}>
+                                    onMouseUp={() => { handleZoomUp() }}>
                                   <Plus size={22} color="white" className="m-1"/>
                                 </div>
                             </div>

@@ -1,5 +1,5 @@
 import { ArrowLeft,Plus,Trash,Camera,HardDrive } from "@phosphor-icons/react";
-import { Link,useNavigate,useLocation } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Circle } from "@phosphor-icons/react";

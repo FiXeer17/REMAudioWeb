@@ -3,17 +3,25 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { useContext, useEffect, useRef, useState } from "react";
 import { RecentConnections } from "./RecentConnections";
-import { Clock, ImageSquare, ArrowDown, MagnifyingGlassMinus, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise, Minus, Plus } from "@phosphor-icons/react";
+import { Clock, ImageSquare, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise, Minus, Plus, Boat } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import { useNavigate } from "react-router-dom";
-import { WideTeleButton } from "@/components/ui/wide_tele";
 import { useClickAndHold, IntensityType, MovementDirection } from "@/lib/handleMovement";
+import { Input } from "@/components/ui/input_email";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { useConnections } from "@/lib/socket/ComponentUuid";
+
+type FormFields = {
+    port: string;
+  };
 
 export const Video = () => {
     const navigate = useNavigate()
+    const {triggerRedirect}=useConnections()
+    const { register:connect, handleSubmit } = useForm<FormFields>();
     const { socket, message_camera, matrix_status, camera_status } = useContext(SocketContext).socketState
     const [labelPresets, setlabelPresets] = useState<{ [key: string]: string; }>({})
-    const [WideTele, setWideTele] = useState<"WIDE" | "TELE">("WIDE")
     const [currentPresets, setCurrentPresets] = useState(0)
     const [isAvailable, setIsAvailable] = useState(true)
 
@@ -91,23 +99,28 @@ export const Video = () => {
     
     const handleZoomDown = (type:string) =>{
         if (type==="plus"){
-            const data = {"section": "zoom_tele", "direction": ""};
+            const data = {"section": "zoom_tele"};
             //socket?.send(JSON.stringify(data));
         }else {
-            const data = {"section": "zoom_tele", "direction": ""};
+            const data = {"section": "zoom_wide"};
             //socket?.send(JSON.stringify(data));
         }
     }
-    const handleZoomUp = (type:string) =>{
-        if (type==="plus"){
-            const data = {"section": "zoom_wide", "direction": ""};
-            //socket?.send(JSON.stringify(data));
-        }else {
-            const data = {"section": "zoom_wide", "direction": ""};
-            //socket?.send(JSON.stringify(data));
-        }
+    const handleZoomUp = () =>{
+        const data = {"section": "zoom_stop"};
+        //socket?.send(JSON.stringify(data));
     }
         
+    const handleConnect = async ({ port }: FormFields) => {
+        const updatedSockets = await triggerRedirect();
+
+        const latestVideoDevice = updatedSockets?.find(updatedSockets => updatedSockets.isLatestVideo);
+
+        const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
+        //console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+        console.log(`${latestVideoDevice?.ip}:${port}`)
+
+      };
 
     return (
         <>
@@ -131,8 +144,22 @@ export const Video = () => {
                     <div className="flex items-center justify-center">
                         <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
                     </div>
-                    <div className="flex bg-home_colors-Navbar/Selection_Bg mx-10 justify-center items-center">
-                        <ImageSquare size={60} color="white" weight="thin" />
+                    <div className="flex flex-col gap-3 bg-home_colors-Navbar/Selection_Bg mx-10 justify-center items-center">
+                            <p className="text-white font-bold text-sm">RTSP PORT</p>
+                            <div className="flex gap-3">
+                                <form onSubmit={handleSubmit(handleConnect)} className="flex gap-3">
+                                    <Input 
+                                        placeholder="port" 
+                                        className="w-20" 
+                                        autoComplete="off"
+                                        {...connect("port", { required: true })} 
+                                    />
+                                    <Button className="text-black bg-white w-16" type="submit">
+                                        Connect
+                                    </Button>
+                                </form>
+                            </div>
+                        {/*<ImageSquare size={60} color="white" weight="thin" />*/}
                     </div>
                     <div className="grid grid-rows-[1fr,2fr]">
 
@@ -140,13 +167,13 @@ export const Video = () => {
                             <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
                                 onContextMenu={(e) => e.preventDefault()}
                                 onTouchStart={() => { handleZoomDown("minus") }}
-                                onTouchEnd={() => { handleZoomUp("minus") }}>
+                                onTouchEnd={() => { handleZoomUp() }}>
                                 <Minus size={22} color="white" className="m-1" />
                             </div>
                             <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
                                 onContextMenu={(e) => e.preventDefault()}
                                 onTouchStart={() => { handleZoomDown("plus") }}
-                                onTouchEnd={() => { handleZoomUp("plus") }}>
+                                onTouchEnd={() => { handleZoomUp() }}>
                                 <Plus size={22} color="white" className="m-1"/>
                             </div>
                         </div>
