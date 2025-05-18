@@ -123,7 +123,6 @@ impl Handler<SetSocket> for TcpStreamsManager {
                         socket: sockv4.to_string(),
                         latest: true,
                         device: msg.device.clone(),
-                        latest_preset: None,
                     };
                     self.sockets.remove(&socket);
                     self.sockets.insert(socket);
