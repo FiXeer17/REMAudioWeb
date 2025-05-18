@@ -1,13 +1,14 @@
+use crate::engines::{audio_engine, video_engine};
 use crate::{
-    configs::{channels_settings, presets_settings}, engines::{audio_engine::lib::MatrixCommand, video_engine::defs::CameraCommand}, services::private::{app::schemas::SetAttributes, socket::utils::Device}
+    configs::{channels_settings, presets_settings},
+    engines::{audio_engine::lib::MatrixCommand, video_engine::defs::CameraCommand},
+    services::private::{app::schemas::SetAttributes, socket::utils::Device},
 };
-use crate::engines::{audio_engine,video_engine};
-
 
 #[derive(Debug, Clone)]
 pub enum HandleText {
     MatrixCommand(Result<MatrixCommand, audio_engine::defs::errors::Error>),
-    CameraCommand(Result<CameraCommand,video_engine::defs::errors::Error>),
+    CameraCommand(Result<CameraCommand, video_engine::defs::errors::Error>),
     SetVisibility(SetAttributes),
     SetChannelLabels(SetAttributes),
     SetPresetLabels(SetAttributes),
