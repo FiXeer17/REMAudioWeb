@@ -11,7 +11,7 @@ pub struct Connect{
 
 #[derive(Message,Debug,Clone)]
 #[rtype(result="()")]
-pub struct StropStream {}
+pub struct EndStream { pub socket: SocketAddrV4}
 
 #[derive(Message,Debug,Clone)]
 #[rtype(result="()")]
