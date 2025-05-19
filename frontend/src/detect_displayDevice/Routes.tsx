@@ -1,11 +1,11 @@
 import { createBrowserRouter,Navigate,Outlet } from "react-router-dom";
 import { 
-      SignIn,NewConnections,CreateConnections,RecentConnections,CallAdministrator,HomeAudio,Volume,Settings,Presets,PreferenciesPresets,PreferenciesChannels,Video,PresetsCamera 
+      SignIn,NewConnections,CreateConnections,RecentConnections,CallAdministrator,HomeAudio,Volume,Settings,Presets,PreferenciesPresets,PreferenciesChannels,Video,PresetsCamera,Mix 
        } from "./RouterSwitchers";
 import UUIDProvider from "../lib/socket/ComponentUuid";
 import SocketContextComponent from "../lib/socket/Component";
 import { clientLoader } from "../lib/clientLoader";
-import UUIDLayout from "@/pages/connections_socket/Redirect";
+import UUIDLayout from "@/lib/Redirect";
 import {Test2} from "@/pages/test/Test2";
   
   const UUIDLay = () => (
@@ -30,10 +30,6 @@ import {Test2} from "@/pages/test/Test2";
       element: <SignIn/> 
     },
     
-    {
-      path: "/test",
-      element: <Test2/>
-    },
     {
       element: <UUIDLay/>,
       children:[
@@ -93,6 +89,10 @@ import {Test2} from "@/pages/test/Test2";
           {
             path: "/presetsCamera",
             element: <PresetsCamera/>
+          },
+          {
+            path: "/mix",
+            element: <Mix/>
           }
           
         ]

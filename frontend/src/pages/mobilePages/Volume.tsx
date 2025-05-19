@@ -3,12 +3,12 @@ import InOutButton from "@/components/ui/in_out"
 import { Button as Mute } from "@/components/ui/button_mute";
 import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { GetData } from "@/lib/WebSocketData";
 import SocketContext from "@/lib/socket/context";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import useSliderThrottle from "@/lib/handleSwipe"; 
-import { RecentConnections } from "../connections_socket/RecentConnections";
+import { RecentConnections } from "./RecentConnections";
 import { Clock } from "@phosphor-icons/react";
 import { ButtonDb } from "@/components/ui/button_db";
 
@@ -143,7 +143,7 @@ export const Volume=()=>{
                   <div className="flex gap-3 pb-3 overflow-x-auto h-[400px] ">
                     <div className="flex flex-col items-center gap-3 pr-3 border-r-2">
                       <div className="flex gap-1">
-                          <ButtonDb onChange={(value) => handleButtonDb(value, "1","ALL")} Text={outputChannelStates["1"] && outputChannelStates["2"] ? "-60" : outputVolumesStates["1"]?outputVolumesStates["1"].toString():""}/>
+                          <ButtonDb onChange={(value) => handleButtonDb(value, "1","ALL")} Text={outputChannelStates["1"] && outputChannelStates["2"] ? "-60" : outputVolumesStates["1"]?outputVolumesStates["1"].toString():"0"}/>
                           <p className="text-home_colors-Similar_White text-sm font-bold">db</p>
                       </div>
                       <Slider orientation="vertical" className="h-full" 

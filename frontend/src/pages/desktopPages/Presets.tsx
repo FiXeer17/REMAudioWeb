@@ -21,14 +21,11 @@ export const Presets =()=>{
         const { currentPresets,labelPresets } = GetData(message_matrix);
         setCurrentPresets(currentPresets)
         setlabelPresets(labelPresets)
+        if (isLoading===true){
+            setIsLoading(false)
+            colorNav==="house" ? navigate("/homeAudio") : navigate("/volume")
+            }
       },[message_matrix])
-
-    useEffect(()=>{
-      if (isLoading===true){
-        setIsLoading(false)
-        colorNav==="house" ? navigate("/homeAudio") : navigate("/volume")
-        }
-    },[currentPresets])
 
     const handleSetPreset=(Preset:string)=>{
       const dataoutput={"section":"matrix_preset","value":Preset}

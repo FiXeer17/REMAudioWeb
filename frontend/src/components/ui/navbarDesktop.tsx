@@ -1,5 +1,5 @@
 import SocketContext from "@/lib/socket/context";
-import { House,SpeakerHigh,VideoCamera,SlidersHorizontal } from "@phosphor-icons/react";
+import { House,SpeakerHigh,Camera,SlidersHorizontal } from "@phosphor-icons/react";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -44,7 +44,7 @@ export default function NavbarDesktop({selectedColor}:NavbarColor){
             </div>
 
             <div onClick={hasLatestVideo ? () => navigate("/video") : undefined} className="flex flex-col items-center cursor-pointer">
-                <VideoCamera size={40} weight="thin" color={hasLatestVideo ? (selectedColor === "video" ? "#007AFF" : "#FAFAFA") : "#A1A1AA"} />
+                <Camera size={40} weight="thin" color={hasLatestVideo ? (selectedColor === "video" ? "#007AFF" : "#FAFAFA") : "#A1A1AA"} />
                 <p className={`text-sm ${selectedColor === "video" ? "text-home_colors-Selected_Borders/text" : hasLatestVideo ? "text-home_colors-Similar_White" : "text-zinc-400"}`}>
                 Video
                 </p>

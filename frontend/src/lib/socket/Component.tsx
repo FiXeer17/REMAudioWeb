@@ -12,15 +12,14 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const navigate=useNavigate()
     const { children } = props
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
-    const [loading, setLoading]= useState(true)
     const {uuid,isAdmin,triggerRedirect}=useConnections()
-    
+    const host = import.meta.env.VITE_WS_HOST
 
     useEffect(()=>{
       
       if (!uuid) return
 
-      const socketServerUrl = `ws://192.168.88.252/ws/app?uuid=${uuid}`;  
+      const socketServerUrl = `ws://${host}/ws/app?uuid=${uuid}`;  
 
       const socket = new WebSocket(socketServerUrl)
       
@@ -49,8 +48,6 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
             socketDispatch({ type: "camera_status", payload: "connected" })
             latest_camera = true
           }
-          setLoading(false)
-          
           
         }else{
           const reason=datajson.reason
@@ -75,6 +72,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
         }
         
       }
+
       socket.onclose=()=>{
         
         if (!manuallyClosed && !isRefreshing) {

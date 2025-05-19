@@ -46,9 +46,7 @@ const UUIDLayout = () => {
   }, [uuid,sockets, isAdmin]);
 
   return (
-    <div>
-      <p>Caricamento in corso...</p>
-    </div>
+    <></>
   );
 };
 

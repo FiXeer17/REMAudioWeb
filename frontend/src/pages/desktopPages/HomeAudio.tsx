@@ -2,10 +2,7 @@ import NavbarDesktop from "@/components/ui/navbarDesktop";
 import { Button as Mute } from "@/components/ui/button_mute";
 import { Button as Channel } from "@/components/ui/button_channels";
 import { Badge } from "@/components/ui/badge";
-import { Button as Audio_Video } from "@/components/ui/audio_video";
-import { Button as Presets } from "@/components/ui/audio_video";
 import { useNavigate } from "react-router-dom";
-import { SwipeChannels } from "../../lib/swipeChannels";
 import { useState, useContext, useEffect } from "react";
 import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
@@ -26,6 +23,16 @@ export const HomeAudio=()=> {
     const [isAvailable, setIsAvailable] = useState(true)
     const navigate=useNavigate()
     const Channels = ["1","2","3","4","5","6","7","8"];
+
+    useEffect(() => {
+      if (!isAvailable || message_matrix) return;
+    
+      const timeout = setTimeout(() => {
+        navigate("/uuidprovider");
+      }, 10000);
+    
+      return () => clearTimeout(timeout); 
+    }, [isAvailable, message_matrix]);
 
     useEffect(()=>{
       if(matrix_status==="disconnected" && camera_status==="connected")

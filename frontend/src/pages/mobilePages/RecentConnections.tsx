@@ -1,5 +1,5 @@
 import { ArrowLeft,Plus,Trash,Camera,HardDrive } from "@phosphor-icons/react";
-import { Link,useNavigate,useLocation } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Circle } from "@phosphor-icons/react";
@@ -108,12 +108,10 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
             <div className="absolute inset-0 bg-black z-20">
                 <div className="grid grid-rows-6 min-h-svh">
                     <div className="flex justify-between mt-9 ml-7 mr-7">
-                        <Link to={"/Login"} onClick={() => localStorage.removeItem("accessToken")}>
-                            <ArrowLeft size={32} color="#FFFFFF" />
-                        </Link>
-                        <Link to={"/createConnections"}>
-                            <Plus color="#FFFFFF" size={32}/>
-                        </Link>
+                        <ArrowLeft size={32} color="#FFFFFF" onClick={() => {
+                                localStorage.removeItem("accessToken") 
+                                navigate("/login")}}/> 
+                        <Plus color="#FFFFFF" size={32} onClick={()=>navigate("/createConnections",{state: { recent: true }})}/>
                     </div>
                     <div className="grid row-span-4 grid-rows-4 mx-10 gap-5 justify-center" style={{
                     transform: `translateX(${Offset}px)`,
@@ -142,8 +140,8 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                                 </div>
                             </div>
                             <div className="flex text-[12px] items-center">
-                                <div className=" bg-home_colors-Navbar/Selection_Bg px-5 py-2 border-2 rounded-l-xl border-home_colors-Border_Connections ">{element.ip}</div>
-                                <div className=" bg-home_colors-Navbar/Selection_Bg px-3 py-2 border-2 rounded-r-xl border-l-transparent border-home_colors-Border_Connections  ">{element.port}</div>
+                                <div className=" bg-home_colors-Navbar/Selection_Bg px-5 py-2 border-2 rounded-l-xl border-home_colors-Border_Connections select-none">{element.ip}</div>
+                                <div className=" bg-home_colors-Navbar/Selection_Bg px-3 py-2 border-2 rounded-r-xl border-l-transparent border-home_colors-Border_Connections select-none">{element.port}</div>
                                 <Button size={"recentConnections"} className=" ml-2  bg-white text-black " onClick={()=>handleClick(element)}>Connect</Button>
                             </div>
                         </div>

@@ -660,6 +660,10 @@ body {
   grid-row: span 4 / span 4;
 }
 
+.m-1 {
+  margin: 0.25rem;
+}
+
 .mx-10 {
   margin-left: 2.5rem;
   margin-right: 2.5rem;
@@ -670,6 +674,11 @@ body {
   margin-right: 3rem;
 }
 
+.mx-16 {
+  margin-left: 4rem;
+  margin-right: 4rem;
+}
+
 .mx-5 {
   margin-left: 1.25rem;
   margin-right: 1.25rem;
@@ -678,6 +687,10 @@ body {
 .mx-7 {
   margin-left: 1.75rem;
   margin-right: 1.75rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
 }
 
 .ml-2 {
@@ -734,10 +747,6 @@ body {
 
 .grid {
   display: grid;
-}
-
-.hidden {
-  display: none;
 }
 
 .aspect-square {
@@ -816,6 +825,10 @@ body {
   height: 600px;
 }
 
+.h-\[64px\] {
+  height: 64px;
+}
+
 .h-\[650px\] {
   height: 650px;
 }
@@ -847,6 +860,10 @@ body {
 
 .w-14 {
   width: 3.5rem;
+}
+
+.w-16 {
+  width: 4rem;
 }
 
 .w-2\/3 {
@@ -889,10 +906,6 @@ body {
   width: 100px;
 }
 
-.w-\[250px\] {
-  width: 250px;
-}
-
 .w-\[25px\] {
   width: 25px;
 }
@@ -932,6 +945,10 @@ body {
 
 .min-w-0 {
   min-width: 0px;
+}
+
+.max-w-\[400px\] {
+  max-width: 400px;
 }
 
 .max-w-\[600px\] {
@@ -996,6 +1013,10 @@ body {
   animation: spin 1s linear infinite;
 }
 
+.cursor-default {
+  cursor: default;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
@@ -1034,16 +1055,20 @@ body {
   grid-template-columns: 100px 1fr 0.5fr;
 }
 
-.grid-rows-2 {
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-
 .grid-rows-4 {
   grid-template-rows: repeat(4, minmax(0, 1fr));
 }
 
 .grid-rows-6 {
   grid-template-rows: repeat(6, minmax(0, 1fr));
+}
+
+.grid-rows-8 {
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+}
+
+.grid-rows-\[0\.45fr_1fr_0\.5fr\] {
+  grid-template-rows: 0.45fr 1fr 0.5fr;
 }
 
 .grid-rows-\[0\.5fr_2fr\2c auto\] {
@@ -1054,10 +1079,6 @@ body {
   grid-template-rows: 1fr 1fr 1/2fr;
 }
 
-.grid-rows-\[1fr\2c 2fr\2c 1fr\] {
-  grid-template-rows: 1fr 2fr 1fr;
-}
-
 .grid-rows-\[1fr\2c 2fr\] {
   grid-template-rows: 1fr 2fr;
 }
@@ -1066,16 +1087,28 @@ body {
   grid-template-rows: 1fr auto;
 }
 
-.grid-rows-\[50px\2c 1fr\2c 1fr\2c auto\] {
-  grid-template-rows: 50px 1fr 1fr auto;
+.grid-rows-\[50px\2c 1fr\2c auto\] {
+  grid-template-rows: 50px 1fr auto;
 }
 
 .grid-rows-\[70px\2c 1fr\2c auto\] {
   grid-template-rows: 70px 1fr auto;
 }
 
+.grid-rows-\[80px\2c 1fr\2c 1fr\2c auto\] {
+  grid-template-rows: 80px 1fr 1fr auto;
+}
+
 .grid-rows-\[auto\2c 1fr\2c 1fr\2c auto\] {
   grid-template-rows: auto 1fr 1fr auto;
+}
+
+.grid-rows-\[auto\2c 1fr\2c 1fr\] {
+  grid-template-rows: auto 1fr 1fr;
+}
+
+.grid-rows-\[auto\2c 1fr\2c 2fr\] {
+  grid-template-rows: auto 1fr 2fr;
 }
 
 .grid-rows-\[auto\2c 1fr\] {
@@ -1517,8 +1550,17 @@ body {
   padding-bottom: 1.75rem;
 }
 
+.py-\[6px\] {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
 .pb-10 {
   padding-bottom: 2.5rem;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
 }
 
 .pb-3 {
@@ -1547,6 +1589,10 @@ body {
 
 .pr-12 {
   padding-right: 3rem;
+}
+
+.pr-2 {
+  padding-right: 0.5rem;
 }
 
 .pr-3 {
@@ -1619,10 +1665,6 @@ body {
   font-weight: 600;
 }
 
-.uppercase {
-  text-transform: uppercase;
-}
-
 .leading-none {
   line-height: 1;
 }
@@ -1678,6 +1720,11 @@ body {
 .text-login_colors-button_bg\/text {
   --tw-text-opacity: 1;
   color: rgb(250 250 250 / var(--tw-text-opacity, 1));
+}
+
+.text-login_colors-place_holder {
+  --tw-text-opacity: 1;
+  color: rgb(161 161 170 / var(--tw-text-opacity, 1));
 }
 
 .text-primary {
@@ -1873,6 +1920,11 @@ body {
 
 .focus-visible\:ring-ring:focus-visible {
   --tw-ring-color: hsl(var(--ring));
+}
+
+.active\:border-home_colors-Selected_Borders\/text:active {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 122 255 / var(--tw-border-opacity, 1));
 }
 
 .disabled\:pointer-events-none:disabled {

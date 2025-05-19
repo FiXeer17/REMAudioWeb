@@ -2,10 +2,6 @@ import * as React from "react";
 import { Eye, EyeSlash } from "@phosphor-icons/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
-
-  
-
 
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input"> & {Forgot:String,Eye_state:String}>(

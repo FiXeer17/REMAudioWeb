@@ -1,5 +1,5 @@
 import SocketContext from "@/lib/socket/context";
-import { House,SpeakerHigh,VideoCamera,SlidersHorizontal } from "@phosphor-icons/react";
+import { House,SpeakerHigh,Camera,SlidersHorizontal } from "@phosphor-icons/react";
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -42,9 +42,9 @@ export default function Navbar({selectedColor}:NavbarColor){
                 : <SpeakerHigh size={28} color="#A1A1AA"/>}
             </div>
             <div onClick={hasLatestVideo ? () => navigate("/video") : undefined}  className="cursor-pointer">
-            { hasLatestVideo ? selectedColor==="video" ? <VideoCamera size={28} color="#007AFF" />
-                : <VideoCamera size={28} color="#FAFAFA"/>
-                : <VideoCamera size={28} color="#A1A1AA"/>}
+            { hasLatestVideo ? selectedColor==="video" ? <Camera size={28} color="#007AFF" />
+                : <Camera size={28} color="#FAFAFA"/>
+                : <Camera size={28} color="#A1A1AA"/>}
             </div>
             <div onClick={()=>navigate("/settings")} className="cursor-pointer">
             {selectedColor==="settings" ? <SlidersHorizontal size={28} color="#007AFF" />

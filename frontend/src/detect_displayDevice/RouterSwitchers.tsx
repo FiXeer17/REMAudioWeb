@@ -2,16 +2,16 @@ import {SignInPage as SignInDesktop } from "../pages/desktopPages/SignIn"
 import {SignInPage as SignInMobile} from "@/pages/mobilePages/SignIn"
 
 import {NewConnections as NewConnectionsDesktop } from "@/pages/desktopPages/NewConnections"
-import {NewConnections as NewConnectionsMobile } from "@/pages/connections_socket/NewConnections"
+import {NewConnections as NewConnectionsMobile } from "@/pages/mobilePages/NewConnections"
 
 import { RecentConnections as RecentConnectionsDesktop } from "@/pages/desktopPages/RecentConnections"
-import { RecentConnections as RecentConnectionsMobile } from "@/pages/connections_socket/RecentConnections"
+import { RecentConnections as RecentConnectionsMobile } from "@/pages/mobilePages/RecentConnections"
 
 import { CreateConnections as CreateConnectionsDesktop } from "@/pages/desktopPages/CreateConnections"
-import { CreateConnections as CreateConnectionsMobile  } from "@/pages/connections_socket/CreateConnections"
+import { CreateConnections as CreateConnectionsMobile  } from "@/pages/mobilePages/CreateConnections"
 
 import { CallAdministrator as CallAdministratorDesktop } from "@/pages/desktopPages/CallAdministrator"
-import { CallAdministrator as CallAdministratorMobile } from "@/pages/connections_socket/CallAdministrator"
+import { CallAdministrator as CallAdministratorMobile } from "@/pages/mobilePages/CallAdministrator"
 
 import { HomeAudio as HomeAudioDesktop }  from "@/pages/desktopPages/HomeAudio"
 import { HomeAudio as HomeAudioMobile } from "@/pages/mobilePages/HomeAudio"
@@ -36,6 +36,9 @@ import { PreferenciesChannels as PreferenciesChannelsMobile } from "@/pages/mobi
 
 import { Video as VideoDesktop} from "@/pages/desktopPages/Video"
 import { Video as VideoMobile } from "@/pages/mobilePages/Video"
+
+import { Mix as MixDesktop } from "@/pages/desktopPages/Mix"
+import { Mix as MixMobile } from "@/pages/mobilePages/Mix"
 
 import { useIsDesktop } from "./useDeviceType"
 
@@ -103,6 +106,11 @@ export const PreferenciesChannels = () => {
 export const Video = () => {
     const isDesktop = useIsDesktop();
     return isDesktop ? <VideoDesktop /> : <VideoMobile />;
+};
+
+export const Mix = () => {
+    const isDesktop = useIsDesktop();
+    return isDesktop ? <MixDesktop /> : <MixMobile />;
 };
 
 

@@ -7,6 +7,7 @@ import { useForm,SubmitHandler } from "react-hook-form";
 import { toast,Toaster } from "sonner";
 import axios from "axios";
 import { login as loginUser } from "@/lib/services";
+import { useEffect } from "react";
 
 
 type FormFields = {
@@ -19,8 +20,10 @@ type FormFields = {
 export const SignInPage=() => {
   const { register,handleSubmit } =useForm<FormFields>();
   const navigate= useNavigate()
-  
-   const showErrorToast = (data : FormFields) => {
+  useEffect(()=>{
+    localStorage.removeItem("access_token")
+  })
+  const showErrorToast = (data : FormFields) => {
       if (data.username===""||data.password===""){
         toast.error("All fields must be filled", { duration: 1000 });
         return false;
@@ -46,9 +49,11 @@ export const SignInPage=() => {
     }catch(error){
       
         if (axios.isAxiosError(error) && error.response?.status !== 200) {
-          
-          toast.error("Wrong credentials");
-          }
+          if(error.response?.status === 401)
+            toast.error("Wrong credentials");
+          else
+            toast.error("Error connecting ")
+        }
     return navigate("/login")
     }}
   
