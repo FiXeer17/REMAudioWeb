@@ -32,3 +32,13 @@ impl Handler<Connect> for StreamManager {
         })
     }
 }
+
+
+impl Handler<EndStream> for StreamManager{
+    type Result = ();
+    fn handle(&mut self, msg: EndStream, _ctx: &mut Self::Context) -> Self::Result {
+        if let Some(actor) = self.open_streams.remove(&msg.socket){
+            actor.do_send(msg);
+        }
+    }
+}
