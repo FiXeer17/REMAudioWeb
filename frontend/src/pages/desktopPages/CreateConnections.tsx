@@ -63,11 +63,11 @@ export const CreateConnections=()=>{
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="flex flex-col mx-16 gap-4 justify-start">
                             <div className="flex flex-col gap-1 ">
-                                <p className="text-white font-sans">MATRIX NAME</p>
+                                <p className="text-white font-sans">{watch("device_type") === "matrix" ? "MATRIX NAME" : "CAMERA NAME"}</p>
                                 <Input  {...register("name")} placeholder="name"  className="w-full"/>
                             </div>
                             <div className="flex flex-col gap-1 ">
-                                <p className="text-white font-sans">MATRIX IP</p>
+                                <p className="text-white font-sans">{watch("device_type") === "matrix" ? "MATRIX IP" : "CAMERA IP"}</p>
                                 <Input {...register("ip")} placeholder="ip" className="w-full"/>
                             </div>
                             <div className="flex mt-5 items-start ">

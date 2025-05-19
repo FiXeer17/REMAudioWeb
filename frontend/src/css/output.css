@@ -1922,6 +1922,11 @@ body {
   --tw-ring-color: hsl(var(--ring));
 }
 
+.active\:border-home_colors-Selected_Borders\/text:active {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 122 255 / var(--tw-border-opacity, 1));
+}
+
 .disabled\:pointer-events-none:disabled {
   pointer-events: none;
 }

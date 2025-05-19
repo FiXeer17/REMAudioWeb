@@ -24,6 +24,7 @@ export const Video = () => {
     const [labelPresets, setlabelPresets] = useState<{ [key: string]: string; }>({})
     const [currentPresets, setCurrentPresets] = useState(0)
     const [isAvailable, setIsAvailable] = useState(true)
+    const [color,setColor]=useState("")
 
     const upArrowRef = useRef<HTMLDivElement>(null);
     const rightArrowRef = useRef<HTMLDivElement>(null);
@@ -81,31 +82,37 @@ export const Video = () => {
     };
 
     const handleMouseUp = (control: any) => (e: React.MouseEvent | React.TouchEvent) => {
+        setColor("")
         e.preventDefault(); 
         control.handleAction(false);
     };
 
     const handleMovement = (direction: MovementDirection|"home", intensity: IntensityType = "slow") => {
-      if (direction==="home"){
-        const data = {"section": "move_camera", "direction": direction};
-        socket?.send(JSON.stringify(data));
-      }else{
-        const data = {"section": "move_camera", "direction": direction, "velocity": intensity};
-        socket?.send(JSON.stringify(data));
-      }
+        setColor(direction)
+        if (direction==="home"){
+            const data = {"section": "move_camera", "direction": direction};
+            socket?.send(JSON.stringify(data));
+        }else{
+            const data = {"section": "move_camera", "direction": direction, "velocity": intensity};
+            socket?.send(JSON.stringify(data));
+        }
       
     }
 
     const handleZoomDown = (type:string) =>{
         if (type==="plus"){
+            setColor("plus")
             const data = {"section": "zoom_tele"};
             socket?.send(JSON.stringify(data));
+
         }else {
+            setColor("minus")
             const data = {"section": "zoom_wide"};
             socket?.send(JSON.stringify(data));
         }
     }
     const handleZoomUp = () =>{
+        setColor("")
         const data = {"section": "zoom_stop"};
         socket?.send(JSON.stringify(data));
     }
@@ -168,22 +175,22 @@ export const Video = () => {
                                 
                             </div>
                             <div className="flex justify-center items-center gap-3">
-                                <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
+                                <div className={`border-[1px] ${color==="minus"?"border-home_colors-Selected_Borders/text":"border-home_colors-Similar_White"} rounded-full  cursor-pointer`}
                                     onMouseDown={() => { handleZoomDown("minus") }}
                                     onMouseUp={() => { handleZoomUp() }}>
-                                  <Minus size={22} color="white" className="m-1"/>
+                                  <Minus size={22} color={color==="minus"?"#007AFF":"white"} className="m-1"/>
                                 </div>
-                                <div className="border-[1px] border-home_colors-Similar_White rounded-full cursor-pointer"
+                                <div className={`border-[1px] ${color==="plus"?"border-home_colors-Selected_Borders/text":"border-home_colors-Similar_White"} rounded-full  cursor-pointer`}
                                     onMouseDown={() => { handleZoomDown("plus") }}
                                     onMouseUp={() => { handleZoomUp() }}>
-                                  <Plus size={22} color="white" className="m-1"/>
+                                  <Plus size={22} color={color==="plus"?"#007AFF":"white"} className="m-1"/>
                                 </div>
                             </div>
                             <div className="flex items-center justify-center gap-10">
-                                <div className="flex flex-col w-32 h-32 border-[1px] rounded-2xl border-home_colors-Selected_Borders/text bg-home_colors-Navbar/Selection_Bg">
+                                <div className="flex flex-col w-32 h-32 border-[1px] rounded-2xl items-center border-home_colors-Selected_Borders/text bg-home_colors-Navbar/Selection_Bg">
                                     <div 
                                         ref={upArrowRef} 
-                                        className="flex justify-center items-start py-[6px]"
+                                        className="flex justify-center items-start py-[6px] "
                                         onMouseDown={handleMouseDown(upControl)}
                                         onMouseUp={handleMouseUp(upControl)}
                                         onMouseLeave={handleMouseUp(upControl)}
@@ -191,10 +198,11 @@ export const Video = () => {
                                         onTouchEnd={handleMouseUp(upControl)}
                                         onContextMenu={(e) => e.preventDefault()}
                                     >
-                                        <ArrowUp color="white" size={36} weight="bold" />
+                                        <ArrowUp color={color==="up"?"#007AFF":"white"} className="cursor-pointer " size={36} weight="bold" />
                                     </div>
-                                    <div className="flex justify-between px-1 items-center">
+                                    <div className="flex justify-between w-full px-1 items-center">
                                         <div 
+                                            className="cursor-pointer"
                                             ref={leftArrowRef}
                                             onMouseDown={handleMouseDown(leftControl)}
                                             onMouseUp={handleMouseUp(leftControl)}
@@ -203,10 +211,18 @@ export const Video = () => {
                                             onTouchEnd={handleMouseUp(leftControl)} 
                                             onContextMenu={(e) => e.preventDefault()}
                                         >
-                                            <ArrowLeft color="white" size={36} weight="bold" />
+                                            <ArrowLeft color={color==="left"?"#007AFF":"white"} size={36} weight="bold" />
                                         </div>
-                                        <ArrowsClockwise color="white" size={30} weight="bold" onClick={()=>{handleMovement("home")}} />
                                         <div 
+                                            onMouseDown={()=>handleMovement("home")}
+                                            onMouseUp={()=>setColor("")}
+                                            onTouchStart={()=>handleMovement("home")}
+                                            onTouchEnd={()=>setColor("")} 
+                                            onContextMenu={(e) => e.preventDefault()}>
+                                            <ArrowsClockwise color={color==="home"?"#007AFF":"white"} className="cursor-pointer " size={30} weight="bold"  />
+                                        </div>
+                                        <div 
+                                            className="cursor-pointer "
                                             ref={rightArrowRef}
                                             onMouseDown={handleMouseDown(rightControl)}
                                             onMouseUp={handleMouseUp(rightControl)}
@@ -215,7 +231,7 @@ export const Video = () => {
                                             onTouchEnd={handleMouseUp(rightControl)}
                                             onContextMenu={(e) => e.preventDefault()}
                                         >
-                                            <ArrowRight color="white" size={36} weight="bold" />
+                                            <ArrowRight color={color==="right"?"#007AFF":"white"} size={36} weight="bold" />
                                         </div>
                                     </div>
                                     <div 
@@ -228,7 +244,7 @@ export const Video = () => {
                                         onTouchEnd={handleMouseUp(downControl)}
                                         onContextMenu={(e) => e.preventDefault()}
                                     >
-                                        <ArrowDown color="white" size={36} weight="bold" />
+                                        <ArrowDown color={color==="down"?"#007AFF":"white"} className="cursor-pointer" size={36} weight="bold" />
                                     </div>
                                 </div>
                             </div>
