@@ -24,6 +24,8 @@ export const Video = () => {
     const [labelPresets, setlabelPresets] = useState<{ [key: string]: string; }>({})
     const [currentPresets, setCurrentPresets] = useState(0)
     const [isAvailable, setIsAvailable] = useState(true)
+    const [showImage,setShowImage]=useState(false)
+    const [urlSafe,setUrlSafe]=useState("")
     const [color,setColor]=useState("")
 
     const upArrowRef = useRef<HTMLDivElement>(null);
@@ -123,38 +125,50 @@ export const Video = () => {
         const latestVideoDevice = updatedSockets?.find(updatedSockets => updatedSockets.isLatestVideo);
 
         const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
-        console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+        setShowImage(true)
+        setUrlSafe(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''))
+        console.log(`${latestVideoDevice?.ip}:${port}`)
+        console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''))
+        
 
       };
 
     return (
-        <>
-        {isAvailable ? (message_camera ?
-            <div className="absolute inset-0 z-10"></div> : <RecentConnections isLoading={true} />
-        ) : (
-            <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
-                <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
-                    <div className="mt-1">
-                        <Clock weight="bold"></Clock>
-                    </div>
-                    <div>
-                        <p>Matrix Unvailable</p>
-                        <p>Please wait...</p>
-                    </div>
-                </div>
-            </div>
-        )}
-        <div className="absolute inset-0 bg-black z-20">
-            <div className="grid grid-cols-[100px,1fr] h-screen">
-                <div>
+        <div className="absolute inset-0 bg-black">
+            <div className="grid grid-cols-[100px,1fr] h-screen relative">
+                <div className="relative z-40">
                     <NavbarDesktop selectedColor="video" />
                 </div>
-                <div className="flex items-center justify-center w-full">
-                    <div className="grid grid-rows-[auto,1fr,1fr] gap-5 border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[600px] w-[710px] px-10 py-7">
+                <div className="flex items-center justify-center w-full relative">
+                    {isAvailable ? (
+                        message_camera ? 
+                            <div className="absolute inset-0 z-10"></div> 
+                            : 
+                            <div className="absolute inset-0 z-20">
+                                <RecentConnections isLoading={true} />
+                            </div>
+                    ) : (
+                        <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center bg-black/30 z-30">
+                            <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2">
+                                <div className="mt-1">
+                                    <Clock weight="bold"></Clock>
+                                </div>
+                                <div>
+                                    <p>Camera Unvailable</p>
+                                    <p>Please wait...</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-rows-[auto,1fr,1fr] gap-5 border-[1.5px] justify-center border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[600px] w-[710px] px-10 py-7 z-10">
                         <div className="flex items-center justify-center">
                             <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
                         </div>
-                        <div className="flex flex-col bg-home_colors-Navbar/Selection_Bg mx-10 border-[1px] gap-2 border-home_colors-Selected_Borders/text justify-center items-center">
+                        <div className="flex flex-col bg-home_colors-Navbar/Selection_Bg mx-10 border-[1px] gap-2 border-home_colors-Selected_Borders/text justify-center items-center w-[350px] h-[230px">
+                            {showImage ? <img src={`http://localhost/stream?a=MTcyLjI1LjAuMTM3Ojg1NTQ`}/>
+                            :
+                            <>
                             <p className="text-white font-bold text-sm">RTSP PORT</p>
                             <div className="flex gap-3">
                                 <form onSubmit={handleSubmit(handleConnect)} className="flex gap-3">
@@ -169,6 +183,8 @@ export const Video = () => {
                                     </Button>
                                 </form>
                             </div>
+                            </>}
+                            
                         </div>
                         <div className="grid grid-rows-[auto,1fr,2fr]">
                             <div className="flex items-center justify-center">
@@ -253,6 +269,5 @@ export const Video = () => {
                 </div>
             </div>
         </div>
-        </>
     )
 }

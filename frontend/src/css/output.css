@@ -644,6 +644,22 @@ body {
   top: -10px;
 }
 
+.bottom-0 {
+  bottom: 0px;
+}
+
+.bottom-\[calc\(3rem\+12px\)\] {
+  bottom: calc(3rem + 12px);
+}
+
+.left-0 {
+  left: 0px;
+}
+
+.right-0 {
+  right: 0px;
+}
+
 .z-10 {
   z-index: 10;
 }
@@ -654,6 +670,14 @@ body {
 
 .z-30 {
   z-index: 30;
+}
+
+.z-40 {
+  z-index: 40;
+}
+
+.z-0 {
+  z-index: 0;
 }
 
 .row-span-4 {
@@ -731,6 +755,10 @@ body {
 
 .mt-9 {
   margin-top: 2.25rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
 }
 
 .block {
@@ -846,6 +874,10 @@ body {
   height: 100vh;
 }
 
+.h-\[calc\(3rem\+12px\)\] {
+  height: calc(3rem + 12px);
+}
+
 .min-h-svh {
   min-height: 100svh;
 }
@@ -908,6 +940,10 @@ body {
 
 .w-\[25px\] {
   width: 25px;
+}
+
+.w-\[350px\] {
+  width: 350px;
 }
 
 .w-\[400px\] {
@@ -1920,11 +1956,6 @@ body {
 
 .focus-visible\:ring-ring:focus-visible {
   --tw-ring-color: hsl(var(--ring));
-}
-
-.active\:border-home_colors-Selected_Borders\/text:active {
-  --tw-border-opacity: 1;
-  border-color: rgb(0 122 255 / var(--tw-border-opacity, 1));
 }
 
 .disabled\:pointer-events-none:disabled {

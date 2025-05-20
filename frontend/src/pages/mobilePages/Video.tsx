@@ -129,23 +129,8 @@ export const Video = () => {
       };
 
     return (
-        <>
-            {isAvailable ? (message_camera ?
-                <div className="absolute inset-0 z-10"></div> : <RecentConnections isLoading={true} />
-            ) : (
-                <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
-                    <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
-                        <div className="mt-1">
-                            <Clock weight="bold"></Clock>
-                        </div>
-                        <div>
-                            <p>Matrix Unvailable</p>
-                            <p>Please wait...</p>
-                        </div>
-                    </div>
-                </div>
-            )}
-            <div className="absolute inset-0 bg-black z-20">
+        <div className="relative min-h-svh">
+            <div className="absolute inset-0 bg-black z-0">
                 <div className="grid grid-rows-[80px,1fr,1fr,auto] min-h-svh">
                     <div className="flex items-center justify-center">
                         <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
@@ -165,10 +150,8 @@ export const Video = () => {
                                     </Button>
                                 </form>
                             </div>
-                        {/*<ImageSquare size={60} color="white" weight="thin" />*/}
                     </div>
                     <div className="grid grid-rows-[1fr,2fr]">
-
                         <div className="flex justify-center items-center gap-3">
                             <div className={`border-[1px] ${color==="minus"?"border-home_colors-Selected_Borders/text":"border-home_colors-Similar_White"} rounded-full cursor-pointer`}
                                 onContextMenu={(e) => e.preventDefault()}
@@ -246,11 +229,35 @@ export const Video = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3 px-5 w-full">
-                        <Navbar selectedColor="video" />
-                    </div>
+                    <div className="h-16 mb-3"></div>
                 </div>
             </div>
-        </>
+            
+            {!isAvailable && (
+                <div className="absolute inset-0 bottom-[calc(3rem+12px)] backdrop-blur-sm flex justify-center items-center bg-black/30 z-10">
+                    <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2">
+                        <div className="mt-1">
+                            <Clock weight="bold"></Clock>
+                        </div>
+                        <div>
+                            <p>Camera Unvailable</p>
+                            <p>Please wait...</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {isAvailable && !message_camera && (
+                <div className="absolute inset-0 bottom-[calc(3rem+12px)] z-10">
+                    <RecentConnections isLoading={true} />
+                </div>
+            )}
+
+            <div className="absolute bottom-0 left-0 right-0 z-20">
+                <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3 px-5 w-full">
+                    <Navbar selectedColor="video" />
+                </div>
+            </div>
+        </div>
     )
 }

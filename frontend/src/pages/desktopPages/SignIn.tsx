@@ -43,7 +43,6 @@ export const SignInPage=()=>{
       localStorage.setItem("accessToken",accessToken)
       localStorage.setItem("isAdmin",isAdmin)
       localStorage.setItem("user",data.username)
-
       return navigate("/uuidprovider",{state:{isAdmin}})
     }catch(error){
       
@@ -52,6 +51,7 @@ export const SignInPage=()=>{
           toast.error("Wrong credentials");
         else
           toast.error("Error connecting ")
+        
       }
     return navigate("/login")
     }}
