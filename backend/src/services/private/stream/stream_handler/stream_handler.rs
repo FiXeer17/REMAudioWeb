@@ -7,9 +7,12 @@ use tokio::{
     sync::broadcast::{self, Sender},
 };
 
-use crate::services::private::stream::{
-    messages::{EndStream, ReadStdout},
-    streams_manager::streams_manager::StreamManager,
+use crate::{
+    configs::streaming_settings,
+    services::private::stream::{
+        messages::{EndStream, ReadStdout},
+        streams_manager::streams_manager::StreamManager,
+    },
 };
 
 pub struct StreamHandler {
@@ -36,13 +39,22 @@ impl StreamHandler {
 impl Actor for StreamHandler {
     type Context = Context<Self>;
     fn started(&mut self, ctx: &mut Self::Context) {
+        let streaming_path = streaming_settings::get_streaming_path();
+        let framerate = streaming_settings::get_frame_rate();
+        let transport_protocol = streaming_settings::get_transport_protocol();
+
         let mut ffmpeg = Command::new("ffmpeg")
             .args([
-                "-rtsp_transport", "tcp",
-                "-i", &format!("rtsp://{}/av0/live", self.rtsp_url),
-                "-f", "mjpeg",
-                "-q:v","5",
-                "-r","30",
+                "-rtsp_transport",
+                &transport_protocol,
+                "-i",
+                &format!("rtsp://{}{}", self.rtsp_url, streaming_path),
+                "-f",
+                "mjpeg",
+                "-q:v",
+                "5",
+                "-r",
+                &framerate.to_string(),
                 "pipe:1",
             ])
             .stdout(Stdio::piped())
@@ -55,14 +67,17 @@ impl Actor for StreamHandler {
 
         let (srv_addr, socket) = (self.stream_manager.clone(), self.rtsp_url.clone());
         tokio::spawn(async move {
-            match ffmpeg.wait().await{
-                Ok(s) => info!("The ffmpeg process stopped succesfully: {}",s.success()),
-                Err(_) => warn!("The ffmpeg process stopped unexpectedly")
+            match ffmpeg.wait().await {
+                Ok(s) => info!("The ffmpeg process stopped succesfully: {}", s.success()),
+                Err(_) => warn!("The ffmpeg process stopped unexpectedly"),
             };
             srv_addr.do_send(EndStream { socket });
         });
     }
     fn stopped(&mut self, _ctx: &mut Self::Context) {
-        info!("Stream handler rtsp://{}/av0/live stopped succesfully",self.rtsp_url.to_string());
+        info!(
+            "Stream handler rtsp://{}/av0/live stopped succesfully",
+            self.rtsp_url.to_string()
+        );
     }
 }

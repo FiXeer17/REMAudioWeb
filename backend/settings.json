@@ -11,6 +11,11 @@
         "audio_presets_number" : 16,
         "video_presets_number":10
     },
+    "streaming_settings" : {
+        "frame_rate":30,
+        "transport_protocol":"tcp",
+        "streaming_path":"/av0/live"
+    },
 
     "tcp_comunication_settings":{
 
