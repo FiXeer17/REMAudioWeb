@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input_email";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { useConnections } from "@/lib/socket/ComponentUuid";
+import { toast, Toaster } from "sonner";
 
 type FormFields = {
     port: string;
@@ -101,6 +102,11 @@ export const Video = () => {
       
     }
 
+    const handleErrorImage=()=>{
+        setShowImage(false)
+        toast.error("Error connecting with camera")
+    }
+
     const handleZoomDown = (type:string) =>{
         if (type==="plus"){
             setColor("plus")
@@ -166,7 +172,7 @@ export const Video = () => {
                             <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
                         </div>
                         <div className="flex flex-col bg-home_colors-Navbar/Selection_Bg mx-10 border-[1px] gap-2 border-home_colors-Selected_Borders/text justify-center items-center w-[350px] h-[230px">
-                            {showImage ? <img src={`http://localhost/stream?a=MTcyLjI1LjAuMTM3Ojg1NTQ`}/>
+                            {showImage ? <img src={`http://localhost/stream?a=MTcyLjI1LjAuMTM3Ojg1NTQ`} onError={()=>handleErrorImage()}/>
                             :
                             <>
                             <p className="text-white font-bold text-sm">RTSP PORT</p>
@@ -265,6 +271,7 @@ export const Video = () => {
                                 </div>
                             </div>
                         </div>
+                        <Toaster/>
                     </div>
                 </div>
             </div>

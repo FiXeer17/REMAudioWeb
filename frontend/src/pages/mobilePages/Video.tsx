@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input_email";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { useConnections } from "@/lib/socket/ComponentUuid";
+import { toast, Toaster } from "sonner";
 
 type FormFields = {
     port: string;
@@ -23,6 +24,8 @@ export const Video = () => {
     const { socket, message_camera, matrix_status, camera_status } = useContext(SocketContext).socketState
     const [labelPresets, setlabelPresets] = useState<{ [key: string]: string; }>({})
     const [currentPresets, setCurrentPresets] = useState(0)
+    const [showImage,setShowImage]=useState(false)
+    const [urlSafe,setUrlSafe]=useState("")
     const [isAvailable, setIsAvailable] = useState(true)
     const [color,setColor]= useState("")
 
@@ -55,7 +58,11 @@ export const Video = () => {
         setlabelPresets(labelPresets)
     }, [message_camera])
 
-
+    const handleErrorImage=()=>{
+        setShowImage(false)
+        toast.error("Error connecting with camera")
+    }
+    
     const upControl = useClickAndHold({
         onHold: (intensity: IntensityType) => handleMovement("up", intensity),
         onSlowClick: () => handleMovement("up", "slow"),
@@ -123,7 +130,10 @@ export const Video = () => {
         const latestVideoDevice = updatedSockets?.find(updatedSockets => updatedSockets.isLatestVideo);
 
         const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
-        console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
+        setShowImage(true)
+        setUrlSafe(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''))
+        console.log(`${latestVideoDevice?.ip}:${port}`)
+        console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''))
         
 
       };
@@ -136,6 +146,9 @@ export const Video = () => {
                         <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
                     </div>
                     <div className="flex flex-col gap-3 bg-home_colors-Navbar/Selection_Bg mx-10 justify-center items-center">
+                        {showImage ? <img src={`http://localhost/stream?a=MTcyLjI1LjAuMTM3Ojg1NTQ`} onError={()=>handleErrorImage()}/>
+                            :
+                            <>
                             <p className="text-white font-bold text-sm">RTSP PORT</p>
                             <div className="flex gap-3">
                                 <form onSubmit={handleSubmit(handleConnect)} className="flex gap-3">
@@ -150,6 +163,7 @@ export const Video = () => {
                                     </Button>
                                 </form>
                             </div>
+                            </>}
                     </div>
                     <div className="grid grid-rows-[1fr,2fr]">
                         <div className="flex justify-center items-center gap-3">
@@ -230,6 +244,7 @@ export const Video = () => {
                         </div>
                     </div>
                     <div className="h-16 mb-3"></div>
+                    
                 </div>
             </div>
             
@@ -255,6 +270,7 @@ export const Video = () => {
 
             <div className="absolute bottom-0 left-0 right-0 z-20">
                 <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3 px-5 w-full">
+                    <Toaster/>
                     <Navbar selectedColor="video" />
                 </div>
             </div>
