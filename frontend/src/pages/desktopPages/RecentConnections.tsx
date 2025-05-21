@@ -53,6 +53,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                         }
                         const value = await setSocket(headers);
                         if (value.status===200){
+                            localStorage.setItem("showImage","false")
                             if (element.device_type==="matrix")
                                 return navigate("/homeAudio")
                             else
@@ -105,8 +106,12 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
             <div className="flex flex-col gap-14 pt-8">
                 <div className="relative w-full h-14 flex items-center justify-center ">
                     <ArrowLeft size={32} color="#FFFFFF" className="absolute left-7" onClick={() => {
-                                    localStorage.removeItem("accessToken") 
-                                    navigate("/login")}}/> 
+                                        if (location.state?.redirect === "settings") {
+                                            navigate("/settings");
+                                          } else {
+                                            localStorage.removeItem("accessToken");
+                                            navigate("/login");
+                                          }}}/> 
                     <p className="text-white font-sans font-semibold text-center">RECENT CONNECTIONS</p>
                     <Plus color="#FFFFFF" size={32} className="absolute right-7" onClick={()=>navigate("/createConnections",{state: { recent: true }})}/>
 

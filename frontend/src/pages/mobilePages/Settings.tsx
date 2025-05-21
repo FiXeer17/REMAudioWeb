@@ -24,7 +24,7 @@ export const Settings=()=>{
     
     const handleRedirect = async () => {
         await triggerRedirect()
-            navigate("/uuidprovider",{state:{show:false}})
+            navigate("/uuidprovider",{state:{show:false,redirect:"settings"}})
         }
     const signOut=()=>{
         localStorage.removeItem("accessToken")

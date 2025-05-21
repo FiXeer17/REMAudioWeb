@@ -608,6 +608,18 @@ body {
   inset: 0px;
 }
 
+.bottom-0 {
+  bottom: 0px;
+}
+
+.bottom-\[calc\(3rem\+12px\)\] {
+  bottom: calc(3rem + 12px);
+}
+
+.left-0 {
+  left: 0px;
+}
+
 .left-12 {
   left: 3rem;
 }
@@ -622,6 +634,10 @@ body {
 
 .left-7 {
   left: 1.75rem;
+}
+
+.right-0 {
+  right: 0px;
 }
 
 .right-3 {
@@ -644,20 +660,8 @@ body {
   top: -10px;
 }
 
-.bottom-0 {
-  bottom: 0px;
-}
-
-.bottom-\[calc\(3rem\+12px\)\] {
-  bottom: calc(3rem + 12px);
-}
-
-.left-0 {
-  left: 0px;
-}
-
-.right-0 {
-  right: 0px;
+.z-0 {
+  z-index: 0;
 }
 
 .z-10 {
@@ -674,10 +678,6 @@ body {
 
 .z-40 {
   z-index: 40;
-}
-
-.z-0 {
-  z-index: 0;
 }
 
 .row-span-4 {
@@ -715,6 +715,10 @@ body {
 
 .mb-2 {
   margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
 }
 
 .ml-2 {
@@ -755,10 +759,6 @@ body {
 
 .mt-9 {
   margin-top: 2.25rem;
-}
-
-.mb-3 {
-  margin-bottom: 0.75rem;
 }
 
 .block {
@@ -833,6 +833,10 @@ body {
   height: 20px;
 }
 
+.h-\[256px\] {
+  height: 256px;
+}
+
 .h-\[330px\] {
   height: 330px;
 }
@@ -872,10 +876,6 @@ body {
 
 .h-screen {
   height: 100vh;
-}
-
-.h-\[calc\(3rem\+12px\)\] {
-  height: calc(3rem + 12px);
 }
 
 .min-h-svh {
@@ -940,6 +940,10 @@ body {
 
 .w-\[25px\] {
   width: 25px;
+}
+
+.w-\[295px\] {
+  width: 295px;
 }
 
 .w-\[350px\] {
@@ -1484,6 +1488,11 @@ body {
 
 .fill-white {
   fill: #fff;
+}
+
+.object-cover {
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 
 .px-0 {

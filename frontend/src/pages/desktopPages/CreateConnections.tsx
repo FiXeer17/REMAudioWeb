@@ -33,6 +33,7 @@ export const CreateConnections=()=>{
                 device_type: data.device_type
                 }
             await addSocket(values)
+            localStorage.setItem("showImage","false")
             if (data.device_type==="matrix")
                 return navigate("/homeAudio")
             else

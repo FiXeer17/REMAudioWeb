@@ -22,7 +22,7 @@ const UUIDLayout = () => {
           if (location.state?.show === true) {
             navigate("/recentConnections", { state: { show: true } });
           } else {
-            navigate("/recentConnections", { state: { show: false } });
+            navigate("/recentConnections", { state: { show: false,redirect:location.state?.redirect } });
           }
         }
       } else {
