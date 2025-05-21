@@ -8,6 +8,7 @@ import { useConnections } from "@/lib/socket/ComponentUuid";
 import { toast, Toaster } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { useEffect } from "react";
 
 type FormFields = {
     name:string;
@@ -22,6 +23,10 @@ export const CreateConnections=()=>{
     const location = useLocation()
     const { register,handleSubmit,setValue,watch } =useForm<FormFields>();
     const {uuid}=useConnections()
+
+    useEffect(() => {
+        setValue("device_type", "matrix");
+    },[]);
 
     const onSubmit: SubmitHandler<FormFields> = async (data) => {
         try{
@@ -81,9 +86,9 @@ export const CreateConnections=()=>{
                                 )}
                         </div>
                         <div className="flex w-1/2 h-[64px] items-end">
-                            <RadioGroup onValueChange={(value) => setValue("device_type", value)}>
+                            <RadioGroup defaultValue="matrix" onValueChange={(value) => setValue("device_type", value)}>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem  value="matrix"  />
+                                    <RadioGroupItem   value="matrix"  />
                                     <Label htmlFor="matrix">Matrix</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
