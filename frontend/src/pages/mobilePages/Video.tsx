@@ -277,9 +277,10 @@ export const Video = () => {
 
             <div className="absolute bottom-0 left-0 right-0 z-20">
                 <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3 px-5 w-full">
-                    <Toaster/>
+                    
                     <Navbar selectedColor="video" />
                 </div>
+                <Toaster/>
             </div>
         </div>
     )
