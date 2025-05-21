@@ -14,9 +14,7 @@ use crate::{
             schemas::{DeviceCommnd, MachineStates},
         },
         public::{
-            interfaces::{
-                self, add_io_channels, retrieve_socketid_from_db,
-            },
+            interfaces::{self, add_io_channels, retrieve_socketid_from_db},
             utils::{retrieve_all_channels, retrieve_all_presets},
         },
     },
@@ -106,15 +104,14 @@ pub fn handle_camera_polling(
         match successfull(stream).await {
             Ok(true) => {
                 if cmd.fncode == crate::engines::video_engine::defs::fncodes::FNCODE::Preset {
-
                     let latest_preset = *cmd.cmd.get(5).unwrap() as i32;
                     states.current_preset = latest_preset;
-                    let message = CameraReady {
-                        socket,
-                        states: states,
-                    };
-                    ctx_addr.do_send(DeviceReady::CameraReady(message));
                 }
+                let message = CameraReady {
+                    socket,
+                    states: states,
+                };
+                ctx_addr.do_send(DeviceReady::CameraReady(message));
             }
             Ok(false) => {
                 let message = StreamFailed {
@@ -180,28 +177,28 @@ pub fn handle_matrix_polling(
             let mut stream_guard = stream.lock().await;
             tokio::time::timeout(timeout, stream_guard.read(&mut buffer)).await
         };
-        match read_bytes{
-            Ok(Ok(lenght)) => {if lenght==0 {
-                let message = ClosedByRemotePeer{socket,message:"Closed by remote peer".to_string()};
-                ctx_addr.do_send(message);
-                return;
-            }}
+        match read_bytes {
+            Ok(Ok(lenght)) => {
+                if lenght == 0 {
+                    let message = ClosedByRemotePeer {
+                        socket,
+                        message: "Closed by remote peer".to_string(),
+                    };
+                    ctx_addr.do_send(message);
+                    return;
+                }
+            }
             Ok(Err(e)) => {
-                let message = StreamFailed{socket,error:e.to_string()};
+                let message = StreamFailed {
+                    socket,
+                    error: e.to_string(),
+                };
                 ctx_addr.do_send(message);
                 return;
-            },
-            _ => ()
+            }
+            _ => (),
         }
-        process_response(    
-            socket,
-            ctx_addr,
-            states,
-            cmd,
-            stream,
-            pgpool,
-        )
-        .await;
+        process_response(socket, ctx_addr, states, cmd, stream, pgpool).await;
     });
 }
 

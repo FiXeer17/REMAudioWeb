@@ -4,7 +4,6 @@ use std::time::Duration;
 use dotenv::{dotenv, from_filename};
 use serde::{Deserialize, Deserializer, Serialize};
 
-
 //VARIABLES NAMES IN .env FILE:
 
 //DB
@@ -17,15 +16,14 @@ pub const DEFAULT_ADMIN_PASSWORD: &str = "DEFAULT_ADMIN_PASSWORD";
 pub const DEFAULT_USER: &str = "DEFAULT_USER";
 pub const DEFAULT_USER_PASSWORD: &str = "DEFAULT_USER_PASSWORD";
 
-
 #[allow(dead_code, unused_variables)]
-#[derive(Serialize,Deserialize,Clone)]
-pub struct Settings{
-    settings_path: String
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Settings {
+    settings_path: String,
 }
 
 #[allow(dead_code, unused_variables)]
-#[derive(Serialize,Deserialize,Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct DatabaseEnv {
     database_url: String,
     database_name: String,
@@ -37,84 +35,90 @@ pub struct DatabaseEnv {
     default_user_password: String,
     jwt_secret: String,
 }
-#[allow(non_camel_case_types,dead_code)]
-#[derive(Serialize,Deserialize,Clone)]
+#[allow(non_camel_case_types, dead_code)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct channels_settings {
-    channel_label_prefix:String,   
-    channels_number:u8,        
-    default_visibility:bool 
+    channel_label_prefix: String,
+    channels_number: u8,
+    default_visibility: bool,
 }
-#[allow(non_camel_case_types,dead_code)]
-#[derive(Serialize,Deserialize,Clone)]
+#[allow(non_camel_case_types, dead_code)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct tcp_comunication_settings {
-    #[serde(deserialize_with="u64_to_millis")]
-    command_delay:Duration,             
-    #[serde(deserialize_with="u64_to_millis")]
-    reconnect_delay:Duration,         
-    #[serde(deserialize_with="u64_to_millis")]
-    read_timeout:Duration,  
-    #[serde(deserialize_with="u64_to_millis")]
-    preset_read_timeout: Duration,          
-    #[serde(deserialize_with="u64_to_millis")]
-    connection_timeout:Duration,   
-    #[serde(deserialize_with="u64_to_millis")]
-    inactivity_timeout:Duration,      
-    max_connection_retries:u8    
+    #[serde(deserialize_with = "u64_to_millis")]
+    command_delay: Duration,
+    #[serde(deserialize_with = "u64_to_millis")]
+    reconnect_delay: Duration,
+    #[serde(deserialize_with = "u64_to_millis")]
+    read_timeout: Duration,
+    #[serde(deserialize_with = "u64_to_millis")]
+    preset_read_timeout: Duration,
+    #[serde(deserialize_with = "u64_to_millis")]
+    connection_timeout: Duration,
+    #[serde(deserialize_with = "u64_to_millis")]
+    inactivity_timeout: Duration,
+    max_connection_retries: u8,
 }
-#[allow(non_camel_case_types,dead_code)]
-#[derive(Serialize,Deserialize,Clone)]
+#[allow(non_camel_case_types, dead_code)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct websocket_settings {
-    #[serde(deserialize_with="u64_to_millis")]
-    heartbeat_interval:Duration,      
-    #[serde(deserialize_with="u64_to_millis")]
-    client_timeout:Duration     
+    #[serde(deserialize_with = "u64_to_millis")]
+    heartbeat_interval: Duration,
+    #[serde(deserialize_with = "u64_to_millis")]
+    client_timeout: Duration,
 }
-#[allow(non_camel_case_types,dead_code)]
-#[derive(Serialize,Deserialize,Clone)]
+#[allow(non_camel_case_types, dead_code)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ping_socket_settings {
-    #[serde(deserialize_with="u64_to_millis")]
-    ping_socket_timeout:Duration,   
-    #[serde(deserialize_with="u64_to_millis")]
-    inactive_sockets_polling_interval:Duration,
-    ping_socket_max_retries:u8,
-    
+    #[serde(deserialize_with = "u64_to_millis")]
+    ping_socket_timeout: Duration,
+    #[serde(deserialize_with = "u64_to_millis")]
+    inactive_sockets_polling_interval: Duration,
+    ping_socket_max_retries: u8,
 }
-#[allow(non_camel_case_types,dead_code)]
-#[derive(Serialize,Deserialize,Clone)]
+#[allow(non_camel_case_types, dead_code)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct presets_settings {
-    audio_preset_label_prefix : String,
-    video_preset_label_prefix : String,
-    audio_presets_number : u8,
-    video_presets_number:u8,
+    audio_preset_label_prefix: String,
+    video_preset_label_prefix: String,
+    audio_presets_number: u8,
+    video_presets_number: u8,
+}
+#[allow(non_camel_case_types, dead_code)]
+#[derive(Serialize, Deserialize, Clone)]
+pub struct streaming_settings {
+    frame_rate: u32,
+    transport_protocol: String,
+    streaming_path: String,
 }
 
-#[allow(non_camel_case_types,dead_code)]
-#[derive(Serialize,Deserialize,Clone)]
-pub struct GeneralSettings{
-    pub channels_settings:channels_settings,
-    pub tcp_comunication_settings:tcp_comunication_settings,
-    pub websocket_settings:websocket_settings,
-    pub ping_socket_settings:ping_socket_settings,
+#[allow(non_camel_case_types, dead_code)]
+#[derive(Serialize, Deserialize, Clone)]
+pub struct GeneralSettings {
+    pub channels_settings: channels_settings,
+    pub tcp_comunication_settings: tcp_comunication_settings,
+    pub websocket_settings: websocket_settings,
+    pub ping_socket_settings: ping_socket_settings,
     pub presets_settings: presets_settings,
+    pub streaming_settings: streaming_settings,
 }
-
-
 
 #[allow(dead_code, unused_variables)]
-#[derive(Serialize,Deserialize,Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Env {
     pub settings: Settings,
     pub database_settings: DatabaseEnv,
     pub general_settings: GeneralSettings,
 }
-impl Settings{
-    pub fn get_vars() -> Self{
+impl Settings {
+    pub fn get_vars() -> Self {
         from_filename(".env.local").ok();
         dotenv().ok();
-        let settings_path = std::env::var("SETTINGS_PATH").expect("failed to retrieve SETTINGS_PATH");
+        let settings_path =
+            std::env::var("SETTINGS_PATH").expect("failed to retrieve SETTINGS_PATH");
         Settings { settings_path }
     }
-    pub fn get_settings_path() -> String{
+    pub fn get_settings_path() -> String {
         Settings::get_vars().settings_path
     }
 }
@@ -187,84 +191,135 @@ impl DatabaseEnv {
     }
 }
 
-impl GeneralSettings{
-    pub fn get_vars() -> Self{
+impl GeneralSettings {
+    pub fn get_vars() -> Self {
         let path = Settings::get_settings_path();
         let json_datas = fs::read_to_string(path).expect("failed to read to string from path");
         serde_json::from_str::<GeneralSettings>(&json_datas).expect("failed to convert settings")
     }
-
 }
 
 impl channels_settings {
-    pub fn get_channels_number() -> u8{
-        GeneralSettings::get_vars().channels_settings.channels_number
+    pub fn get_channels_number() -> u8 {
+        GeneralSettings::get_vars()
+            .channels_settings
+            .channels_number
     }
-    pub fn get_default_visibility() -> bool{
-        GeneralSettings::get_vars().channels_settings.default_visibility
+    pub fn get_default_visibility() -> bool {
+        GeneralSettings::get_vars()
+            .channels_settings
+            .default_visibility
     }
-    pub fn get_channel_default_prefix() -> String{
-        GeneralSettings::get_vars().channels_settings.channel_label_prefix
-    }
-}
-impl ping_socket_settings{
-    pub fn get_ping_socket_max_retries()->u8{
-        GeneralSettings::get_vars().ping_socket_settings.ping_socket_max_retries
-    }
-    pub fn get_ping_socket_timeout()->Duration{
-        GeneralSettings::get_vars().ping_socket_settings.ping_socket_timeout
-    }
-    pub fn get_inactive_sockets_polling_interval()->Duration{
-        GeneralSettings::get_vars().ping_socket_settings.inactive_sockets_polling_interval
+    pub fn get_channel_default_prefix() -> String {
+        GeneralSettings::get_vars()
+            .channels_settings
+            .channel_label_prefix
     }
 }
-impl websocket_settings{
-    pub fn get_heartbeat_interval()-> Duration{
-        GeneralSettings::get_vars().websocket_settings.heartbeat_interval
+impl ping_socket_settings {
+    pub fn get_ping_socket_max_retries() -> u8 {
+        GeneralSettings::get_vars()
+            .ping_socket_settings
+            .ping_socket_max_retries
     }
-    pub fn get_client_timeout()-> Duration{
-        GeneralSettings::get_vars().websocket_settings.client_timeout
+    pub fn get_ping_socket_timeout() -> Duration {
+        GeneralSettings::get_vars()
+            .ping_socket_settings
+            .ping_socket_timeout
     }
+    pub fn get_inactive_sockets_polling_interval() -> Duration {
+        GeneralSettings::get_vars()
+            .ping_socket_settings
+            .inactive_sockets_polling_interval
+    }
+}
+impl websocket_settings {
+    pub fn get_heartbeat_interval() -> Duration {
+        GeneralSettings::get_vars()
+            .websocket_settings
+            .heartbeat_interval
+    }
+    pub fn get_client_timeout() -> Duration {
+        GeneralSettings::get_vars()
+            .websocket_settings
+            .client_timeout
+    }
+}
+impl tcp_comunication_settings {
+    pub fn get_read_timeout() -> Duration {
+        GeneralSettings::get_vars()
+            .tcp_comunication_settings
+            .read_timeout
+    }
+    pub fn get_preset_read_timeout() -> Duration {
+        GeneralSettings::get_vars()
+            .tcp_comunication_settings
+            .preset_read_timeout
+    }
+    pub fn get_command_delay() -> Duration {
+        GeneralSettings::get_vars()
+            .tcp_comunication_settings
+            .command_delay
+    }
+    pub fn get_inactivity_timeout() -> Duration {
+        GeneralSettings::get_vars()
+            .tcp_comunication_settings
+            .inactivity_timeout
+    }
+    pub fn get_connection_timeout() -> Duration {
+        GeneralSettings::get_vars()
+            .tcp_comunication_settings
+            .connection_timeout
+    }
+    pub fn get_reconnect_delay() -> Duration {
+        GeneralSettings::get_vars()
+            .tcp_comunication_settings
+            .reconnect_delay
+    }
+    pub fn get_max_connection_retries() -> u8 {
+        GeneralSettings::get_vars()
+            .tcp_comunication_settings
+            .max_connection_retries
+    }
+}
+impl presets_settings {
+    pub fn get_audio_preset_label_prefix() -> String {
+        GeneralSettings::get_vars()
+            .presets_settings
+            .audio_preset_label_prefix
+    }
+    pub fn get_video_preset_label_prefix() -> String {
+        GeneralSettings::get_vars()
+            .presets_settings
+            .video_preset_label_prefix
+    }
+    pub fn get_audio_presets_number() -> u8 {
+        GeneralSettings::get_vars()
+            .presets_settings
+            .audio_presets_number
+    }
+    pub fn get_video_presets_number() -> u8 {
+        GeneralSettings::get_vars()
+            .presets_settings
+            .video_presets_number
+    }
+}
 
-}
-impl tcp_comunication_settings{
-    pub fn get_read_timeout() -> Duration{
-        GeneralSettings::get_vars().tcp_comunication_settings.read_timeout
+impl streaming_settings {
+    pub fn get_frame_rate() -> u32 {
+        GeneralSettings::get_vars().streaming_settings.frame_rate
     }
-    pub fn get_preset_read_timeout() -> Duration{
-        GeneralSettings::get_vars().tcp_comunication_settings.preset_read_timeout
+    pub fn get_transport_protocol() -> String {
+        GeneralSettings::get_vars()
+            .streaming_settings
+            .transport_protocol
     }
-    pub fn get_command_delay()-> Duration{
-        GeneralSettings::get_vars().tcp_comunication_settings.command_delay
-    }
-    pub fn get_inactivity_timeout()-> Duration{
-        GeneralSettings::get_vars().tcp_comunication_settings.inactivity_timeout
-    }
-    pub fn get_connection_timeout()-> Duration{
-        GeneralSettings::get_vars().tcp_comunication_settings.connection_timeout
-    }
-    pub fn get_reconnect_delay() -> Duration{
-        GeneralSettings::get_vars().tcp_comunication_settings.reconnect_delay
-    }
-    pub fn get_max_connection_retries()-> u8{
-        GeneralSettings::get_vars().tcp_comunication_settings.max_connection_retries
+    pub fn get_streaming_path() -> String {
+        GeneralSettings::get_vars()
+            .streaming_settings
+            .streaming_path
     }
 }
-impl presets_settings{
-    pub fn get_audio_preset_label_prefix() -> String{
-        GeneralSettings::get_vars().presets_settings.audio_preset_label_prefix
-    }
-    pub fn get_video_preset_label_prefix() -> String{
-        GeneralSettings::get_vars().presets_settings.video_preset_label_prefix
-    }
-    pub fn get_audio_presets_number() -> u8{
-        GeneralSettings::get_vars().presets_settings.audio_presets_number
-    }
-    pub fn get_video_presets_number()->u8{
-        GeneralSettings::get_vars().presets_settings.video_presets_number
-    }
-}
-
 
 impl Env {
     pub fn get_vars() -> Self {
@@ -275,15 +330,14 @@ impl Env {
         Env {
             database_settings,
             general_settings,
-            settings
+            settings,
         }
     }
 }
 
-
-pub fn u64_to_millis<'de,D>(d:D) -> Result<Duration,D::Error>
-where D: Deserializer<'de>,
-{   
+pub fn u64_to_millis<'de, D>(d: D) -> Result<Duration, D::Error>
+where
+    D: Deserializer<'de>,
+{
     Ok(Duration::from_millis(u64::deserialize(d)?))
-    
 }

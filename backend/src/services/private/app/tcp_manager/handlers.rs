@@ -296,9 +296,13 @@ impl Handler<Disconnect> for TcpStreamsManager {
 impl Handler<StreamFailed> for TcpStreamsManager {
     type Result = ();
     fn handle(&mut self, msg: StreamFailed, _ctx: &mut Self::Context) -> Self::Result {
-        for session in self.streams.remove(&msg.socket).unwrap() {
-            session.do_send(msg.clone())
+        let maybe_sessions = self.streams.remove(&msg.socket);
+        if let Some(sessions) = maybe_sessions{
+            for session in  sessions {
+                session.do_send(msg.clone())
+            }
         }
+
     }
 }
 

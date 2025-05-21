@@ -237,6 +237,7 @@ pub mod pan_tilt{
                 DOWN_LABEL => Ok(Self::DOWN),
                 LEFT_LABEL => Ok(Self::LEFT),
                 RIGHT_LABEL => Ok(Self::RIGHT),
+                HOME_LABEL => Ok(Self::HOME),
                 _ => Err(super::errors::Error::InvalidDirection)
 
             }
