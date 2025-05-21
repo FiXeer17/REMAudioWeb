@@ -188,7 +188,7 @@ export const Video = () => {
                             </div>
                         </div>
                         <div className="flex items-center justify-center">
-                            <div className="flex flex-col w-32 h-32 border-[1px] items-center rounded-2xl border-home_colors-Selected_Borders/text bg-home_colors-Navbar/Selection_Bg">
+                            <div className="flex flex-col w-32 h-32 border-[1px] select-none items-center rounded-2xl border-home_colors-Selected_Borders/text bg-home_colors-Navbar/Selection_Bg">
                                 <div 
                                     ref={upArrowRef} 
                                     className="flex justify-center w-fit items-start cursor-pointer py-[6px]"
