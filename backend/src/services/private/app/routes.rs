@@ -25,7 +25,7 @@ pub async fn app(
     if let Err(_) = Uuid::from_str(&uuid.uuid) {
         return Ok(HttpResponse::Unauthorized().json(toast("Invalid uuid found")));
     }
-    let uuid = Uuid::from_str(&uuid.uuid).unwrap();
+    let Ok(uuid) = Uuid::from_str(&uuid.uuid) else {return Ok(HttpResponse::BadRequest().json(toast("Invalid uuid")))};
     let checked = srv.send(CheckSessionUUID { uuid }).await;
     if let Err(e) = checked {
         return Ok(HttpResponse::InternalServerError().json(toast(&format!("{}", e))));
@@ -39,21 +39,15 @@ pub async fn app(
         return Ok(HttpResponse::InternalServerError().json(toast(&format!("{}", e))));
     }
 
-    let user_id = srv.send(RetrieveUserFromUuid { uuid }).await;
-    if let Err(e) = user_id {
-        return Ok(HttpResponse::InternalServerError().json(toast(&e.to_string())));
-    }
-    let user_id = user_id.unwrap();
-    if user_id.is_none() {
-        return Ok(HttpResponse::Unauthorized().finish());
-    }
+    let Ok(user_id) = srv.send(RetrieveUserFromUuid { uuid }).await else {return Ok(HttpResponse::InternalServerError().finish());};
+    let Some(user_id) = user_id else {return Ok(HttpResponse::Unauthorized().finish());};
 
     let session = WsSession {
         hb: Instant::now(),
         srv: srv.get_ref().clone(),
         socket: None,
         pgpool: pgpool.clone(),
-        user_id: user_id.unwrap(),
+        user_id: user_id,
     };
     ws::start(session, &req, stream)
 }

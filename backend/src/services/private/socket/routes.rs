@@ -48,7 +48,7 @@ pub async fn add_socket(
                 let sockets = srv.send(GetConnections {}).await;
                 if let Ok(connections) = sockets {
                     if let Some(connections) = connections{
-                        match connections.socket_is_contained(&s.unwrap().to_string()) {
+                        match connections.socket_is_contained(&sock.to_string()) {
                             Some(_) => (),
                             None => {
                                 if !try_connection(sock).await {
