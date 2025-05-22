@@ -6,10 +6,10 @@ use crate::{
     configs::tcp_comunication_settings,
     engines::{
         audio_engine::{
-            defs::datas::io::SRC,
+            defs::{datas::io::SRC, errors::Error},
             lib::{read_all_states, MatrixCommand},
         },
-        video_engine::{self, camera_presets_lib::read_preset, },
+        video_engine::{self, camera_presets_lib::read_preset},
     },
     services::{
         private::{
@@ -26,8 +26,7 @@ use crate::{
         public::interfaces::{
             retrieve_channel_labels, retrieve_preset_labels, retrieve_socket_from_db,
             retrieve_socketid_from_db, retrieve_visibility, update_channel_labels_in_db,
-            update_channel_visibility,
-            update_preset_labels_in_db,
+            update_channel_visibility, update_preset_labels_in_db,
         },
     },
     AppState,
@@ -35,7 +34,6 @@ use crate::{
 use actix::{Addr, AsyncContext, Context};
 use log::warn;
 use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
 };
 
@@ -45,6 +43,7 @@ use super::{
         schemas::MatrixStates,
     },
     tcp_handler::TcpStreamActor,
+    utils::send_matrix_command,
 };
 
 impl TcpStreamActor {
@@ -55,65 +54,33 @@ impl TcpStreamActor {
         pgpool: Data<AppState>,
     ) {
         let commands = read_all_states().unwrap();
-        let mut buffer = [0u8; 128];
+        let buffer = [0u8; 128];
         let mut responses: Vec<MatrixCommand> = Vec::new();
 
         for command in commands {
-            let cmd = command.to_byte_hex().unwrap();
-            let written_bytes = {
-                let mut stream = stream.lock().await;
-                stream.write(&cmd).await
-            };
+            let mut retries = 0;
+            let cmd_from_buffer: Result<Result<MatrixCommand, Error>, ()> = loop {
+                let Ok(buffer) = send_matrix_command(command.clone(), stream.clone(), ctx_addr.clone(), buffer, socket).await else {break Err(());};
 
-            if let Err(_) = written_bytes {
-                warn!("closed by remote peer on write");
-                ctx_addr.do_send(ClosedByRemotePeer {
-                    message: "error occurred on matrix".to_string(),
-                    socket,
-                });
-                return;
-            }
-            let timeout = tcp_comunication_settings::get_read_timeout();
-            let read_bytes = {
-                let mut stream = stream.lock().await;
-                tokio::time::timeout(timeout, stream.read(&mut buffer)).await
-            };
-            if let Ok(Ok(n)) = read_bytes {
-                if n == 0 {
-                    warn!("closed by remote peer on read (0 bytes)");
-                    ctx_addr.do_send(ClosedByRemotePeer {
-                        message: "error occurred on matrix".to_string(),
-                        socket,
-                    });
-                    return;
+                match MatrixCommand::try_from(&buffer[..]) {
+                    Ok(cmd) => break Ok(Ok(cmd)),
+                    Err(err) => {
+                        warn!("Command conversion failed at attempt {}, with buffer content: {:?}",retries,buffer);
+                        if retries < tcp_comunication_settings::get_max_read_retries() {
+                            retries += 1;
+                            tokio::time::sleep(tcp_comunication_settings::get_command_delay()).await;
+                            continue;
+                        }
+                        break Ok(Err(err));
+                    }
                 }
-            }
+            };
 
-            if let Err(_) = read_bytes {
-                warn!("Time elapsed for response.");
-                ctx_addr.do_send(StreamFailed {
-                    socket,
-                    error: "error occurred on matrix".to_string(),
-                });
+            if cmd_from_buffer.is_err() {
                 return;
             }
 
-            if let Ok(Err(_)) = read_bytes {
-                warn!("Cannot read response");
-                let message = StreamFailed {
-                    error: "error occurred on matrix".to_string(),
-                    socket,
-                };
-                ctx_addr.do_send(message);
-                return;
-            }
-
-            let read_bytes = read_bytes.unwrap();
-
-            let buffer = &buffer[..read_bytes.unwrap()];
-            let cmd_from_buffer = MatrixCommand::try_from(buffer);
-
-            if let Err(_) = cmd_from_buffer {
+            if let Ok(Err(_)) = cmd_from_buffer {
                 warn!("Cannot convert buffer in matrix command");
                 ctx_addr.do_send(StreamFailed {
                     socket,
@@ -121,7 +88,7 @@ impl TcpStreamActor {
                 });
                 return;
             }
-            responses.push(cmd_from_buffer.unwrap());
+            responses.push(cmd_from_buffer.unwrap().unwrap());
             tokio::time::sleep(tcp_comunication_settings::get_command_delay()).await;
         }
         let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
@@ -202,24 +169,28 @@ impl TcpStreamActor {
             return;
         };
         let current_preset = read_preset(stream).await;
-        if let Err(e) = current_preset{
+        if let Err(e) = current_preset {
             match e {
                 video_engine::defs::errors::Error::ClosedByRemotePeer => {
-                    let mess = ClosedByRemotePeer {socket,message:"error occurred on camera".to_string()};
+                    let mess = ClosedByRemotePeer {
+                        socket,
+                        message: "error occurred on camera".to_string(),
+                    };
                     ctx_addr.do_send(mess);
                     return;
-                },
+                }
                 video_engine::defs::errors::Error::InvalidPreset => {
-                    let mess = StreamFailed {socket,error:"error occurred on camera".to_string()};
+                    let mess = StreamFailed {
+                        socket,
+                        error: "error occurred on camera".to_string(),
+                    };
                     ctx_addr.do_send(mess);
                     return;
-                },
-                _ => unreachable!()
-
+                }
+                _ => unreachable!(),
             }
         }
         let current_preset = current_preset.unwrap();
-        
 
         let states = CameraStates::new(sock.socket, preset_labels, current_preset);
         ctx_addr.do_send(DeviceReady::CameraReady(CameraReady { states, socket }));
@@ -284,7 +255,6 @@ impl TcpStreamActor {
             .push_front(DeviceCommnd::CameraCommand(sc.command));
     }
 
-    
     pub fn handle_recache(&mut self, ctx: &mut Context<Self>) {
         if self.machine_states.is_some() {
             if let Some(poller) = self.cmd_poller {

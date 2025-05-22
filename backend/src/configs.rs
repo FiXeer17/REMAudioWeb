@@ -53,6 +53,7 @@ pub struct tcp_comunication_settings {
     #[serde(deserialize_with = "u64_to_millis")]
     inactivity_timeout: Duration,
     max_connection_retries: u8,
+    max_read_retries:u8,
 }
 #[allow(non_camel_case_types, dead_code)]
 #[derive(Serialize, Deserialize, Clone)]
@@ -262,6 +263,11 @@ impl tcp_comunication_settings {
         GeneralSettings::get_vars()
             .tcp_comunication_settings
             .max_connection_retries
+    }
+    pub fn get_max_read_retries() -> u8 {
+        GeneralSettings::get_vars()
+            .tcp_comunication_settings
+            .max_read_retries
     }
 }
 impl presets_settings {
