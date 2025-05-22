@@ -52,11 +52,7 @@ pub async fn process_response(
         let message = MatrixReady { socket, states };
         ctx_addr.do_send(DeviceReady::MatrixReady(message));
     } else {
-        TcpStreamActor::read_audio_states(ctx_addr.clone(), socket, stream, pgpool).await; //TODO DELETE .clone()
-        warn!("DEBUG PURPOSE, DELETE ROWS: 78,79,80 IN PRODUCTION");
-        states.set_changes(cmd); //TODO DELETE THIS LINE
-        let message = MatrixReady { socket, states }; //TODO DELETE THIS LINE
-        ctx_addr.do_send(DeviceReady::MatrixReady(message)); //TODO DELETE THIS LINE
+        TcpStreamActor::read_audio_states(ctx_addr, socket, stream, pgpool).await;
     }
 }
 
@@ -238,6 +234,67 @@ pub async fn add_presets(pgpool: Data<AppState>, socket: SocketAddrV4, device: S
         };
     }
     info!("Presets added succesfully for device type: {}.", device)
+}
+
+pub async fn send_matrix_command(
+    command: MatrixCommand,
+    stream: Arc<Mutex<TcpStream>>,
+    ctx_addr: Addr<TcpStreamActor>,
+    mut buffer: [u8; 128],
+    socket: SocketAddrV4,
+) -> Result<Vec<u8>, ()> {
+    let cmd = command.to_byte_hex().unwrap();
+    let written_bytes = {
+        let mut stream = stream.lock().await;
+        stream.write(&cmd).await
+    };
+
+    if let Err(_) = written_bytes {
+        warn!("closed by remote peer on write");
+        ctx_addr.do_send(ClosedByRemotePeer {
+            message: "error occurred on matrix".to_string(),
+            socket,
+        });
+        return Err(());
+    }
+    let timeout = tcp_comunication_settings::get_read_timeout();
+    let read_bytes = {
+        let mut stream = stream.lock().await;
+        tokio::time::timeout(timeout, stream.read(&mut buffer)).await
+    };
+    if let Ok(Ok(n)) = read_bytes {
+        if n == 0 {
+            warn!("closed by remote peer on read (0 bytes)");
+            ctx_addr.do_send(ClosedByRemotePeer {
+                message: "error occurred on matrix".to_string(),
+                socket,
+            });
+            return Err(());
+        }
+    }
+
+    if let Err(_) = read_bytes {
+        warn!("Time elapsed for response.");
+        ctx_addr.do_send(StreamFailed {
+            socket,
+            error: "error occurred on matrix".to_string(),
+        });
+        return Err(());
+    }
+
+    if let Ok(Err(_)) = read_bytes {
+        warn!("Cannot read response");
+        let message = StreamFailed {
+            error: "error occurred on matrix".to_string(),
+            socket,
+        };
+        ctx_addr.do_send(message);
+        return Err(());
+    }
+
+    let read_bytes = read_bytes.unwrap();
+
+    Ok(buffer[..read_bytes.unwrap()].to_vec())
 }
 
 pub mod errors {
