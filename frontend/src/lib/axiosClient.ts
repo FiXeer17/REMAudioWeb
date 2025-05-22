@@ -11,6 +11,7 @@ class AxiosInterceptor {
 
     constructor(instanceConfig:AxiosRequestConfig = {}) {
       this.axiosInstance = axios.create({
+        timeout:8000,
         ...instanceConfig,
       });
   

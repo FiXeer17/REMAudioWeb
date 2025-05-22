@@ -14,3 +14,14 @@ export async function clientLoader() {
     return redirect("/login");
   }
 }
+
+export async function isAdmin() {
+  try{
+    const isAdmin=localStorage.getItem("isAdmin")
+    if(isAdmin==="false"){
+      return redirect("/")
+    }
+  }catch(error){
+    return 
+  }
+}

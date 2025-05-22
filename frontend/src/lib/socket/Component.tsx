@@ -50,10 +50,12 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
           }
           
         }else{
+          
           const reason=datajson.reason
           if(reason.includes("camera")){
             latest_camera=false
             socketDispatch({ type: "camera_status", payload: "disconnected" })
+            localStorage.setItem("showImage","false")
           }else if(reason.includes("matrix")){
             latest_matrix=false
             socketDispatch({ type: "matrix_status", payload: "disconnected" })
