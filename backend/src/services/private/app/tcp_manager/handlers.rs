@@ -64,7 +64,8 @@ impl Handler<Connect> for TcpStreamsManager {
                         socket: Some(socket),
                     };
                 }
-                self.streams_actors.get(&socket).unwrap().do_send(message);
+                if let Some(actor) = self.streams_actors.get(&socket){actor.do_send(message);};
+                
             } else {
                 let ctx_addr = ctx.address().clone();
                 let pool_cloned = self.pgpool.clone();

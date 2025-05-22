@@ -79,7 +79,7 @@ pub async fn remove_inactive_connection(
             "Inactive connection found, removing socket: {}...",
             socket.socket_name
         );
-        sockets.remove(&socket).unwrap();
+        sockets.remove(&socket);
     }
 
     if let Some(latest) = latest_audio_socket {
