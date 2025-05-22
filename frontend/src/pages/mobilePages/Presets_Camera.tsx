@@ -5,6 +5,7 @@ import { Button as PresetsButton } from "@/components/ui/audio_video";
 import { Badge } from "@/components/ui/badge";
 import SocketContext from "@/lib/socket/context";
 import { useNavigate } from "react-router-dom";
+import { toast, Toaster } from "sonner";
 
 export const Presets_Camera = () => {
     const navigate=useNavigate()
@@ -12,6 +13,16 @@ export const Presets_Camera = () => {
     const {socket,message_camera} = useContext(SocketContext).socketState
     const [currentPresets,setCurrentPresets]=useState(0)
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
+
+    useEffect(() => {
+
+      const timeout = setTimeout(() => {
+          setIsLoading(false)
+          toast.error("Error setting preset",{duration:1000})
+      }, 10000);
+
+      return () => clearTimeout(timeout);
+  }, [message_camera]);
 
 
     useEffect(()=>{
@@ -61,6 +72,7 @@ export const Presets_Camera = () => {
           <div className="flex items-center pb-3 pt-3">
                 <Navbar selectedColor="video"/>
           </div>
+          <Toaster/>
         </div>
       </div>
     </>

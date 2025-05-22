@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { GetData } from "@/lib/WebSocketData";
 import NavbarDesktop from "@/components/ui/navbarDesktop";
+import { toast, Toaster } from "sonner";
 
 export const Presets_Camera = () => {
     const navigate=useNavigate()
@@ -13,6 +14,14 @@ export const Presets_Camera = () => {
     const [currentPresets,setCurrentPresets]=useState(0)
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
 
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setIsLoading(false)
+            toast.error("Error setting preset",{duration:1000})
+        }, 10000);
+  
+        return () => clearTimeout(timeout);
+    }, [message_camera]);
 
     useEffect(()=>{
         if (!message_camera) return
@@ -61,6 +70,7 @@ export const Presets_Camera = () => {
                                 </div>
                             </div>
                         </div>
+                        <Toaster/>
                     </div>
                 </div>
             </div>

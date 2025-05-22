@@ -20,7 +20,7 @@ export const Presets =()=>{
 
         const timeout = setTimeout(() => {
             setIsLoading(false)
-            toast.error("Error setting preset")
+            toast.error("Error setting preset",{duration:1000})
         }, 10000);
   
         return () => clearTimeout(timeout);
@@ -68,7 +68,6 @@ export const Presets =()=>{
                     </div>
                     <Toaster/>
                 </div>
-                
             </div>
         </div>
         </>

@@ -6,7 +6,6 @@ import UUIDProvider from "../lib/socket/ComponentUuid";
 import SocketContextComponent from "../lib/socket/Component";
 import { clientLoader,isAdmin } from "../lib/control";
 import UUIDLayout from "@/lib/Redirect";
-import {Test2} from "@/pages/test/Test2";
   
   const UUIDLay = () => (
     <UUIDProvider>
@@ -40,15 +39,18 @@ import {Test2} from "@/pages/test/Test2";
         
         {
           path: "/recentconnections",
-          element: <RecentConnections/>
+          element: <RecentConnections/>,
+          loader: isAdmin
         },
         {
           path: "/newconnections",
-          element: <NewConnections/>
+          element: <NewConnections/>,
+          loader: isAdmin
         },
         {
           path: "/createconnections",
-          element: <CreateConnections/>
+          element: <CreateConnections/>,
+          loader: isAdmin
         },
         {
           path: "/callAdministrator",
@@ -76,11 +78,13 @@ import {Test2} from "@/pages/test/Test2";
           },
           {
             path: "/preferenciesChannels",
-            element: <PreferenciesChannels/>
+            element: <PreferenciesChannels/>,
+            loader: isAdmin
           },
           {
             path: "/preferenciesPresets",
-            element: <PreferenciesPresets/>
+            element: <PreferenciesPresets/>,
+            loader: isAdmin
           },
           {
             path: "/video",
@@ -92,7 +96,8 @@ import {Test2} from "@/pages/test/Test2";
           },
           {
             path: "/mix",
-            element: <Mix/>
+            element: <Mix/>,
+            loader: isAdmin
           }
           
         ]
