@@ -89,17 +89,17 @@ impl TcpStreamActor {
                 }
             }
 
-            if let Err(e) = read_bytes {
+            if let Err(_) = read_bytes {
                 ctx_addr.do_send(StreamFailed {
                     socket,
-                    error: e.to_string(),
+                    error: "error occurred on matrix".to_string(),
                 });
                 return;
             }
 
-            if let Ok(Err(e)) = read_bytes {
+            if let Ok(Err(_)) = read_bytes {
                 let message = StreamFailed {
-                    error: e.to_string(),
+                    error: "error occurred on matrix".to_string(),
                     socket,
                 };
                 ctx_addr.do_send(message);
@@ -111,10 +111,10 @@ impl TcpStreamActor {
             let buffer = &buffer[..read_bytes.unwrap()];
             let cmd_from_buffer = MatrixCommand::try_from(buffer);
 
-            if let Err(e) = cmd_from_buffer {
+            if let Err(_) = cmd_from_buffer {
                 ctx_addr.do_send(StreamFailed {
                     socket,
-                    error: e.to_string(),
+                    error: "error occurred on matrix".to_string(),
                 });
                 return;
             }
