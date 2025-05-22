@@ -4,7 +4,7 @@ import {
        } from "./RouterSwitchers";
 import UUIDProvider from "../lib/socket/ComponentUuid";
 import SocketContextComponent from "../lib/socket/Component";
-import { clientLoader } from "../lib/clientLoader";
+import { clientLoader,isAdmin } from "../lib/control";
 import UUIDLayout from "@/lib/Redirect";
   
   const UUIDLay = () => (

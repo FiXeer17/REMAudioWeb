@@ -203,7 +203,7 @@ export const Volume=()=>{
                 <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={()=>{navigate("/presets",{state:"volume"})}}/>
                 <div className="flex flex-col items-center gap-3 border-[1.5px] border-home_colors-Selected_Borders/text border-opacity-40 bg-home_colors-Navbar/Selection_Bg rounded-[60px] h-[550px] w-[100px] py-20  ">
                         <div className="flex gap-1">
-                          <ButtonDb onChange={(value) => handleButtonDb(value, "1","ALL")} Text={outputChannelStates["1"] && outputChannelStates["2"] ? "-60" : outputVolumesStates["1"]?outputVolumesStates["1"].toString():""}/>
+                          <ButtonDb onChange={(value) => handleButtonDb(value, "1","ALL")} Text={outputChannelStates["1"] && outputChannelStates["2"] ? "-60" : outputVolumesStates["1"]?outputVolumesStates["1"].toString():"0"}/>
                           <p className="text-home_colors-Similar_White text-sm font-bold">db</p>
                         </div>
                         <Slider orientation="vertical" className="h-full" 

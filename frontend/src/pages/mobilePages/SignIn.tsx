@@ -47,7 +47,6 @@ export const SignInPage=() => {
 
       return navigate("/uuidprovider",{state:{isAdmin}})
     }catch(error){
-      
         if (axios.isAxiosError(error) && error.response?.status !== 200) {
           if(error.response?.status === 401)
             toast.error("Wrong credentials");
