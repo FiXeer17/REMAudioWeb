@@ -90,6 +90,7 @@ impl TcpStreamActor {
             }
 
             if let Err(_) = read_bytes {
+                warn!("Time elapsed for response.");
                 ctx_addr.do_send(StreamFailed {
                     socket,
                     error: "error occurred on matrix".to_string(),
@@ -98,6 +99,7 @@ impl TcpStreamActor {
             }
 
             if let Ok(Err(_)) = read_bytes {
+                warn!("Cannot read response");
                 let message = StreamFailed {
                     error: "error occurred on matrix".to_string(),
                     socket,
@@ -112,6 +114,7 @@ impl TcpStreamActor {
             let cmd_from_buffer = MatrixCommand::try_from(buffer);
 
             if let Err(_) = cmd_from_buffer {
+                warn!("Cannot convert buffer in matrix command");
                 ctx_addr.do_send(StreamFailed {
                     socket,
                     error: "error occurred on matrix".to_string(),
