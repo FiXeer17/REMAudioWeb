@@ -1,8 +1,8 @@
-import React, { PropsWithChildren, useEffect, useReducer, useState } from "react";
+import React, { PropsWithChildren, useEffect, useReducer } from "react";
 import { defaultSocketContextState,SocketReducer,SocketContextProvider } from "./context";
 import { useConnections } from "./ComponentUuid";
 import { useNavigate } from "react-router-dom";
-
+import { getConfig } from "@/config";
 
 
 export interface ISocketContextComponentProps extends PropsWithChildren{}
@@ -13,7 +13,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
     const { children } = props
     const [socketState, socketDispatch]=useReducer(SocketReducer,defaultSocketContextState)
     const {uuid,isAdmin,triggerRedirect}=useConnections()
-    const host = import.meta.env.VITE_WS_HOST
+    const host = getConfig().APPLICATION_URL;
 
     useEffect(()=>{
       

@@ -16,11 +16,6 @@ pub const DEFAULT_ADMIN_PASSWORD: &str = "DEFAULT_ADMIN_PASSWORD";
 pub const DEFAULT_USER: &str = "DEFAULT_USER";
 pub const DEFAULT_USER_PASSWORD: &str = "DEFAULT_USER_PASSWORD";
 
-#[allow(dead_code, unused_variables)]
-#[derive(Serialize, Deserialize, Clone)]
-pub struct Settings {
-    settings_path: String,
-}
 
 #[allow(dead_code, unused_variables)]
 #[derive(Serialize, Deserialize, Clone)]
@@ -106,22 +101,10 @@ pub struct GeneralSettings {
 #[allow(dead_code, unused_variables)]
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Env {
-    pub settings: Settings,
     pub database_settings: DatabaseEnv,
     pub general_settings: GeneralSettings,
 }
-impl Settings {
-    pub fn get_vars() -> Self {
-        from_filename(".env.local").ok();
-        dotenv().ok();
-        let settings_path =
-            std::env::var("SETTINGS_PATH").expect("failed to retrieve SETTINGS_PATH");
-        Settings { settings_path }
-    }
-    pub fn get_settings_path() -> String {
-        Settings::get_vars().settings_path
-    }
-}
+
 #[allow(dead_code, unused_variables)]
 impl DatabaseEnv {
     pub fn get_vars() -> Self {
@@ -193,8 +176,7 @@ impl DatabaseEnv {
 
 impl GeneralSettings {
     pub fn get_vars() -> Self {
-        let path = Settings::get_settings_path();
-        let json_datas = fs::read_to_string(path).expect("failed to read to string from path");
+        let json_datas = fs::read_to_string("./settings.json").expect("failed to read to string from path");
         serde_json::from_str::<GeneralSettings>(&json_datas).expect("failed to convert settings")
     }
 }
@@ -325,12 +307,10 @@ impl Env {
     pub fn get_vars() -> Self {
         let database_settings = DatabaseEnv::get_vars();
         let general_settings = GeneralSettings::get_vars();
-        let settings = Settings::get_vars();
 
         Env {
             database_settings,
             general_settings,
-            settings,
         }
     }
 }

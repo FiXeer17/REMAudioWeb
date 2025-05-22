@@ -1,12 +1,9 @@
-import { Clock } from "@phosphor-icons/react";
-import { GetData } from "@/lib/WebSocketData";
 import Navbar from "@/components/ui/navbar";
 import { Button as PresetsButton } from "@/components/ui/audio_video";
 import { Badge } from "@/components/ui/badge";
-import SocketContext from "@/lib/socket/context";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {ButtonEdit} from "@/components/ui/button_edit";
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 
 
 
@@ -14,7 +11,6 @@ import { useContext, useEffect, useState } from "react";
 export const Test2 = ()=>{
     const navigate=useNavigate()
     //const {socket,message} = useContext(SocketContext).socketState
-    const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
     const Presets = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
     const [s,setS]=useState("")
 

@@ -1,30 +1,35 @@
-# Use the Rust base image
-FROM rust:1.82
+# Stage di build (heavy version)
+FROM rust:1.82 as builder
 
-# Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Update the ubuntu system and install ffmpeg for rstp conversion in hls
 
-RUN apt update -y && apt upgrade -y && \
-apt install ffmpeg -y
+RUN apt update && apt install -y ffmpeg pkg-config libssl-dev
 
-# Install sqlx-cli and cargo-watch tools
-RUN cargo install sqlx-cli --version 0.8.2 --no-default-features --features postgres && \
-    cargo install cargo-watch
 
-# Copy dependency files and build dependencies only
-COPY Cargo.toml Cargo.lock settings.json ./
+COPY Cargo.toml Cargo.lock ./
+COPY migrations ./migrations
+COPY src ./src
 
-# Create a dummy main.rs to cache dependencies
-RUN mkdir src && \
-    echo "fn main(){}" > src/main.rs && \
-    cargo build && \
-    rm src/main.rs && \
-    rm -rf target/debug/deps/backend*
 
-# Set environment variables for better error messages
-ENV RUST_BACKTRACE=1
+RUN cargo build --release --target x86_64-unknown-linux-gnu
 
-# Use cargo-watch for hot reloading
-CMD ["cargo", "watch", "-x", "run"]
+# Stage di runtime (ligher version)
+FROM debian:bookworm-slim
+
+RUN apt update && \
+    apt install -y ffmpeg ca-certificates && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=builder /app/target/x86_64-unknown-linux-gnu/release/backend .
+
+ENV RUST_LOG=info \
+    RUST_BACKTRACE=1
+
+EXPOSE 8000
+
+# Comando di avvio
+CMD ["./backend"]

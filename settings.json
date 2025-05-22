@@ -1,4 +1,4 @@
-{
+{    
     "channels_settings":{
 
         "channel_label_prefix": "ch",   
@@ -39,6 +39,5 @@
 
         "heartbeat_interval":5000,      
         "client_timeout":10000          
-
     }
 }

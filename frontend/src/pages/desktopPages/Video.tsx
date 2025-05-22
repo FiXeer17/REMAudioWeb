@@ -3,7 +3,7 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { RecentConnections } from "./RecentConnections";
 import { useContext, useEffect, useRef, useState } from "react";
-import { Clock, ImageSquare, Plus, Minus, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise } from "@phosphor-icons/react";
+import { Clock, Plus, Minus, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import { useNavigate } from "react-router-dom";
 import { useClickAndHold, IntensityType, MovementDirection } from "@/lib/handleMovement";
