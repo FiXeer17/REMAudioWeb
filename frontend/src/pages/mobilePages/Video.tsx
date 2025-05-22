@@ -175,25 +175,27 @@ export const Video = () => {
                     <div className="flex items-center justify-center">
                         <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
                     </div>
-                    <div className="flex flex-col gap-3 bg-home_colors-Navbar/Selection_Bg mx-10 w-[295px] h-[256px] justify-center items-center">
-                        {showImage ? <img className="w-full h-full object-cover" key={urlSafe} src={`http://${host}/stream?a=${urlSafe}&t=${Date.now()}`} onError={()=>handleErrorImage()}/>
-                            :
-                            <>
-                            <p className="text-white font-bold text-sm">RTSP PORT</p>
-                            <div className="flex gap-3">
-                                <form onSubmit={handleSubmit(handleConnect)} className="flex gap-3">
-                                    <Input 
-                                        placeholder="port" 
-                                        className="w-20" 
-                                        autoComplete="off"
-                                        {...connect("port", { required: true })} 
-                                    />
-                                    <Button className="text-black bg-white w-16" type="submit">
-                                        Connect
-                                    </Button>
-                                </form>
-                            </div>
-                            </>}
+                    <div className="flex justify-center items-center">
+                        <div className="flex flex-col gap-3 bg-home_colors-Navbar/Selection_Bg mx-10 w-[295px] h-[256px] justify-center items-center">
+                            {showImage ? <img className="w-full h-full object-cover" key={urlSafe} src={`http://${host}/stream?a=${urlSafe}&t=${Date.now()}`} onError={()=>handleErrorImage()}/>
+                                :
+                                <>
+                                <p className="text-white font-bold text-sm">RTSP PORT</p>
+                                <div className="flex gap-3">
+                                    <form onSubmit={handleSubmit(handleConnect)} className="flex gap-3">
+                                        <Input 
+                                            placeholder="port" 
+                                            className="w-20" 
+                                            autoComplete="off"
+                                            {...connect("port", { required: true })} 
+                                        />
+                                        <Button className="text-black bg-white w-16" type="submit">
+                                            Connect
+                                        </Button>
+                                    </form>
+                                </div>
+                                </>}
+                        </div>
                     </div>
                     <div className="grid grid-rows-[1fr,2fr]">
                         <div className="flex justify-center items-center gap-3">
@@ -273,7 +275,7 @@ export const Video = () => {
                             </div>
                         </div>
                     </div>
-                    <div className=" flex justify-center pb-3">
+                    <div className="flex w-screen justify-center pb-3">
                         <Navbar selectedColor="video" />
                     </div>
                     <Toaster/>

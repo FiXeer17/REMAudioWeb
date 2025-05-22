@@ -53,7 +53,7 @@ export const PreferenciesChannels=()=>{
 
 
     return(
-        <div className="grid grid-rows-[70px,1fr,auto] h-screen relative">
+        <div className="grid grid-rows-[70px,1fr,auto] min-h-svh relative">
           <div className="flex items-center justify-center gap-3" >
                 <PresetsButton  variant={"white"} className="flex flex-col gap-0 items-center justify-center text-center " onClick={()=>navigate("/preferenciesPresets")}>
                     <span>LABELS</span> 
@@ -61,7 +61,7 @@ export const PreferenciesChannels=()=>{
                 </PresetsButton>
                 <PresetsButton variant={"blue"} >CHANNELS</PresetsButton>
           </div>
-          <div className="flex flex-1 px-7 pb-7 overflow-hidden relative pt-5 ">
+          <div className="flex flex-1 px-7 pb-7 overflow-hidden relative pt-5">
               <div className="flex flex-col px-6 pt-10 pb-6 w-full  bg-home_colors-Navbar/Selection_Bg rounded-2xl items-center gap-6">
                 <div className="grid grid-cols-2 h-full w-full  gap-5 overflow-y-auto">
                 {Presets.map((presets,index) => {
