@@ -5,6 +5,7 @@ import SocketContext from "@/lib/socket/context";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { GetData } from "@/lib/WebSocketData";
+import { toast,Toaster } from "sonner";
 
 export const Presets =()=>{
     const navigate=useNavigate()
@@ -15,6 +16,15 @@ export const Presets =()=>{
     const [colorNav] = useState<string>(() => location.state);
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
 
+    useEffect(() => {
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false)
+            toast.error("Error setting preset")
+        }, 10000);
+  
+        return () => clearTimeout(timeout);
+    }, [message_matrix]);
 
     useEffect(()=>{
         if (!message_matrix)return
@@ -51,12 +61,14 @@ export const Presets =()=>{
                             </Badge>
                             <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto scroll">
                             {Object.entries(labelPresets).map(([key,Presets],index)=>(
-                                <PresetsButton size={"presets"} variant={currentPresets === index ? "blue" : "white"} key={key} onClick={()=>handleSetPreset(key)}>{Presets}</PresetsButton>
+                                <PresetsButton size={"presets"} variant={currentPresets === index+1 ? "blue" : "white"} key={key} onClick={()=>handleSetPreset(key)}>{Presets}</PresetsButton>
                                 ))}
                             </div>
                         </div>
                     </div>
+                    <Toaster/>
                 </div>
+                
             </div>
         </div>
         </>

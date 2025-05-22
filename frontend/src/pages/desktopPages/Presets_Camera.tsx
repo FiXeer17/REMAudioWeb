@@ -30,8 +30,12 @@ export const Presets_Camera = () => {
 
     const handleSetPreset=(Preset:string)=>{
       const dataoutput={"section":"camera_preset","value":Preset}
-      socket?.send(JSON.stringify(dataoutput))
-      setIsLoading(true)
+      if(Preset===String(currentPresets)){
+        navigate("/video")
+      }else{
+        socket?.send(JSON.stringify(dataoutput))
+        setIsLoading(true)
+      }
     }
     return(
         <>

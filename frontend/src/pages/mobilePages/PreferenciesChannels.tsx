@@ -63,9 +63,6 @@ export const PreferenciesChannels=()=>{
                 <PresetsButton variant={"blue"} >CHANNELS</PresetsButton>
           </div>
           <div className="flex flex-1 px-7 pb-7 overflow-hidden relative pt-5 ">
-                <Badge className="absolute left-12 top-3 transform -translate-x-1/2">
-                  PRESETS
-                </Badge>
               <div className="flex flex-col px-6 pt-10 pb-6 w-full  bg-home_colors-Navbar/Selection_Bg rounded-2xl items-center gap-6">
                 <div className="grid grid-cols-2 h-full w-full  gap-5 overflow-y-auto">
                 {Presets.map((presets,index) => {

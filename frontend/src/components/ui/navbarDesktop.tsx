@@ -29,28 +29,28 @@ export default function NavbarDesktop({selectedColor}:NavbarColor){
     },[matrix_status])
     return(
         <div className="flex flex-col items-center justify-around bg-home_colors-Navbar/Selection_Bg w-full h-full text-center">
-            <div onClick={hasLatestAudio ? () => navigate("/homeAudio") : undefined} className="flex flex-col items-center cursor-pointer">
+            <div onClick={hasLatestAudio ? () => navigate("/homeAudio") : undefined} className="flex select-none flex-col items-center cursor-pointer">
                 <House size={40} weight="thin" color={hasLatestAudio ? (selectedColor === "house" ? "#007AFF" : "#FAFAFA") : "#A1A1AA"} />
                 <p className={`text-sm ${selectedColor === "house" ? "text-home_colors-Selected_Borders/text" : hasLatestAudio ? "text-home_colors-Similar_White" : "text-zinc-400"}`}>
                 Home
                 </p>
             </div>
 
-            <div onClick={hasLatestAudio ? () => navigate("/volume") : undefined} className="flex flex-col items-center cursor-pointer">
+            <div onClick={hasLatestAudio ? () => navigate("/volume") : undefined} className="flex flex-col select-none items-center cursor-pointer">
                 <SpeakerHigh size={40} weight="thin" color={hasLatestAudio ? (selectedColor === "speaker" ? "#007AFF" : "#FAFAFA") : "#A1A1AA"} />
                 <p className={`text-sm ${selectedColor === "speaker" ? "text-home_colors-Selected_Borders/text" : hasLatestAudio ? "text-home_colors-Similar_White" : "text-zinc-400"}`}>
                 Audio
                 </p>
             </div>
 
-            <div onClick={hasLatestVideo ? () => navigate("/video") : undefined} className="flex flex-col items-center cursor-pointer">
+            <div onClick={hasLatestVideo ? () => navigate("/video") : undefined} className="flex flex-col select-none items-center cursor-pointer">
                 <Camera size={40} weight="thin" color={hasLatestVideo ? (selectedColor === "video" ? "#007AFF" : "#FAFAFA") : "#A1A1AA"} />
                 <p className={`text-sm ${selectedColor === "video" ? "text-home_colors-Selected_Borders/text" : hasLatestVideo ? "text-home_colors-Similar_White" : "text-zinc-400"}`}>
                 Video
                 </p>
             </div>
 
-            <div onClick={() => navigate("/settings")} className="flex flex-col items-center cursor-pointer">
+            <div onClick={() => navigate("/settings")} className="flex flex-col items-center select-none cursor-pointer">
                 <SlidersHorizontal size={40} weight="thin" color={selectedColor === "settings" ? "#007AFF" : "#FAFAFA"} />
                 <p className={`text-sm ${selectedColor === "settings" ? "text-home_colors-Selected_Borders/text" : "text-home_colors-Similar_White"}`}>
                 Settings

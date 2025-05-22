@@ -67,9 +67,6 @@ export const PreferenciesPresets = ()=>{
                 <PresetsButton variant={"white"} onClick={()=>navigate("/preferenciesChannels")}>CHANNELS</PresetsButton>
           </div>
           <div className="flex flex-1 flex-col px-7 pb-2 overflow-hidden relative pt-5 gap-4">
-                <Badge className="absolute left-12 top-3 transform -translate-x-1/2">
-                  PRESETS
-                </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
                   {MatrixCamera==="MATRIX" ?
                     Object.entries(labelPresetsMatrix).map(([key,Presets])=>(
