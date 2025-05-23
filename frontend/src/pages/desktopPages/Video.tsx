@@ -12,13 +12,15 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { useConnections } from "@/lib/socket/ComponentUuid";
 import { toast, Toaster } from "sonner";
+import { getConfig } from "@/config";
 
 type FormFields = {
     port: string;
   };
 
 export const Video = () => {
-    const host = import.meta.env.VITE_WS_HOST
+        const host = getConfig().APPLICATION_URL;
+    
     const navigate = useNavigate()
     const {triggerRedirect}=useConnections()
     const { register:connect, handleSubmit } = useForm<FormFields>();
@@ -139,8 +141,7 @@ export const Video = () => {
     const handleConnect = async ({ port }: FormFields) => {
         const updatedSockets = await triggerRedirect();
         const latestVideoDevice = updatedSockets?.find(updatedSockets => updatedSockets.isLatestVideo);
-    
-        const base64 = btoa(`${latestVideoDevice}:${port}`);
+        const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
         const encodedUrlSafe = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     
         setUrlSafe(encodedUrlSafe);

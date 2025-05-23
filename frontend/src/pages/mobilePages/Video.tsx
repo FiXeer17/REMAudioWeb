@@ -137,8 +137,8 @@ export const Video = () => {
     const handleConnect = async ({ port }: FormFields) => {
         const updatedSockets = await triggerRedirect();
         const latestVideoDevice = updatedSockets?.find(updatedSockets => updatedSockets.isLatestVideo);
-    
-        const base64 = btoa(`${latestVideoDevice}:${port}`);
+        console.log(latestVideoDevice)
+        const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
         const encodedUrlSafe = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     
         setUrlSafe(encodedUrlSafe);

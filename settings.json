@@ -14,16 +14,16 @@
     "streaming_settings" : {
         "frame_rate":30,
         "transport_protocol":"tcp",
-        "streaming_path":"/av0/live"
+        "streaming_path":"/live/av0"
     },
 
     "tcp_comunication_settings":{
 
-        "command_delay":20,             
+        "command_delay":50,             
         "reconnect_delay":1500,         
-        "read_timeout":1000,   
-        "max_read_retries":4,  
-        "preset_read_timeout":3500,        
+        "read_timeout":10000,   
+        "max_read_retries":20,  
+        "preset_read_timeout":3000,        
         "connection_timeout":2000,      
         "inactivity_timeout":5000,      
         "max_connection_retries":3

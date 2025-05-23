@@ -5,7 +5,7 @@ import SocketContext from "@/lib/socket/context";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { GetData } from "@/lib/WebSocketData";
-import { toast,Toaster } from "sonner";
+
 
 export const Presets =()=>{
     const navigate=useNavigate()
@@ -16,16 +16,7 @@ export const Presets =()=>{
     const [colorNav] = useState<string>(() => location.state);
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
 
-    useEffect(() => {
-
-        const timeout = setTimeout(() => {
-            setIsLoading(false)
-            toast.error("Error setting preset",{duration:1000})
-        }, 10000);
-  
-        return () => clearTimeout(timeout);
-    }, [message_matrix]);
-
+    
     useEffect(()=>{
         if (!message_matrix)return
         const { currentPresets,labelPresets } = GetData(message_matrix);
@@ -66,7 +57,6 @@ export const Presets =()=>{
                             </div>
                         </div>
                     </div>
-                    <Toaster/>
                 </div>
             </div>
         </div>
