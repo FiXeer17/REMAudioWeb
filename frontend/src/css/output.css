@@ -717,6 +717,10 @@ body {
   margin-bottom: 0.5rem;
 }
 
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
 .ml-2 {
   margin-left: 0.5rem;
 }
@@ -755,10 +759,6 @@ body {
 
 .mt-9 {
   margin-top: 2.25rem;
-}
-
-.mb-3 {
-  margin-bottom: 0.75rem;
 }
 
 .block {
@@ -878,6 +878,10 @@ body {
   height: 100vh;
 }
 
+.max-h-\[calc\(100svh-70px-auto\)\] {
+  max-height: calc(100svh - 70px - auto);
+}
+
 .min-h-svh {
   min-height: 100svh;
 }
@@ -983,8 +987,20 @@ body {
   width: 100%;
 }
 
+.w-screen {
+  width: 100vw;
+}
+
 .min-w-0 {
   min-width: 0px;
+}
+
+.max-w-\[107px\] {
+  max-width: 107px;
+}
+
+.max-w-\[305px\] {
+  max-width: 305px;
 }
 
 .max-w-\[400px\] {
@@ -1153,6 +1169,18 @@ body {
 
 .grid-rows-\[auto\2c 1fr\] {
   grid-template-rows: auto 1fr;
+}
+
+.grid-rows-\[50px\2c 1fr\2c 1fr\2c auto\] {
+  grid-template-rows: 50px 1fr 1fr auto;
+}
+
+.grid-rows-\[70px\2c 1fr\2c 1fr\2c auto\] {
+  grid-template-rows: 70px 1fr 1fr auto;
+}
+
+.grid-rows-\[75px\2c 1fr\2c 1fr\2c auto\] {
+  grid-template-rows: 75px 1fr 1fr auto;
 }
 
 .flex-col {
@@ -1666,6 +1694,18 @@ body {
 
 .pt-8 {
   padding-top: 2rem;
+}
+
+.pt-12 {
+  padding-top: 3rem;
+}
+
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.pb-8 {
+  padding-bottom: 2rem;
 }
 
 .text-center {

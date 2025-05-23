@@ -54,6 +54,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                         const value = await setSocket(headers);
                         if (value.status===200){
                             localStorage.setItem("showImage","false")
+                            localStorage.setItem("urlSafe","")
                             if (element.device_type==="matrix")
                                 return navigate("/homeAudio")
                             else

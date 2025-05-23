@@ -3,7 +3,7 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { useContext, useEffect, useRef, useState } from "react";
 import { RecentConnections } from "./RecentConnections";
-import { Clock, ImageSquare, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise, Minus, Plus, Boat } from "@phosphor-icons/react";
+import { Clock, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise, Minus, Plus } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import { useNavigate } from "react-router-dom";
 import { useClickAndHold, IntensityType, MovementDirection } from "@/lib/handleMovement";
@@ -18,6 +18,7 @@ type FormFields = {
   };
 
 export const Video = () => {
+    const host = import.meta.env.VITE_WS_HOST
     const navigate = useNavigate()
     const {triggerRedirect}=useConnections()
     const { register:connect, handleSubmit } = useForm<FormFields>();
@@ -28,7 +29,9 @@ export const Video = () => {
         const saved = localStorage.getItem("showImage");
         return saved === "true"; 
     });
-    const [urlSafe,setUrlSafe]=useState("")
+    const [urlSafe, setUrlSafe] = useState(() => {
+        return localStorage.getItem("urlSafe") || "";
+    });
     const [isAvailable, setIsAvailable] = useState(true)
     const [color,setColor]= useState("")
 
@@ -64,9 +67,10 @@ export const Video = () => {
     }, [message_camera])
 
     const handleErrorImage=()=>{
-        setShowImage(false)
-        localStorage.setItem("showImage","false")
-        toast.error("Error connecting with camera")
+        setShowImage(false);
+        localStorage.setItem("showImage", "false");
+        localStorage.removeItem("urlSafe")
+        toast.error("Error connecting with camera",{duration:1000})
     }
     
     const upControl = useClickAndHold({
@@ -132,45 +136,66 @@ export const Video = () => {
         
     const handleConnect = async ({ port }: FormFields) => {
         const updatedSockets = await triggerRedirect();
-
         const latestVideoDevice = updatedSockets?.find(updatedSockets => updatedSockets.isLatestVideo);
-
-        const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
-        setShowImage(true)
-        localStorage.setItem("showImage","true")
-        setUrlSafe(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''))
-        console.log(`${latestVideoDevice?.ip}:${port}`)
-        console.log(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''))
-        
+    
+        const base64 = btoa(`${latestVideoDevice}:${port}`);
+        const encodedUrlSafe = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    
+        setUrlSafe(encodedUrlSafe);
+        localStorage.setItem("urlSafe", encodedUrlSafe); 
 
       };
 
+    useEffect(()=>{
+        if(urlSafe==="") return
+        setShowImage(true)
+        localStorage.setItem("showImage","true")
+    },[urlSafe])
+
     return (
-        <div className="relative min-h-svh">
-            <div className="absolute inset-0 bg-black z-0">
-                <div className="grid grid-rows-[80px,1fr,1fr,auto] justify-center min-h-svh">
+        <>
+            {isAvailable ? ( message_camera ?
+                        <div className="absolute inset-0 z-10"></div>:<RecentConnections isLoading={true}/> ) :
+                  <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
+                    <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
+                      <div className="mt-1">
+                        <Clock weight="bold"></Clock>
+                      </div>
+                      <div>
+                      <p>Camera Unvailable</p>
+                      <p>Please wait...</p>
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 w-full flex justify-center  pb-3">
+                            <Navbar selectedColor="video" />
+                    </div>
+                  </div>}
+                <div className="absolute inset-0 bg-black z-20">
+                <div className="grid grid-rows-[75px,1fr,1fr,auto] justify-center min-h-svh">
                     <div className="flex items-center justify-center">
                         <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
                     </div>
-                    <div className="flex flex-col gap-3 bg-home_colors-Navbar/Selection_Bg mx-10 w-[295px] h-[256px] justify-center items-center">
-                        {showImage ? <img className="w-full h-full object-cover" src={`http://localhost/stream?a=MTkyLjE2OC44OC4yNTI6ODU1NA`} onError={()=>handleErrorImage()}/>
-                            :
-                            <>
-                            <p className="text-white font-bold text-sm">RTSP PORT</p>
-                            <div className="flex gap-3">
-                                <form onSubmit={handleSubmit(handleConnect)} className="flex gap-3">
-                                    <Input 
-                                        placeholder="port" 
-                                        className="w-20" 
-                                        autoComplete="off"
-                                        {...connect("port", { required: true })} 
-                                    />
-                                    <Button className="text-black bg-white w-16" type="submit">
-                                        Connect
-                                    </Button>
-                                </form>
-                            </div>
-                            </>}
+                    <div className="flex justify-center items-center">
+                        <div className="flex flex-col gap-3 bg-home_colors-Navbar/Selection_Bg mx-10 w-[295px] h-[256px] justify-center items-center">
+                            {showImage ? <img className="w-full h-full object-cover" key={urlSafe} src={`http://${host}/stream?a=${urlSafe}&t=${Date.now()}`} onError={()=>handleErrorImage()}/>
+                                :
+                                <>
+                                <p className="text-white font-bold text-sm">RTSP PORT</p>
+                                <div className="flex gap-3">
+                                    <form onSubmit={handleSubmit(handleConnect)} className="flex gap-3">
+                                        <Input 
+                                            placeholder="port" 
+                                            className="w-20" 
+                                            autoComplete="off"
+                                            {...connect("port", { required: true })} 
+                                        />
+                                        <Button className="text-black bg-white w-16" type="submit">
+                                            Connect
+                                        </Button>
+                                    </form>
+                                </div>
+                                </>}
+                        </div>
                     </div>
                     <div className="grid grid-rows-[1fr,2fr]">
                         <div className="flex justify-center items-center gap-3">
@@ -250,38 +275,13 @@ export const Video = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="h-16 mb-3"></div>
-                    
-                </div>
-            </div>
-            
-            {!isAvailable && (
-                <div className="absolute inset-0 bottom-[calc(3rem+12px)] backdrop-blur-sm flex justify-center items-center bg-black/30 z-10">
-                    <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2">
-                        <div className="mt-1">
-                            <Clock weight="bold"></Clock>
-                        </div>
-                        <div>
-                            <p>Camera Unvailable</p>
-                            <p>Please wait...</p>
-                        </div>
+                    <div className="flex w-screen justify-center pb-3">
+                        <Navbar selectedColor="video" />
                     </div>
+                    <Toaster/>
                 </div>
-            )}
-            
-            {isAvailable && !message_camera && (
-                <div className="absolute inset-0 bottom-[calc(3rem+12px)] z-10">
-                    <RecentConnections isLoading={true} />
-                </div>
-            )}
-
-            <div className="absolute bottom-0 left-0 right-0 z-20">
-                <div className="flex flex-col justify-between items-center pb-3 gap-12 pt-3 px-5 w-full">
-                    
-                    <Navbar selectedColor="video" />
-                </div>
-                <Toaster/>
             </div>
-        </div>
+        </>
+
     )
 }

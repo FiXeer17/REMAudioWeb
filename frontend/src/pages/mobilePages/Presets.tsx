@@ -5,6 +5,7 @@ import { Button as PresetsButton } from "@/components/ui/audio_video";
 import { Badge } from "@/components/ui/badge";
 import SocketContext from "@/lib/socket/context";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast, Toaster } from "sonner";
 
 export const Presets = () => {
     const navigate=useNavigate()
@@ -15,6 +16,15 @@ export const Presets = () => {
     const [colorNav] = useState<string>(() => location.state);
     const [labelPresets,setlabelPresets]=useState<{[key: string]: string;}>({})
 
+    useEffect(() => {
+
+      const timeout = setTimeout(() => {
+          setIsLoading(false)
+          toast.error("Error setting preset",{duration:1000})
+      }, 10000);
+
+      return () => clearTimeout(timeout);
+  }, [message_matrix]);
 
     useEffect(()=>{
         if (!message_matrix)return
@@ -48,13 +58,14 @@ export const Presets = () => {
                 </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto scroll">
               {Object.entries(labelPresets).map(([key,Presets],index)=>(
-                    <PresetsButton size={"presets"} variant={currentPresets === index ? "blue" : "white"} key={key} onClick={()=>handleSetPreset(key)}>{Presets}</PresetsButton>
+                    <PresetsButton size={"presets"} variant={currentPresets === index+1 ? "blue" : "white"} key={key} onClick={()=>handleSetPreset(key)}>{Presets}</PresetsButton>
                   ))}
               </div>
           </div>
           <div className="flex items-center pb-3 pt-3">
                 <Navbar selectedColor={colorNav}/>
           </div>
+          <Toaster/>
         </div>
       </div>
     </>

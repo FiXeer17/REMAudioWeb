@@ -3,7 +3,7 @@ import SocketContext from "@/lib/socket/context";
 import { GetData } from "@/lib/WebSocketData";
 import { RecentConnections } from "./RecentConnections";
 import { useContext, useEffect, useRef, useState } from "react";
-import { Clock, ImageSquare, Plus, Minus, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise } from "@phosphor-icons/react";
+import { Clock, Plus, Minus, ArrowDown, ArrowLeft, ArrowUp, ArrowRight, ArrowsClockwise } from "@phosphor-icons/react";
 import { ButtonPresets } from "@/components/ui/button_presets";
 import { useNavigate } from "react-router-dom";
 import { useClickAndHold, IntensityType, MovementDirection } from "@/lib/handleMovement";
@@ -18,6 +18,7 @@ type FormFields = {
   };
 
 export const Video = () => {
+    const host = import.meta.env.VITE_WS_HOST
     const navigate = useNavigate()
     const {triggerRedirect}=useConnections()
     const { register:connect, handleSubmit } = useForm<FormFields>();
@@ -29,7 +30,9 @@ export const Video = () => {
         const saved = localStorage.getItem("showImage");
         return saved === "true"; 
     });
-    const [urlSafe,setUrlSafe]=useState("")
+    const [urlSafe, setUrlSafe] = useState(() => {
+        return localStorage.getItem("urlSafe") || "";
+    });
     const [color,setColor]=useState("")
 
     const upArrowRef = useRef<HTMLDivElement>(null);
@@ -111,7 +114,8 @@ export const Video = () => {
     const handleErrorImage=()=>{
         setShowImage(false);
         localStorage.setItem("showImage", "false");
-        toast.error("Error connecting with camera")
+        localStorage.removeItem("urlSafe")
+        toast.error("Error connecting with camera",{duration:1000})
     }
 
     const handleZoomDown = (type:string) =>{
@@ -134,15 +138,21 @@ export const Video = () => {
 
     const handleConnect = async ({ port }: FormFields) => {
         const updatedSockets = await triggerRedirect();
-
         const latestVideoDevice = updatedSockets?.find(updatedSockets => updatedSockets.isLatestVideo);
-
-        const base64 = btoa(`${latestVideoDevice?.ip}:${port}`);
-        setShowImage(true);
-        localStorage.setItem("showImage","true")
-        setUrlSafe(base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''))
+    
+        const base64 = btoa(`${latestVideoDevice}:${port}`);
+        const encodedUrlSafe = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    
+        setUrlSafe(encodedUrlSafe);
+        localStorage.setItem("urlSafe", encodedUrlSafe); 
 
       };
+    
+    useEffect(()=>{
+            if(urlSafe==="") return
+            setShowImage(true)
+            localStorage.setItem("showImage","true")
+        },[urlSafe])
 
     return (
         <div className="absolute inset-0 bg-black">
@@ -177,7 +187,7 @@ export const Video = () => {
                             <ButtonPresets text={labelPresets[currentPresets.toString()]} onClick={() => { navigate("/presetsCamera") }} />
                         </div>
                         <div className="flex flex-col bg-home_colors-Navbar/Selection_Bg mx-10 border-[1px] gap-2 border-home_colors-Selected_Borders/text justify-center items-center w-[350px] h-[230px">
-                            {showImage ? <img className="w-full h-full object-cover" src={`http://localhost/stream?a=MTkyLjE2OC44OC4yNTI6ODU1NA`} onError={()=>handleErrorImage()}/>
+                            {showImage ? <img className="w-full h-full object-cover" key={urlSafe} src={`http://${host}/stream?a=${urlSafe}&t=${Date.now()}`} onError={()=>handleErrorImage()}/>
                             :
                             <>
                             <p className="text-white font-bold text-sm">RTSP PORT</p>

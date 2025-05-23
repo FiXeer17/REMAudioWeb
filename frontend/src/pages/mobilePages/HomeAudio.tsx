@@ -88,6 +88,9 @@ export const HomeAudio=() => {
           <p>Please wait...</p>
           </div>
         </div>
+        <div className="absolute bottom-0 w-full flex justify-center  pb-3">
+                <Navbar selectedColor="house" />
+        </div>
       </div>}
     
     <div className="absolute inset-0 bg-black z-20">

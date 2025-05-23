@@ -55,6 +55,7 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                 const value = await setSocket(headers);
                 if (value.status===200){
                     localStorage.setItem("showImage","false")
+                    localStorage.setItem("urlSafe","")
                     if (element.device_type==="matrix")
                         return navigate("/homeAudio")
                     else
@@ -128,14 +129,14 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                         >
                     
                     {displayedConnections.map((element:Connection)=>(
-                        <div className={`flex flex-col items-start justify-center text-white w-fit px-6 py-3 text-sm border-2 rounded-2xl ${
+                        <div className={`flex flex-col items-start justify-center text-white w-fit px-6 py-3 text-sm border-2 rounded-2xl max-w-[305px] ${
                             element.isLatestAudio
                             ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Selected_Borders/text": element.isLatestVideo 
                             ? "bg-home_colors-Navbar/Selection_Bg border-home_colors-Enabled_Channels":
                                 "bg-home_colors-Navbar/Selection_Bg border-home_colors-Border_Connections"
                             
                         }`} key={element.ip}>
-                            <div className="flex justify-between w-full items-center ">
+                            <div className="flex justify-between w-full items-center  ">
                                 <div className="flex items-center gap-3">
                                     {element.device_type==="matrix"? <HardDrive size={20}/>:<Camera size={20}/>}
                                     <p className="flex ">{element.name}</p>
@@ -144,8 +145,8 @@ export const RecentConnections=({isLoading=false}:RecentConnectionsProps)=>{
                                     <Trash size={22}/>
                                 </div>
                             </div>
-                            <div className="flex text-[12px] items-center">
-                                <div className=" bg-home_colors-Navbar/Selection_Bg px-5 py-2 border-2 rounded-l-xl border-home_colors-Border_Connections select-none">{element.ip}</div>
+                            <div className="flex text-[12px] items-center ">
+                                <div className=" bg-home_colors-Navbar/Selection_Bg px-5 py-2 border-2 rounded-l-xl border-home_colors-Border_Connections max-w-[107px] select-none">{element.ip}</div>
                                 <div className=" bg-home_colors-Navbar/Selection_Bg px-3 py-2 border-2 rounded-r-xl border-l-transparent border-home_colors-Border_Connections select-none">{element.port}</div>
                                 <Button size={"recentConnections"} className=" ml-2  bg-white text-black " onClick={()=>handleClick(element)}>Connect</Button>
                             </div>
