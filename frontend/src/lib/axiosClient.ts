@@ -36,7 +36,8 @@ class AxiosInterceptor {
       return localStorage.getItem("accessToken");
     }
   }
-  
+
+let client: AxiosInterceptor | null = null;
 
 export function createClient() {
   if (!client) {
