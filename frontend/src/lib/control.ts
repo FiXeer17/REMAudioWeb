@@ -19,7 +19,7 @@ export async function isAdmin() {
   try{
     const isAdmin=localStorage.getItem("isAdmin")
     if(isAdmin==="false"){
-      return redirect("/")
+      return redirect("/login")
     }
   }catch(error){
     return 

@@ -2,7 +2,6 @@ import { Eye,EyeSlash } from "@phosphor-icons/react";
 import { GetData } from "@/lib/WebSocketData";
 import Navbar from "@/components/ui/navbar";
 import { Button as PresetsButton } from "@/components/ui/audio_video";
-import { Badge } from "@/components/ui/badge";
 import SocketContext from "@/lib/socket/context";
 import { useNavigate } from "react-router-dom";
 import {ButtonEdit} from "@/components/ui/button_edit";
@@ -54,7 +53,7 @@ export const PreferenciesChannels=()=>{
 
 
     return(
-        <div className="grid grid-rows-[70px,1fr,auto] h-screen relative">
+        <div className="grid grid-rows-[70px,1fr,auto] min-h-svh relative">
           <div className="flex items-center justify-center gap-3" >
                 <PresetsButton  variant={"white"} className="flex flex-col gap-0 items-center justify-center text-center " onClick={()=>navigate("/preferenciesPresets")}>
                     <span>LABELS</span> 
@@ -62,10 +61,7 @@ export const PreferenciesChannels=()=>{
                 </PresetsButton>
                 <PresetsButton variant={"blue"} >CHANNELS</PresetsButton>
           </div>
-          <div className="flex flex-1 px-7 pb-7 overflow-hidden relative pt-5 ">
-                <Badge className="absolute left-12 top-3 transform -translate-x-1/2">
-                  PRESETS
-                </Badge>
+          <div className="flex flex-1 px-7 pb-7 overflow-hidden relative pt-5">
               <div className="flex flex-col px-6 pt-10 pb-6 w-full  bg-home_colors-Navbar/Selection_Bg rounded-2xl items-center gap-6">
                 <div className="grid grid-cols-2 h-full w-full  gap-5 overflow-y-auto">
                 {Presets.map((presets,index) => {

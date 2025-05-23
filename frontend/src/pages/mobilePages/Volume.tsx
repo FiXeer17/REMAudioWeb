@@ -122,17 +122,20 @@ export const Volume=()=>{
       <>
         {isAvailable ? ( message_matrix ?
             <div className="absolute inset-0 z-10"></div>:<RecentConnections isLoading={true}/> ) :
-      <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
-        <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
-          <div className="mt-1">
-            <Clock weight="bold"></Clock>
-          </div>
-          <div>
-          <p>Matrix Unvailable</p>
-          <p>Please wait...</p>
-          </div>
-        </div>
-      </div>}
+          <div className="absolute inset-0 backdrop-blur-sm flex justify-center items-center  bg-black/30 z-30">
+            <div className="flex border-yellow-500 border-2 rounded-sm px-3 py-3 text-yellow-500 text-sm font-bold gap-2 ">
+              <div className="mt-1">
+                <Clock weight="bold"></Clock>
+              </div>
+              <div>
+              <p>Matrix Unvailable</p>
+              <p>Please wait...</p>
+              </div>
+            </div>
+            <div className="absolute bottom-0 w-full flex justify-center  pb-3">
+                <Navbar selectedColor="speaker" />
+            </div>
+          </div>}
     
       <div className="absolute inset-0 bg-black z-20">
           <div className="grid grid-rows-[0.5fr_2fr,auto]  min-h-svh">
@@ -242,7 +245,7 @@ export const Volume=()=>{
                   
                   </div>
               </div>
-              <div className="flex flex-col justify-end items-center gap-4 pt-5 pb-3 px-5">
+              <div className="flex flex-col justify-end items-center  pt-5 pb-3 px-5">
                   <Navbar selectedColor="speaker"/>
               </div>
           </div>

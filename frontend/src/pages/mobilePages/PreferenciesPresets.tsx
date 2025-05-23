@@ -1,7 +1,6 @@
 import { GetData } from "@/lib/WebSocketData";
 import Navbar from "@/components/ui/navbar";
 import { Button as PresetsButton } from "@/components/ui/audio_video";
-import { Badge } from "@/components/ui/badge";
 import SocketContext from "@/lib/socket/context";
 import { useNavigate } from "react-router-dom";
 import {ButtonEdit} from "@/components/ui/button_edit";
@@ -67,9 +66,6 @@ export const PreferenciesPresets = ()=>{
                 <PresetsButton variant={"white"} onClick={()=>navigate("/preferenciesChannels")}>CHANNELS</PresetsButton>
           </div>
           <div className="flex flex-1 flex-col px-7 pb-2 overflow-hidden relative pt-5 gap-4">
-                <Badge className="absolute left-12 top-3 transform -translate-x-1/2">
-                  PRESETS
-                </Badge>
               <div className="grid grid-cols-2 h-full w-full bg-home_colors-Navbar/Selection_Bg rounded-2xl px-10 py-10 gap-5 overflow-y-auto">
                   {MatrixCamera==="MATRIX" ?
                     Object.entries(labelPresetsMatrix).map(([key,Presets])=>(

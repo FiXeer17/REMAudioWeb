@@ -39,15 +39,18 @@ import UUIDLayout from "@/lib/Redirect";
         
         {
           path: "/recentconnections",
-          element: <RecentConnections/>
+          element: <RecentConnections/>,
+          loader: isAdmin
         },
         {
           path: "/newconnections",
-          element: <NewConnections/>
+          element: <NewConnections/>,
+          loader: isAdmin
         },
         {
           path: "/createconnections",
-          element: <CreateConnections/>
+          element: <CreateConnections/>,
+          loader: isAdmin
         },
         {
           path: "/callAdministrator",
@@ -75,11 +78,13 @@ import UUIDLayout from "@/lib/Redirect";
           },
           {
             path: "/preferenciesChannels",
-            element: <PreferenciesChannels/>
+            element: <PreferenciesChannels/>,
+            loader: isAdmin
           },
           {
             path: "/preferenciesPresets",
-            element: <PreferenciesPresets/>
+            element: <PreferenciesPresets/>,
+            loader: isAdmin
           },
           {
             path: "/video",
@@ -91,7 +96,8 @@ import UUIDLayout from "@/lib/Redirect";
           },
           {
             path: "/mix",
-            element: <Mix/>
+            element: <Mix/>,
+            loader: isAdmin
           }
           
         ]

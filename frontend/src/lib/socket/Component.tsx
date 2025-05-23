@@ -56,6 +56,7 @@ const SocketContextComponent: React.FunctionComponent<ISocketContextComponentPro
             latest_camera=false
             socketDispatch({ type: "camera_status", payload: "disconnected" })
             localStorage.setItem("showImage","false")
+            localStorage.removeItem("urlSafe")
           }else if(reason.includes("matrix")){
             latest_matrix=false
             socketDispatch({ type: "matrix_status", payload: "disconnected" })
