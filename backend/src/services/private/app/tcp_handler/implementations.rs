@@ -32,7 +32,7 @@ use crate::{
     AppState,
 };
 use actix::{Addr, AsyncContext, Context};
-use log::warn;
+use log::{info, warn};
 use tokio::{
     net::TcpStream,
 };
@@ -63,7 +63,7 @@ impl TcpStreamActor {
                 let Ok(buffer) = send_matrix_command(command.clone(), stream.clone(), ctx_addr.clone(), buffer, socket).await else {break Err(());};
 
                 match MatrixCommand::try_from(&buffer[..]) {
-                    Ok(cmd) => break Ok(Ok(cmd)),
+                    Ok(cmd) => { info!("Command succesfully converted");break Ok(Ok(cmd))},
                     Err(err) => {
                         warn!("Command conversion failed at attempt {}, with buffer content: {:?}",retries,buffer);
                         if retries < tcp_comunication_settings::get_max_read_retries() {
@@ -91,6 +91,7 @@ impl TcpStreamActor {
             responses.push(cmd_from_buffer.unwrap().unwrap());
             tokio::time::sleep(tcp_comunication_settings::get_command_delay()).await;
         }
+
         let Ok(socket_id) = retrieve_socketid_from_db(&pgpool, socket).await else {
             warn!("Cannot retrieve socket id from database");
             return;
