@@ -15,7 +15,7 @@ services:
     networks:
       - debug_net
   backend:
-    image: backend/realese:latest
+    image: rem/backend-realese:latest
     ports:
       - "8000:8000"
     depends_on:
@@ -31,7 +31,7 @@ services:
       - debug_net
 
   frontend:
-    image: frontend/realese:latest
+    image: rem/frontend-realese:latest
     ports:
       - "80:80"
     depends_on:
